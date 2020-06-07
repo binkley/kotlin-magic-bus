@@ -1,0 +1,119 @@
+plugins {
+    id "build-dashboard"
+    id "java"
+    id "jacoco"
+    id "com.github.spotbugs"
+    id "org.unbroken-dome.test-sets"
+    id "com.dorongold.task-tree"
+    id "com.github.ben-manes.versions"
+}
+
+group = "hm.binkley.labs"
+version = "0"
+
+repositories {
+    mavenCentral()
+    jcenter()
+}
+
+dependencies {
+    annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+
+    compileOnly "org.projectlombok:lombok:${lombokVersion}"
+    compileOnly "com.github.spotbugs:spotbugs-annotations:${spotbugsAnnotationsVersion}"
+
+    testCompileOnly "org.projectlombok:lombok:${lombokVersion}"
+    testCompileOnly "com.github.spotbugs:spotbugs-annotations:${spotbugsAnnotationsVersion}"
+
+    testImplementation "org.junit.jupiter:junit-jupiter-api:${junitVersion}"
+    testImplementation "org.assertj:assertj-core:${assertJVersion}"
+    testImplementation "org.awaitility:awaitility:${awaitilityVersion}"
+
+    testRuntime "org.junit.jupiter:junit-jupiter-engine:${junitVersion}"
+}
+
+sourceCompatibility = 11
+targetCompatibility = 11
+
+spotbugs {
+    toolVersion = "${spotbugsToolVersion}"
+}
+
+// TODO: How to do this generically with Spotbugs task type?
+spotbugsMain {
+    reports {
+        html {
+            enabled = true
+        }
+    }
+}
+
+spotbugsTest {
+    reports {
+        html {
+            enabled = true
+        }
+    }
+}
+
+jacoco {
+    toolVersion = "${jacocoToolVersion}"
+}
+
+defaultTasks "build"
+
+tasks.withType(JavaCompile) {
+    options.compilerArgs = [
+            "-encoding", "UTF8",
+            "-parameters",
+            "-Werror",
+            "-Xdiags:verbose",
+            "-Xlint:all,-processing,-serial"
+    ]
+}
+
+tasks.withType(Test) {
+    useJUnitPlatform()
+
+    testLogging {
+        exceptionFormat "full"
+    }
+}
+
+tasks.withType(JacocoReportBase) {
+    executionData(fileTree(buildDir).include("/jacoco/*.exec"))
+}
+
+tasks {
+    wrapper {
+        distributionType = Wrapper.DistributionType.ALL
+    }
+
+    clean {
+        delete "out"
+    }
+
+    jacocoTestReport {
+        dependsOn(test) // TODO: Redundant?
+    }
+
+    jacocoTestCoverageVerification {
+        violationRules {
+            rule {
+                limit {
+                    minimum = new BigDecimal("0.99")
+                }
+            }
+        }
+        dependsOn(jacocoTestReport)
+    }
+
+    check {
+        dependsOn(jacocoTestCoverageVerification)
+    }
+}
+
+wrapper {
+    distributionType = Wrapper.DistributionType.ALL
+    gradleVersion = "${gradleWrapperVersion}"
+}
