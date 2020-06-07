@@ -1,6 +1,6 @@
 # Magic Bus
 
-A revivification of an old project
+Kotlin version of self-messaging
 
 ## What is this?
 
