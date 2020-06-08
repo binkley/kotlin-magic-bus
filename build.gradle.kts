@@ -2,10 +2,12 @@ import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
 import org.gradle.api.tasks.wrapper.Wrapper.DistributionType.ALL
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
+val assertJVersion: String by project
+val awaitilityVersion: String by project
 val gradleWrapperVersion: String by project
 val jacocoVersion: String by project
+val junitVersion: String by project
 val kotlinVersion: String by project
-val kotlinTestVersion: String by project
 val lombokVersion: String by project
 val mockkVersion: String by project
 
@@ -14,7 +16,6 @@ plugins {
     id("io.gitlab.arturbosch.detekt")
     id("org.jlleitschuh.gradle.ktlint")
     id("com.github.ben-manes.versions")
-    application
     jacoco
 }
 
@@ -33,22 +34,16 @@ dependencies {
     implementation(kotlin("reflect"))
     implementation(kotlin("stdlib-jdk8"))
 
-    testImplementation("io.kotlintest:kotlintest-runner-junit5:$kotlinTestVersion")
+    testImplementation("org.junit.jupiter:junit-jupiter:$junitVersion")
+    testImplementation("org.assertj:assertj-core:$assertJVersion")
+    testImplementation("org.awaitility:awaitility:$awaitilityVersion")
     testImplementation("io.mockk:mockk:$mockkVersion")
-}
-
-application {
-    mainClassName = "hm.binkley.labs.Application"
 }
 
 detekt {
     failFast = true
     // No support yet for configuring direcly in Gradle
     config = files("config/detekt.yml")
-}
-
-jacoco {
-    toolVersion = jacocoVersion
 }
 
 ktlint {
@@ -75,6 +70,13 @@ tasks {
         finalizedBy(jacocoTestReport)
     }
 
+    jacocoTestReport {
+        reports {
+            html.isEnabled = true
+        }
+        dependsOn(test)
+    }
+
     jacocoTestCoverageVerification {
         violationRules {
             rule {
@@ -89,14 +91,6 @@ tasks {
         dependsOn(jacocoTestCoverageVerification)
         // TODO: Do not run both ktlintCheck and ktlintFormat
         dependsOn(ktlintFormat)
-    }
-
-    named<JavaExec>("run") {
-        jvmArgs(
-            "-noverify",
-            "-XX:TieredStopAtLevel=1",
-            "-Dcom.sun.management.jmxremote"
-        )
     }
 
     withType<Wrapper> {

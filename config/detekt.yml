@@ -1,0 +1,25 @@
+build:
+  maxIssues: 0
+
+console-reports:
+  exclude:
+  # - 'ProjectStatisticsReport'
+  # - 'ComplexityReport'
+  # - 'NotificationReport'
+  # - 'FindingsReport'
+  # - 'FileBasedFindingsReport'
+  # - 'BuildFailureReport'
+
+# Rules
+
+comments:
+  UndocumentedPublicClass:
+    active: false
+  UndocumentedPublicFunction:
+    active: false
+  UndocumentedPublicProperty:
+    active: false
+
+style:
+  ForbiddenComment:
+    active: false
