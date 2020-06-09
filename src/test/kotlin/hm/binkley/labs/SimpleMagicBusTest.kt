@@ -1,16 +1,16 @@
 package hm.binkley.labs
 
-import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.assertThatThrownBy
-import org.awaitility.Awaitility.await
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
 import java.util.ArrayList
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit.MILLISECONDS
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.stream.IntStream
+import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
+import org.awaitility.Awaitility.await
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 
 internal class SimpleMagicBusTest {
     private val returned: MutableList<ReturnedMessage> =
@@ -259,7 +259,8 @@ internal class SimpleMagicBusTest {
     }
 
     private fun with(
-        mailbox: Mailbox<*>, message: Any,
+        mailbox: Mailbox<*>,
+        message: Any,
         failure: java.lang.Exception
     ): FailedMessage {
         return FailedMessage(bus, mailbox, message, failure)

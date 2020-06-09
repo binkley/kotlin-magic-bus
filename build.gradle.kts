@@ -79,7 +79,7 @@ tasks {
         violationRules {
             rule {
                 limit {
-                    minimum = BigDecimal.ONE // TODO: Real coverage
+                    minimum = BigDecimal.ZERO // TODO: Real coverage
                 }
             }
         }
