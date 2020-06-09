@@ -2,6 +2,8 @@
 
 Kotlin version of self-messaging
 
+(See [the original Java version](https://github.com/binkley/magic-bus).)
+
 ## What is this?
 
 _Magic Bus_ is an an _internal_ message bus for JVM programs to talk with
