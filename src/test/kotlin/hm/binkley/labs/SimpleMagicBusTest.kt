@@ -41,7 +41,7 @@ internal class SimpleMagicBusTest {
 
         bus.post(message)
 
-        assertOn(mailbox.messages)
+        assertOn(mailbox)
             .delivered(message)
             .noneReturned()
             .noneFailed()
@@ -55,7 +55,7 @@ internal class SimpleMagicBusTest {
 
         bus.post(message)
 
-        assertOn(mailbox.messages)
+        assertOn(mailbox)
             .noneDelivered()
             .returned(this.with(message))
             .noneFailed()
@@ -69,7 +69,7 @@ internal class SimpleMagicBusTest {
 
         bus.post(message)
 
-        assertOn(mailbox.messages)
+        assertOn(mailbox)
             .delivered(message)
             .noneReturned()
             .noneFailed()
@@ -130,7 +130,9 @@ internal class SimpleMagicBusTest {
         assertThat(second.get()).isEqualTo(1)
         assertThat(third.get()).isEqualTo(2)
         assertThat(fourth.get()).isEqualTo(3)
-        assertOn(noMailbox<Any>()).noneReturned().noneFailed()
+        assertOn(noMailbox<Any>())
+            .noneReturned()
+            .noneFailed()
     }
 
     @Test
@@ -149,7 +151,9 @@ internal class SimpleMagicBusTest {
         assertThat(base.get()).isEqualTo(1)
         assertThat(right.get()).isEqualTo(2)
         assertThat(farRight.get()).isEqualTo(3)
-        assertOn(noMailbox<Any>()).noneReturned().noneFailed()
+        assertOn(noMailbox<Any>())
+            .noneReturned()
+            .noneFailed()
     }
 
     @Test
@@ -161,7 +165,7 @@ internal class SimpleMagicBusTest {
 
         bus.post(message)
 
-        assertOn(mailbox.messages)
+        assertOn(mailbox)
             .noneDelivered()
             .returned(this.with(message))
             .noneFailed()
@@ -178,7 +182,7 @@ internal class SimpleMagicBusTest {
 
         bus.post(message)
 
-        assertOn(mailboxA.messages)
+        assertOn(mailboxA)
             .delivered(message)
             .noneReturned()
             .noneFailed()
@@ -252,6 +256,10 @@ internal class SimpleMagicBusTest {
 
     private fun <T> assertOn(delivered: List<T>): AssertDelivery<T> {
         return AssertDelivery(delivered)
+    }
+
+    private fun <T> assertOn(delivered: TestMailbox<T>): AssertDelivery<T> {
+        return assertOn(delivered.messages)
     }
 
     private fun with(message: Any): ReturnedMessage {

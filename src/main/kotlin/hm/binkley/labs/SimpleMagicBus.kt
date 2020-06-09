@@ -37,9 +37,7 @@ class SimpleMagicBus(
         }
 
     @Suppress("UNCHECKED_CAST")
-    fun <T> subscribers(
-        messageType: Class<T>
-    ): List<Mailbox<in T>> =
+    fun <T> subscribers(messageType: Class<T>): List<Mailbox<in T>> =
         subscribers.of(messageType as Class<Any>)
             .map { mailbox: Mailbox<*> -> mailbox as Mailbox<T> }
             .collect(toList())
@@ -81,9 +79,7 @@ class SimpleMagicBus(
 
 internal class Subscribers {
     private val subscriptions: MutableMap<Class<Any>, MutableSet<Mailbox<Any>>> =
-        ConcurrentSkipListMap { a: Class<*>, b: Class<*> ->
-            classOrder(a, b)
-        }
+        ConcurrentSkipListMap { a, b -> classOrder(a, b) }
 
     @Suppress("UNCHECKED_CAST")
     @Synchronized
@@ -115,12 +111,6 @@ internal class Subscribers {
     }
 
     companion object {
-        private fun classOrder(a: Class<*>, b: Class<*>): Int {
-            val aFirst = b.isAssignableFrom(a)
-            val bFirst = a.isAssignableFrom(b)
-            return if (aFirst && !bFirst) 1 else if (bFirst && !aFirst) -1 else 0
-        }
-
         private fun <T> mailboxes(): MutableSet<Mailbox<T>> =
             CopyOnWriteArraySet()
 
@@ -128,9 +118,7 @@ internal class Subscribers {
             messageType: Class<*>
         ): Predicate<Map.Entry<Class<*>, Set<Mailbox<*>>>> {
             return Predicate { e: Map.Entry<Class<*>, Set<Mailbox<*>>> ->
-                e.key.isAssignableFrom(
-                    messageType
-                )
+                e.key.isAssignableFrom(messageType)
             }
         }
     }
@@ -138,3 +126,9 @@ internal class Subscribers {
 
 private fun toMailboxes(): (Map.Entry<Class<Any>, Set<Mailbox<Any>>>) -> Stream<Mailbox<Any>> =
     { e: Map.Entry<Class<Any>, Set<Mailbox<Any>>> -> e.value.stream() }
+
+private fun classOrder(a: Class<*>, b: Class<*>): Int {
+    val aFirst = b.isAssignableFrom(a)
+    val bFirst = a.isAssignableFrom(b)
+    return if (aFirst && !bFirst) 1 else if (bFirst && !aFirst) -1 else 0
+}
