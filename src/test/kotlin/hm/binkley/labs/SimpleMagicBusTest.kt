@@ -17,7 +17,7 @@ internal class SimpleMagicBusTest {
         CopyOnWriteArrayList()
     private val failed: MutableList<FailedMessage> = CopyOnWriteArrayList()
     private val observed: MutableMap<Mailbox<*>, MutableList<Any>> =
-        LinkedHashMap()
+        mutableMapOf()
 
     private lateinit var bus: MagicBus
 
@@ -28,7 +28,7 @@ internal class SimpleMagicBusTest {
             { message -> failed.add(message) }
         ) { mailbox, message ->
             observed
-                .computeIfAbsent(mailbox) { ArrayList() }
+                .computeIfAbsent(mailbox) { mutableListOf() }
                 .add(message)
         }
     }
@@ -89,7 +89,7 @@ internal class SimpleMagicBusTest {
 
     @Test
     fun shouldSaveFailedPosts() {
-        val failure: java.lang.Exception = java.lang.Exception()
+        val failure = Exception()
         val mailbox: Mailbox<LeftType> = failWith { failure }
         bus.subscribe(LeftType::class.java, mailbox)
         val message = LeftType()
@@ -231,14 +231,14 @@ internal class SimpleMagicBusTest {
     fun shouldProvideSubscriberForMessageType() {
         val a: Mailbox<RightType> = object :
             Mailbox<RightType> {
-            override fun receive(message: RightType) {}
+            override operator fun invoke(message: RightType) {}
             override fun toString(): String {
                 return "b"
             }
         }
         val b: Mailbox<BaseType> = object :
             Mailbox<BaseType> {
-            override fun receive(message: BaseType) {}
+            override operator fun invoke(message: BaseType) {}
             override fun toString(): String {
                 return "a"
             }
@@ -261,7 +261,7 @@ internal class SimpleMagicBusTest {
     private fun with(
         mailbox: Mailbox<*>,
         message: Any,
-        failure: java.lang.Exception
+        failure: Exception
     ): FailedMessage {
         return FailedMessage(bus, mailbox, message, failure)
     }
@@ -273,7 +273,9 @@ internal class SimpleMagicBusTest {
         }
 
         @SafeVarargs
-        internal fun <U : T?> delivered(vararg delivered: U): AssertDelivery<T> {
+        internal fun <U : T?> delivered(
+            vararg delivered: U
+        ): AssertDelivery<T> {
             assertThat(this.delivered).containsExactly(*delivered)
             return this
         }
@@ -311,37 +313,24 @@ internal class SimpleMagicBusTest {
         private fun <T> record(
             order: AtomicInteger,
             record: AtomicInteger
-        ): Mailbox<T> {
-            return object : Mailbox<T> {
-                override fun receive(message: T) {
-                    record.set(order.getAndIncrement())
-                }
-            }
-        }
+        ): Mailbox<T> = { record.set(order.getAndIncrement()) }
     }
 }
 
 internal class TestMailbox<T>(
     val messages: MutableList<T> = ArrayList(1)
 ) : Mailbox<T> {
-    override fun receive(message: T) {
+    override operator fun invoke(message: T) {
         messages.add(message)
     }
 }
 
 internal class Discard<T> : Mailbox<T> {
-    override fun receive(message: T) {}
+    override operator fun invoke(message: T) {}
 }
 
-internal fun <T, E : java.lang.Exception> failWith(
-    ctor: () -> E
-): Mailbox<T> {
-    return object : Mailbox<T> {
-        override fun receive(message: T) {
-            throw ctor()
-        }
-    }
-}
+internal fun <T, E : Exception> failWith(ctor: () -> E): Mailbox<T> =
+    { throw ctor() }
 
 internal abstract class BaseType
 internal class LeftType : BaseType()

@@ -1,8 +1,6 @@
 package hm.binkley.labs
 
-interface Mailbox<T> {
-    fun receive(message: T)
-}
+typealias Mailbox<T> = (T) -> Unit
 
 interface MagicBus {
     fun <T> subscribe(messageType: Class<T>, mailbox: Mailbox<in T>)

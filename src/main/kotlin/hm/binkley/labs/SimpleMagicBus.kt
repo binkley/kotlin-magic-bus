@@ -49,7 +49,7 @@ class SimpleMagicBus(
         return Consumer { mailbox: Mailbox<T> ->
             try {
                 observed(mailbox, message as Any)
-                mailbox.receive(message)
+                mailbox(message)
             } catch (e: RuntimeException) {
                 throw e
             } catch (e: Exception) {
