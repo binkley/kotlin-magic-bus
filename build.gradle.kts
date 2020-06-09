@@ -5,7 +5,6 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 val assertJVersion: String by project
 val awaitilityVersion: String by project
 val gradleWrapperVersion: String by project
-val jacocoVersion: String by project
 val junitVersion: String by project
 val kotlinVersion: String by project
 val lombokVersion: String by project
