@@ -11,6 +11,7 @@ val kotlinVersion: String by project
 val lombokVersion: String by project
 
 plugins {
+    id("build-dashboard")
     kotlin("jvm")
     id("io.gitlab.arturbosch.detekt")
     id("org.jlleitschuh.gradle.ktlint")
