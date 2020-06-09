@@ -9,7 +9,6 @@ val jacocoVersion: String by project
 val junitVersion: String by project
 val kotlinVersion: String by project
 val lombokVersion: String by project
-val mockkVersion: String by project
 
 plugins {
     kotlin("jvm")
@@ -37,7 +36,6 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter:$junitVersion")
     testImplementation("org.assertj:assertj-core:$assertJVersion")
     testImplementation("org.awaitility:awaitility:$awaitilityVersion")
-    testImplementation("io.mockk:mockk:$mockkVersion")
 }
 
 detekt {
