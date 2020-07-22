@@ -79,8 +79,8 @@ class SimpleMagicBus(
 
 internal class Subscribers {
     private val subscriptions:
-            MutableMap<Class<Any>, MutableSet<Mailbox<Any>>> =
-        ConcurrentSkipListMap { a, b -> classOrder(a, b) }
+        MutableMap<Class<Any>, MutableSet<Mailbox<Any>>> =
+            ConcurrentSkipListMap { a, b -> classOrder(a, b) }
 
     @Suppress("UNCHECKED_CAST")
     @Synchronized
@@ -126,8 +126,8 @@ internal class Subscribers {
 }
 
 private fun toMailboxes():
-            (Map.Entry<Class<Any>, Set<Mailbox<Any>>>) -> Stream<Mailbox<Any>> =
-    { e: Map.Entry<Class<Any>, Set<Mailbox<Any>>> -> e.value.stream() }
+    (Map.Entry<Class<Any>, Set<Mailbox<Any>>>) -> Stream<Mailbox<Any>> =
+        { e: Map.Entry<Class<Any>, Set<Mailbox<Any>>> -> e.value.stream() }
 
 private fun classOrder(a: Class<*>, b: Class<*>): Int {
     val aFirst = b.isAssignableFrom(a)

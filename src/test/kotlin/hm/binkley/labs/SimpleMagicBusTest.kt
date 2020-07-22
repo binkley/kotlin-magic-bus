@@ -3,7 +3,6 @@ package hm.binkley.labs
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.awaitility.Awaitility.await
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.ArrayList
 import java.util.concurrent.CopyOnWriteArrayList
@@ -19,24 +18,19 @@ internal class SimpleMagicBusTest {
     private val observed: MutableMap<Mailbox<*>, MutableList<Any>> =
         mutableMapOf()
 
-    private lateinit var bus: MagicBus
-
-    @BeforeEach
-    fun setUp() {
-        bus = SimpleMagicBus.of(
-            { message -> returned.add(message) },
-            { message -> failed.add(message) }
-        ) { mailbox, message ->
-            observed
-                .computeIfAbsent(mailbox) { mutableListOf() }
-                .add(message)
-        }
+    private val bus: MagicBus = SimpleMagicBus.of(
+        { message -> returned.add(message) },
+        { message -> failed.add(message) }
+    ) { mailbox, message ->
+        observed
+            .computeIfAbsent(mailbox) { mutableListOf() }
+            .add(message)
     }
 
     @Test
     fun shouldReceiveCorrectType() {
         val mailbox = TestMailbox<RightType>()
-        bus.subscribe(RightType::class.java, mailbox)
+        mailbox.deliverTo(bus)
         val message = RightType()
 
         bus.post(message)
@@ -50,7 +44,7 @@ internal class SimpleMagicBusTest {
     @Test
     fun shouldNotReceiveWrongType() {
         val mailbox = TestMailbox<LeftType>()
-        bus.subscribe(LeftType::class.java, mailbox)
+        mailbox.deliverTo(bus)
         val message = RightType()
 
         bus.post(message)
@@ -64,7 +58,7 @@ internal class SimpleMagicBusTest {
     @Test
     fun shouldReceiveSubtypes() {
         val mailbox = TestMailbox<BaseType>()
-        bus.subscribe(BaseType::class.java, mailbox)
+        mailbox.deliverTo(bus)
         val message = RightType()
 
         bus.post(message)
@@ -91,7 +85,7 @@ internal class SimpleMagicBusTest {
     fun shouldSaveFailedPosts() {
         val failure = Exception()
         val mailbox: Mailbox<LeftType> = failWith { failure }
-        bus.subscribe(LeftType::class.java, mailbox)
+        mailbox.deliverTo(bus)
         val message = LeftType()
 
         bus.post(message)
@@ -160,8 +154,8 @@ internal class SimpleMagicBusTest {
     @Test
     fun shouldUnsubscribeOnlyMailbox() {
         val mailbox = TestMailbox<LeftType>()
-        bus.subscribe(LeftType::class.java, mailbox)
-        bus.unsubscribe(LeftType::class.java, mailbox)
+        mailbox.deliverTo(bus)
+        mailbox.noDeliveryTo(bus)
         val message = LeftType()
 
         bus.post(message)
@@ -176,9 +170,9 @@ internal class SimpleMagicBusTest {
     fun shouldUnsubscribeRightMailbox() {
         val mailboxA = TestMailbox<RightType>()
         val mailboxB: Mailbox<RightType> = failWith { Exception() }
-        bus.subscribe(RightType::class.java, mailboxA)
-        bus.subscribe(RightType::class.java, mailboxB)
-        bus.unsubscribe(RightType::class.java, mailboxB)
+        mailboxA.deliverTo(bus)
+        mailboxB.deliverTo(bus)
+        mailboxB.noDeliveryTo(bus)
         val message = RightType()
 
         bus.post(message)
@@ -196,8 +190,8 @@ internal class SimpleMagicBusTest {
             IntStream.range(0, 100).parallel()
                 .forEach { _: Int ->
                     val mailbox: Mailbox<RightType> = Discard()
-                    bus.subscribe(RightType::class.java, mailbox)
-                    bus.unsubscribe(RightType::class.java, mailbox)
+                    mailbox.deliverTo(bus)
+                    mailbox.noDeliveryTo(bus)
                     latch.countDown()
                 }
             assertThat(
@@ -218,41 +212,39 @@ internal class SimpleMagicBusTest {
     @Test
     fun shouldComplainWhenUnsubscribingBadMailbox() {
         assertThatThrownBy {
-            bus.subscribe(RightType::class.java, Discard())
-            val mailbox = Discard<RightType>()
-            bus.unsubscribe(RightType::class.java, mailbox)
+            Discard<RightType>().deliverTo(bus)
+            Discard<RightType>().noDeliveryTo(bus)
         }.isInstanceOf(NoSuchElementException::class.java)
     }
 
     @Test
     fun shouldComplainWhenUnsubscribingBadMessageType() {
         assertThatThrownBy {
-            val mailbox = Discard<RightType>()
-            bus.unsubscribe(RightType::class.java, mailbox)
+            Discard<RightType>().noDeliveryTo(bus)
         }.isInstanceOf(NoSuchElementException::class.java)
     }
 
     @Test
     fun shouldProvideSubscriberForMessageType() {
-        val a: Mailbox<RightType> = object :
+        val mailboxRight: Mailbox<RightType> = object :
             Mailbox<RightType> {
             override operator fun invoke(message: RightType) {}
             override fun toString(): String {
                 return "b"
             }
         }
-        val b: Mailbox<BaseType> = object :
+        val mailboxBase: Mailbox<BaseType> = object :
             Mailbox<BaseType> {
             override operator fun invoke(message: BaseType) {}
             override fun toString(): String {
                 return "a"
             }
         }
-        bus.subscribe(BaseType::class.java, b)
-        bus.subscribe(RightType::class.java, a)
+        mailboxBase.deliverTo(bus)
+        mailboxRight.deliverTo(bus)
 
         assertThat((bus as SimpleMagicBus).subscribers(RightType::class.java))
-            .isEqualTo(listOf(b, a))
+            .isEqualTo(listOf(mailboxBase, mailboxRight))
     }
 
     private fun <T> assertOn(delivered: List<T>): AssertDelivery<T> {

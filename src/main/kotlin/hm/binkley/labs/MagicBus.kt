@@ -19,3 +19,9 @@ data class ReturnedMessage(
     val bus: MagicBus,
     val message: Any
 )
+
+inline fun <reified T> Mailbox<in T>.deliverTo(bus: MagicBus) =
+    bus.subscribe(T::class.java, this)
+
+inline fun <reified T> Mailbox<in T>.noDeliveryTo(bus: MagicBus) =
+    bus.unsubscribe(T::class.java, this)
