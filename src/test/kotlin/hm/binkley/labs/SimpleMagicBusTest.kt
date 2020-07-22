@@ -19,13 +19,14 @@ internal class SimpleMagicBusTest {
         mutableMapOf()
 
     private val bus: MagicBus = SimpleMagicBus.of(
-        { message -> returned.add(message) },
-        { message -> failed.add(message) }
-    ) { mailbox, message ->
-        observed
-            .computeIfAbsent(mailbox) { mutableListOf() }
-            .add(message)
-    }
+        returned = { message -> returned.add(message) },
+        failed = { message -> failed.add(message) },
+        observed = { mailbox, message ->
+            observed
+                .computeIfAbsent(mailbox) { mutableListOf() }
+                .add(message)
+        }
+    )
 
     @Test
     fun shouldReceiveCorrectType() {
