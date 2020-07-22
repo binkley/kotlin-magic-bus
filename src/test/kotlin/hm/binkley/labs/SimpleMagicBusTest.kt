@@ -189,15 +189,17 @@ internal class SimpleMagicBusTest {
         await().atMost(2000L, MILLISECONDS).until {
             val latch = CountDownLatch(100)
             IntStream.range(0, 100).parallel().forEach { _: Int ->
-                val mailbox: Mailbox<RightType> = Discard()
+                val mailbox: Mailbox<RightType> = discard()
                 mailbox.deliverTo(bus)
                 mailbox.noDeliveryTo(bus)
                 latch.countDown()
             }
-            assertThat(latch.await(
-                1000L,
-                MILLISECONDS
-            )).isNotEqualTo(0)
+            assertThat(
+                latch.await(
+                    1000L,
+                    MILLISECONDS
+                )
+            ).isNotEqualTo(0)
             val message = RightType()
             bus.post(message)
             assertOn(noMailbox<Any>())
@@ -210,15 +212,15 @@ internal class SimpleMagicBusTest {
     @Test
     fun `should complain when unsubscribing a bad mailbox`() {
         assertThatThrownBy {
-            Discard<RightType>().deliverTo(bus)
-            Discard<RightType>().noDeliveryTo(bus)
+            discard<RightType>().deliverTo(bus)
+            discard<RightType>().noDeliveryTo(bus)
         }.isInstanceOf(NoSuchElementException::class.java)
     }
 
     @Test
     fun `should complain when unsubscribing from bad message type`() {
         assertThatThrownBy {
-            Discard<RightType>().noDeliveryTo(bus)
+            discard<RightType>().noDeliveryTo(bus)
         }.isInstanceOf(NoSuchElementException::class.java)
     }
 
@@ -323,13 +325,6 @@ internal class TestMailbox<T>(
         messages.add(message)
     }
 }
-
-internal class Discard<T> : Mailbox<T> {
-    override operator fun invoke(message: T) {}
-}
-
-internal fun <T, E : Exception> failWith(ctor: () -> E): Mailbox<T> =
-    { throw ctor() }
 
 internal abstract class BaseType
 internal class LeftType : BaseType()

@@ -20,6 +20,13 @@ data class ReturnedMessage(
     val message: Any
 )
 
+fun <T> discard(): Mailbox<T> = object : Mailbox<T> {
+    override operator fun invoke(message: T) = Unit
+}
+
+fun <T, E : Exception> failWith(exceptionCtor: () -> E): Mailbox<T> =
+    { throw exceptionCtor() }
+
 inline fun <reified T> Mailbox<in T>.deliverTo(bus: MagicBus) =
     bus.subscribe(T::class.java, this)
 
