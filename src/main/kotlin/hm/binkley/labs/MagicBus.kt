@@ -21,7 +21,7 @@ inline fun <reified T> Mailbox<in T>.deliverFrom(bus: MagicBus) =
 inline fun <reified T> Mailbox<in T>.noDeliveryFrom(bus: MagicBus) =
     bus.unsubscribe(T::class.java, this)
 
-/** Subscribe to [ReturnedMessage] to find out about posts to no mailbox. */
+/** Subscribe to [ReturnedMessage] to find out about posts with no mailbox. */
 data class ReturnedMessage(
     val bus: MagicBus,
     val message: Any
