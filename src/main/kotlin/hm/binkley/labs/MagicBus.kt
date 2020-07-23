@@ -5,19 +5,29 @@ import lombok.Generated
 typealias Mailbox<T> = (T) -> Unit
 
 interface MagicBus {
-    /** Posts messages of [messageType] to [mailbox]. */
+    /** Delivers messages of [messageType] to [mailbox]. */
     fun <T> subscribe(messageType: Class<T>, mailbox: Mailbox<in T>)
-    /** Stops posting messages of [messageType] to [mailbox]. */
+
+    /** Stops delivering messages of [messageType] to [mailbox]. */
     fun <T> unsubscribe(messageType: Class<T>, mailbox: Mailbox<in T>)
+
     /** Posts [message] to any subscribed mailboxes. */
     fun post(message: Any)
 }
 
-/** Subscribes without caller providing a class object. */
+/**
+ * Subscribes without caller providing a class object.
+ *
+ * @see MagicBus.subscribe
+ */
 inline fun <reified T> Mailbox<in T>.deliverFrom(bus: MagicBus) =
     bus.subscribe(T::class.java, this)
 
-/** Unsubscribes without caller providing a class object. */
+/**
+ * Unsubscribes without caller providing a class object.
+ *
+ * @see MagicBus.unsubscribe
+ */
 inline fun <reified T> Mailbox<in T>.noDeliveryFrom(bus: MagicBus) =
     bus.unsubscribe(T::class.java, this)
 
