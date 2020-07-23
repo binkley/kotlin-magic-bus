@@ -52,7 +52,7 @@ internal class SimpleMagicBusTest {
 
         assertOn(mailbox)
             .noneDelivered()
-            .returned(this.with(message))
+            .returned(with(message))
             .noneFailed()
     }
 
@@ -163,7 +163,7 @@ internal class SimpleMagicBusTest {
 
         assertOn(mailbox)
             .noneDelivered()
-            .returned(this.with(message))
+            .returned(with(message))
             .noneFailed()
     }
 
@@ -203,7 +203,7 @@ internal class SimpleMagicBusTest {
             val message = RightType()
             bus.post(message)
             assertOn(noMailbox<Any>())
-                .returned(this.with(message))
+                .returned(with(message))
                 .noneFailed()
             true
         }
