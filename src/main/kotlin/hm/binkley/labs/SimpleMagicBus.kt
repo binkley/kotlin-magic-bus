@@ -7,6 +7,14 @@ import java.util.function.Consumer
 import java.util.stream.Collectors.toList
 import java.util.stream.Stream
 
+/**
+ * A _simple_ implementation of [MagicBus].  Limitations include:
+ * * Single-threaded [post] &mdash; callers _block_ until all mailboxes
+ *   process the message
+ * * No loop detection &mdash; no attempt is made to prevent "storms" whereby
+ *   a single post results in mailboxes posting additional messages, possibly
+ *   without limits
+ */
 class SimpleMagicBus(
     private val returned: (ReturnedMessage) -> Unit,
     private val failed: (FailedMessage) -> Unit,
