@@ -68,9 +68,6 @@ class SimpleMagicBus(
             failed: (FailedMessage) -> Unit,
             observed: (Mailbox<*>, Any) -> Unit
         ) = SimpleMagicBus(returned, failed, observed)
-
-        private fun record(deliveries: AtomicInteger): Consumer<Mailbox<*>> =
-            Consumer { deliveries.incrementAndGet() }
     }
 }
 
@@ -124,3 +121,6 @@ private fun toMailboxes():
 
 private fun messageTypeOrder(a: Class<*>, b: Class<*>) =
     b.isAssignableFrom(a).compareTo(a.isAssignableFrom(b))
+
+private fun record(deliveries: AtomicInteger): Consumer<Mailbox<*>> =
+    Consumer { deliveries.incrementAndGet() }
