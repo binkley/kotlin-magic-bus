@@ -71,14 +71,14 @@ class SimpleMagicBus(
     }
 }
 
-internal class Subscribers {
+private class Subscribers {
     private val subscriptions:
         MutableMap<Class<Any>, MutableSet<Mailbox<Any>>> =
             ConcurrentSkipListMap { a, b -> messageTypeOrder(a, b) }
 
     @Suppress("UNCHECKED_CAST")
     @Synchronized
-    internal fun <T> subscribe(
+    fun <T> subscribe(
         messageType: Class<T>,
         mailbox: Mailbox<in T>
     ) {
@@ -88,7 +88,7 @@ internal class Subscribers {
     }
 
     @Synchronized
-    internal fun unsubscribe(
+    fun unsubscribe(
         messageType: Class<*>,
         mailbox: Mailbox<*>
     ) {
@@ -99,7 +99,7 @@ internal class Subscribers {
 
     @Suppress("FunctionMinLength")
     @Synchronized
-    internal fun of(messageType: Class<Any>): Stream<Mailbox<Any>> =
+    fun of(messageType: Class<Any>): Stream<Mailbox<Any>> =
         subscriptions.entries.stream()
             .filter(subscribedTo(messageType))
             .flatMap(toMailboxes())
