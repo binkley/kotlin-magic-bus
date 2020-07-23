@@ -13,11 +13,9 @@ import java.util.concurrent.atomic.AtomicInteger
 import java.util.stream.IntStream
 
 internal class SimpleMagicBusTest {
-    private val returned: MutableList<ReturnedMessage> =
-        CopyOnWriteArrayList()
-    private val failed: MutableList<FailedMessage> = CopyOnWriteArrayList()
-    private val delivered: MutableMap<Mailbox<*>, MutableList<Any>> =
-        mutableMapOf()
+    private val returned = CopyOnWriteArrayList<ReturnedMessage>()
+    private val failed = CopyOnWriteArrayList<FailedMessage>()
+    private val delivered = mutableMapOf<Mailbox<*>, MutableList<Any>>()
 
     private val bus = SimpleMagicBus.onReturn {
         returned.add(it)
