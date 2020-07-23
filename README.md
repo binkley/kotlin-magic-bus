@@ -87,22 +87,6 @@ class VariationOnABus {
 }
 ```
 
-```kotlin
-class QuieterVariationOnABus {
-    fun main() {
-        SimpleMagicBus.of(
-                { returned -> println("BUG: No receiver: $returned") },
-                // Even quieter: SimpleMagicBus.ignoreReturns()
-                { failed ->
-                    System.err.println(failed);
-                    failed.failure.printStackTrace();
-                },
-                // Even quieter: SimpleMagicBus.ignoreFailures()
-                SimpleMagicBus.ignoreDeliveries())
-    }
-}
-```
-
 ## Tech features
 
 * Pure JDK, no 3<sup>rd</sup> parties
