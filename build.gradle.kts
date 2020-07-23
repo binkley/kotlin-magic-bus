@@ -69,9 +69,6 @@ tasks {
     }
 
     jacocoTestReport {
-        reports {
-            html.isEnabled = true
-        }
         dependsOn(test)
     }
 
@@ -79,7 +76,8 @@ tasks {
         violationRules {
             rule {
                 limit {
-                    minimum = BigDecimal.ZERO // TODO: Real coverage
+                    // TODO: Why is 0% instructions reported?
+                    minimum = "0".toBigDecimal()
                 }
             }
         }
