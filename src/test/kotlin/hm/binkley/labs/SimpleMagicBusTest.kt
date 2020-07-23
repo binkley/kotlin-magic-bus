@@ -189,7 +189,7 @@ internal class SimpleMagicBusTest {
         await().atMost(2000L, MILLISECONDS).until {
             val latch = CountDownLatch(100)
             IntStream.range(0, 100).parallel().forEach { _: Int ->
-                val mailbox: Mailbox<RightType> = discard()
+                val mailbox: Mailbox<RightType> = TestMailbox()
                 mailbox.deliverTo(bus)
                 mailbox.noDeliveryTo(bus)
                 latch.countDown()
@@ -210,15 +210,7 @@ internal class SimpleMagicBusTest {
     }
 
     @Test
-    fun `should complain when unsubscribing a bad mailbox`() {
-        assertThatThrownBy {
-            discard<RightType>().deliverTo(bus)
-            discard<RightType>().noDeliveryTo(bus)
-        }.isInstanceOf(NoSuchElementException::class.java)
-    }
-
-    @Test
-    fun `should complain when unsubscribing from bad message type`() {
+    fun `should complain when unsubscribing from bad mailbox`() {
         assertThatThrownBy {
             discard<RightType>().noDeliveryTo(bus)
         }.isInstanceOf(NoSuchElementException::class.java)
@@ -226,19 +218,13 @@ internal class SimpleMagicBusTest {
 
     @Test
     fun `should provide subscriber for message type`() {
-        val mailboxRight: Mailbox<RightType> = object :
-            Mailbox<RightType> {
+        val mailboxRight: Mailbox<RightType> = object : Mailbox<RightType> {
             override operator fun invoke(message: RightType) {}
-            override fun toString(): String {
-                return "b"
-            }
+            override fun toString() = "right-type mailbox"
         }
-        val mailboxBase: Mailbox<BaseType> = object :
-            Mailbox<BaseType> {
+        val mailboxBase: Mailbox<BaseType> = object : Mailbox<BaseType> {
             override operator fun invoke(message: BaseType) {}
-            override fun toString(): String {
-                return "a"
-            }
+            override fun toString() = "base-type mailbox"
         }
         mailboxBase.deliverTo(bus)
         mailboxRight.deliverTo(bus)

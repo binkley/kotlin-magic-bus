@@ -20,9 +20,11 @@ data class ReturnedMessage(
     val message: Any
 )
 
-fun <T> discard(): Mailbox<T> = object : Mailbox<T> {
+data class DiscardMailbox<T>(val type: Class<T>) : Mailbox<T> {
     override operator fun invoke(message: T) = Unit
 }
+
+inline fun <reified T> discard(): Mailbox<T> = DiscardMailbox(T::class.java)
 
 fun <T, E : Exception> failWith(exceptionCtor: () -> E): Mailbox<T> =
     { throw exceptionCtor() }
