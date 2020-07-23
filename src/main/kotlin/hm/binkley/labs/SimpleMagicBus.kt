@@ -4,7 +4,6 @@ import java.util.concurrent.ConcurrentSkipListMap
 import java.util.concurrent.CopyOnWriteArraySet
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.function.Consumer
-import java.util.function.Predicate
 import java.util.stream.Collectors.toList
 import java.util.stream.Stream
 
@@ -113,13 +112,12 @@ internal class Subscribers {
         private fun <T> mailboxes(): MutableSet<Mailbox<T>> =
             CopyOnWriteArraySet()
 
-        private fun subscribedTo(
-            messageType: Class<*>
-        ): Predicate<Map.Entry<Class<*>, Set<Mailbox<*>>>> {
-            return Predicate { e: Map.Entry<Class<*>, Set<Mailbox<*>>> ->
-                e.key.isAssignableFrom(messageType)
+        private fun subscribedTo(messageType: Class<*>):
+            (Map.Entry<Class<*>, Set<Mailbox<*>>>) -> Boolean {
+                return { e: Map.Entry<Class<*>, Set<Mailbox<*>>> ->
+                    e.key.isAssignableFrom(messageType)
+                }
             }
-        }
     }
 }
 
