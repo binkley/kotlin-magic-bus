@@ -84,8 +84,8 @@ internal class SimpleMagicBusTest {
 
     @Test
     fun `should save failed posts`() {
-        val failure = Exception()
-        val mailbox: Mailbox<LeftType> = failWith { failure }
+        val reason = Exception()
+        val mailbox: Mailbox<LeftType> = failWith { reason }
         mailbox.deliverTo(bus)
         val message = LeftType()
 
@@ -94,7 +94,7 @@ internal class SimpleMagicBusTest {
         assertOn(noMailbox<Any>())
             .noneDelivered()
             .noneReturned()
-            .failed(with(mailbox, message, failure))
+            .failed(with(mailbox, message, reason))
     }
 
     @Test
@@ -102,9 +102,7 @@ internal class SimpleMagicBusTest {
         assertThatThrownBy {
             bus.subscribe(
                 LeftType::class.java,
-                failWith {
-                    RuntimeException()
-                }
+                failWith { RuntimeException() }
             )
             bus.post(LeftType())
         }.isInstanceOf(RuntimeException::class.java)
