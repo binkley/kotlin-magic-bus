@@ -70,7 +70,9 @@ class SimpleMagicBus(
             observed: (Mailbox<*>, Any) -> Unit
         ) = SimpleMagicBus(returned, failed, observed)
 
-        fun ignored() = { _: Mailbox<*>, _: Any -> }
+        fun ignoreReturns() = { _: ReturnedMessage -> }
+        fun ignoreFailures() = { _: FailedMessage -> }
+        fun ignoreDeliveries() = { _: Mailbox<*>, _: Any -> }
 
         private fun record(deliveries: AtomicInteger): Consumer<Mailbox<*>> =
             Consumer { deliveries.incrementAndGet() }

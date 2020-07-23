@@ -92,11 +92,13 @@ class QuieterVariationOnABus {
     fun main() {
         SimpleMagicBus.of(
                 { returned -> println("BUG: No receiver: $returned") },
+                // Even quieter: SimpleMagicBus.ignoreReturns()
                 { failed ->
                     System.err.println(failed);
                     failed.failure.printStackTrace();
                 },
-                SimpleMagicBus.ignored())
+                // Even quieter: SimpleMagicBus.ignoreFailures()
+                SimpleMagicBus.ignoreDeliveries())
     }
 }
 ```

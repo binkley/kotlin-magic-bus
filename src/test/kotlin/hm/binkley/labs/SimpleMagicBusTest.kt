@@ -1,5 +1,8 @@
 package hm.binkley.labs
 
+import hm.binkley.labs.SimpleMagicBus.Companion.ignoreDeliveries
+import hm.binkley.labs.SimpleMagicBus.Companion.ignoreFailures
+import hm.binkley.labs.SimpleMagicBus.Companion.ignoreReturns
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.awaitility.Awaitility.await
@@ -229,6 +232,15 @@ internal class SimpleMagicBusTest {
 
         assertThat((bus as SimpleMagicBus).subscribers(RightType::class.java))
             .isEqualTo(listOf(mailboxBase, mailboxRight))
+    }
+
+    @Test
+    fun `should ignore and nothing happens`() {
+        SimpleMagicBus.of(
+            ignoreReturns(),
+            ignoreFailures(),
+            ignoreDeliveries()
+        ).post(this)
     }
 
     private fun <T> assertOn(delivered: List<T>): AssertDelivery<T> {
