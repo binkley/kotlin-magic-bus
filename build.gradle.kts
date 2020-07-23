@@ -68,16 +68,11 @@ tasks {
         finalizedBy(jacocoTestReport)
     }
 
-    jacocoTestReport {
-        dependsOn(test)
-    }
-
     jacocoTestCoverageVerification {
         violationRules {
             rule {
                 limit {
-                    // TODO: Why is 0% instructions reported?
-                    minimum = "0".toBigDecimal()
+                    minimum = "0.98".toBigDecimal()
                 }
             }
         }
