@@ -12,11 +12,11 @@ interface MagicBus {
 }
 
 /** Subscribes without caller providing a class object. */
-inline fun <reified T> Mailbox<in T>.deliverTo(bus: MagicBus) =
+inline fun <reified T> Mailbox<in T>.deliverFrom(bus: MagicBus) =
     bus.subscribe(T::class.java, this)
 
 /** Unsubscribes without caller providing a class object. */
-inline fun <reified T> Mailbox<in T>.noDeliveryTo(bus: MagicBus) =
+inline fun <reified T> Mailbox<in T>.noDeliveryFrom(bus: MagicBus) =
     bus.unsubscribe(T::class.java, this)
 
 /** Subscribe to [ReturnedMessage] to find out about posts to no mailbox. */

@@ -31,7 +31,7 @@ internal class SimpleMagicBusTest {
     @Test
     fun `should receive correct type`() {
         val mailbox = TestMailbox<RightType>()
-        mailbox.deliverTo(bus)
+        mailbox.deliverFrom(bus)
         val message = RightType()
 
         bus.post(message)
@@ -45,7 +45,7 @@ internal class SimpleMagicBusTest {
     @Test
     fun `should not receive wrong type`() {
         val mailbox = TestMailbox<LeftType>()
-        mailbox.deliverTo(bus)
+        mailbox.deliverFrom(bus)
         val message = RightType()
 
         bus.post(message)
@@ -59,7 +59,7 @@ internal class SimpleMagicBusTest {
     @Test
     fun `should receive subtypes`() {
         val mailbox = TestMailbox<BaseType>()
-        mailbox.deliverTo(bus)
+        mailbox.deliverFrom(bus)
         val message = RightType()
 
         bus.post(message)
@@ -86,7 +86,7 @@ internal class SimpleMagicBusTest {
     fun `should save failed posts`() {
         val reason = Exception()
         val mailbox: Mailbox<LeftType> = failWith { reason }
-        mailbox.deliverTo(bus)
+        mailbox.deliverFrom(bus)
         val message = LeftType()
 
         bus.post(message)
@@ -153,8 +153,8 @@ internal class SimpleMagicBusTest {
     @Test
     fun `should unsubscribe for exact type`() {
         val mailbox = TestMailbox<LeftType>()
-        mailbox.deliverTo(bus)
-        mailbox.noDeliveryTo(bus)
+        mailbox.deliverFrom(bus)
+        mailbox.noDeliveryFrom(bus)
         val message = LeftType()
 
         bus.post(message)
@@ -169,9 +169,9 @@ internal class SimpleMagicBusTest {
     fun `should unsubscribe exact mailbox`() {
         val mailboxA = TestMailbox<RightType>()
         val mailboxB: Mailbox<RightType> = failWith { Exception() }
-        mailboxA.deliverTo(bus)
-        mailboxB.deliverTo(bus)
-        mailboxB.noDeliveryTo(bus)
+        mailboxA.deliverFrom(bus)
+        mailboxB.deliverFrom(bus)
+        mailboxB.noDeliveryFrom(bus)
         val message = RightType()
 
         bus.post(message)
@@ -188,8 +188,8 @@ internal class SimpleMagicBusTest {
             val latch = CountDownLatch(100)
             IntStream.range(0, 100).parallel().forEach { _: Int ->
                 val mailbox: Mailbox<RightType> = TestMailbox()
-                mailbox.deliverTo(bus)
-                mailbox.noDeliveryTo(bus)
+                mailbox.deliverFrom(bus)
+                mailbox.noDeliveryFrom(bus)
                 latch.countDown()
             }
             assertThat(
@@ -210,7 +210,7 @@ internal class SimpleMagicBusTest {
     @Test
     fun `should complain when unsubscribing from bad mailbox`() {
         assertThatThrownBy {
-            discard<RightType>().noDeliveryTo(bus)
+            discard<RightType>().noDeliveryFrom(bus)
         }.isInstanceOf(NoSuchElementException::class.java)
     }
 
@@ -224,8 +224,8 @@ internal class SimpleMagicBusTest {
             override operator fun invoke(message: BaseType) {}
             override fun toString() = "base-type mailbox"
         }
-        mailboxBase.deliverTo(bus)
-        mailboxRight.deliverTo(bus)
+        mailboxBase.deliverFrom(bus)
+        mailboxRight.deliverFrom(bus)
 
         assertThat((bus as SimpleMagicBus).subscribers(RightType::class.java))
             .isEqualTo(listOf(mailboxBase, mailboxRight))
@@ -244,7 +244,7 @@ internal class SimpleMagicBusTest {
     fun `should provide accurate details on failed posts`() {
         val reason = Exception()
         val mailbox: Mailbox<SimpleMagicBusTest> = failWith { reason }
-        mailbox.deliverTo(bus)
+        mailbox.deliverFrom(bus)
         val message = this
         bus.post(message)
         val failed = failed[0]

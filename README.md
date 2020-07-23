@@ -61,12 +61,12 @@ class QuitListening(private val bus: MagicBus) {
 
     init {
         bus.subscribe(Exception::class.java, receiver)
-        // Or: receiver.deliverTo(bus)
+        // Or: receiver.deliverFrom(bus)
     }
 
     fun silenceIsGolden() {
         bus.unsubscribe(Exception::class.java, receiver)
-        // Or: receiver.noDeliveryTo(bus)
+        // Or: receiver.noDeliveryFrom(bus)
     }
 }
 ```
