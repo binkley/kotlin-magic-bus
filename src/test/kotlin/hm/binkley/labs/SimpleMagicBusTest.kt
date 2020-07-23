@@ -19,7 +19,7 @@ internal class SimpleMagicBusTest {
     private val observed: MutableMap<Mailbox<*>, MutableList<Any>> =
         mutableMapOf()
 
-    private val bus: MagicBus = SimpleMagicBus.of(
+    private val bus: MagicBus = SimpleMagicBus(
         returned = { message -> returned.add(message) },
         failed = { message -> failed.add(message) },
         observed = { mailbox, message ->

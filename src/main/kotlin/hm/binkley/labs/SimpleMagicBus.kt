@@ -68,15 +68,6 @@ class SimpleMagicBus(
             returned(ReturnedMessage(this, message))
         }
     }
-
-    companion object {
-        @Suppress("FunctionMinLength")
-        fun of(
-            returned: (ReturnedMessage) -> Unit,
-            failed: (FailedMessage) -> Unit,
-            observed: (Mailbox<*>, Any) -> Unit
-        ) = SimpleMagicBus(returned, failed, observed)
-    }
 }
 
 private class Subscribers {
