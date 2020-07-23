@@ -231,6 +231,29 @@ internal class SimpleMagicBusTest {
             .isEqualTo(listOf(mailboxBase, mailboxRight))
     }
 
+    @Test
+    fun `should provide accurate details on dead letters`() {
+        val message = this
+        bus.post(message)
+        val dead = returned[0]
+        assertThat(dead.bus).isSameAs(bus)
+        assertThat(dead.message).isSameAs(message)
+    }
+
+    @Test
+    fun `should provide accurate details on failed posts`() {
+        val reason = Exception()
+        val mailbox: Mailbox<SimpleMagicBusTest> = failWith { reason }
+        mailbox.deliverTo(bus)
+        val message = this
+        bus.post(message)
+        val failed = failed[0]
+        assertThat(failed.bus).isSameAs(bus)
+        assertThat(failed.mailbox).isSameAs(mailbox)
+        assertThat(failed.message).isSameAs(message)
+        assertThat(failed.failure).isSameAs(reason)
+    }
+
     private fun <T> assertOn(delivered: List<T>): AssertDelivery<T> {
         return AssertDelivery(delivered)
     }
