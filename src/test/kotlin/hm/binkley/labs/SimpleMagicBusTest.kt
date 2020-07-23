@@ -4,6 +4,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.util.ArrayList
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.CountDownLatch
@@ -151,7 +152,7 @@ internal class SimpleMagicBusTest {
     }
 
     @Test
-    fun `should unsubscribe for exact type`() {
+    fun `should unsubscribe exact type`() {
         val mailbox = TestMailbox<LeftType>()
         mailbox.deliverFrom(bus)
         mailbox.noDeliveryFrom(bus)
@@ -180,6 +181,17 @@ internal class SimpleMagicBusTest {
             .delivered(message)
             .noneReturned()
             .noneFailed()
+    }
+
+    @Test
+    fun `should fail to unsubscribe exact mailbox`() {
+        val mailboxA = TestMailbox<RightType>()
+        val mailboxB: Mailbox<RightType> = failWith { Exception() }
+        mailboxA.deliverFrom(bus)
+
+        assertThrows<NoSuchElementException> {
+            mailboxB.noDeliveryFrom(bus)
+        }
     }
 
     @Test

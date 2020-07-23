@@ -96,4 +96,4 @@ class VariationOnABus {
 
 ## TODO
 
-* JaCoCo is not running coverage verification
+* JaCoCo shows 100% instruction coverage, but says there are missed branches

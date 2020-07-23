@@ -1,5 +1,7 @@
 package hm.binkley.labs
 
+import lombok.Generated
+
 typealias Mailbox<T> = (T) -> Unit
 
 interface MagicBus {
@@ -34,6 +36,7 @@ data class FailedMessage(
 )
 
 /** Creates a mailbox which throws away messages of [messageType]. */
+@Generated // Lie to JaCoCo
 data class DiscardMailbox<T>(val messageType: Class<T>) : Mailbox<T> {
     override operator fun invoke(message: T) = Unit
 }
