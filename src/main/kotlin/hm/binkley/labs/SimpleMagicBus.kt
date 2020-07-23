@@ -132,5 +132,5 @@ private fun toMailboxes():
 private fun classOrder(a: Class<*>, b: Class<*>): Int {
     val aFirst = b.isAssignableFrom(a)
     val bFirst = a.isAssignableFrom(b)
-    return if (aFirst && !bFirst) 1 else if (bFirst && !aFirst) -1 else 0
+    return aFirst.compareTo(bFirst)
 }
