@@ -102,21 +102,18 @@ internal class Subscribers {
 
     @Suppress("FunctionMinLength")
     @Synchronized
-    internal fun of(messageType: Class<Any>): Stream<Mailbox<Any>> {
-        return subscriptions.entries.stream()
+    internal fun of(messageType: Class<Any>): Stream<Mailbox<Any>> =
+        subscriptions.entries.stream()
             .filter(subscribedTo(messageType))
             .flatMap(toMailboxes())
-    }
 
     companion object {
         private fun <T> mailboxes(): MutableSet<Mailbox<T>> =
             CopyOnWriteArraySet()
 
-        private fun subscribedTo(messageType: Class<*>):
-            (Map.Entry<Class<*>, Set<Mailbox<*>>>) -> Boolean {
-                return { e: Map.Entry<Class<*>, Set<Mailbox<*>>> ->
-                    e.key.isAssignableFrom(messageType)
-                }
+        private fun subscribedTo(messageType: Class<*>) =
+            { e: Map.Entry<Class<*>, Set<Mailbox<*>>> ->
+                e.key.isAssignableFrom(messageType)
             }
     }
 }
@@ -125,8 +122,5 @@ private fun toMailboxes():
     (Map.Entry<Class<Any>, Set<Mailbox<Any>>>) -> Stream<Mailbox<Any>> =
         { e: Map.Entry<Class<Any>, Set<Mailbox<Any>>> -> e.value.stream() }
 
-private fun classOrder(a: Class<*>, b: Class<*>): Int {
-    val aFirst = b.isAssignableFrom(a)
-    val bFirst = a.isAssignableFrom(b)
-    return aFirst.compareTo(bFirst)
-}
+private fun classOrder(a: Class<*>, b: Class<*>) =
+    b.isAssignableFrom(a).compareTo(a.isAssignableFrom(b))
