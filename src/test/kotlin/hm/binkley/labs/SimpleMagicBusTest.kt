@@ -16,18 +16,18 @@ internal class SimpleMagicBusTest {
     private val returned: MutableList<ReturnedMessage> =
         CopyOnWriteArrayList()
     private val failed: MutableList<FailedMessage> = CopyOnWriteArrayList()
-    private val observed: MutableMap<Mailbox<*>, MutableList<Any>> =
+    private val delivered: MutableMap<Mailbox<*>, MutableList<Any>> =
         mutableMapOf()
 
-    private val bus: MagicBus = SimpleMagicBus(
-        returned = { message -> returned.add(message) },
-        failed = { message -> failed.add(message) },
-        observed = { mailbox, message ->
-            observed
-                .computeIfAbsent(mailbox) { mutableListOf() }
-                .add(message)
-        }
-    )
+    private val bus = SimpleMagicBus.onReturn {
+        returned.add(it)
+    } onFailure {
+        failed.add(it)
+    } onDelivery { mailbox, message ->
+        delivered
+            .computeIfAbsent(mailbox) { mutableListOf() }
+            .add(message)
+    }
 
     @Test
     fun `should receive correct type`() {

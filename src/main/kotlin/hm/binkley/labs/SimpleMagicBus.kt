@@ -18,7 +18,7 @@ import java.util.stream.Stream
 class SimpleMagicBus(
     private val returned: (ReturnedMessage) -> Unit,
     private val failed: (FailedMessage) -> Unit,
-    private val observed: (Mailbox<*>, Any) -> Unit
+    private val delivered: (Mailbox<*>, Any) -> Unit
 ) : MagicBus {
     private val subscribers = Subscribers()
 
@@ -53,7 +53,7 @@ class SimpleMagicBus(
     private fun <T> receive(message: T): Consumer<Mailbox<T>> {
         return Consumer { mailbox: Mailbox<T> ->
             try {
-                observed(mailbox, message as Any)
+                delivered(mailbox, message as Any)
                 mailbox(message)
             } catch (e: RuntimeException) {
                 throw e
@@ -68,7 +68,21 @@ class SimpleMagicBus(
             returned(ReturnedMessage(this, message))
         }
     }
+
+    companion object
 }
+
+class OnReturn(private val returned: (ReturnedMessage) -> Unit) {
+    inner class OnFailure(private val failed: (FailedMessage) -> Unit) {
+        infix fun onDelivery(delivered: (Mailbox<*>, Any) -> Unit): MagicBus =
+            SimpleMagicBus(returned, failed, delivered)
+    }
+
+    infix fun onFailure(failed: (FailedMessage) -> Unit) = OnFailure(failed)
+}
+
+fun SimpleMagicBus.Companion.onReturn(returned: (ReturnedMessage) -> Unit) =
+    OnReturn(returned)
 
 private class Subscribers {
     private val subscriptions:
