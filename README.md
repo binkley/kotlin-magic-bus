@@ -97,3 +97,4 @@ class VariationOnABus {
 ## TODO
 
 * JaCoCo shows 100% instruction coverage, but says there are missed branches
+* Replace use of `Stream` with `Sequence`
