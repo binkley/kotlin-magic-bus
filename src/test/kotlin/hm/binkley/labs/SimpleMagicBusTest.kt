@@ -264,69 +264,48 @@ internal class SimpleMagicBusTest {
         assertThat(failed.failure).isSameAs(reason)
     }
 
-    private fun <T> assertOn(delivered: List<T>): AssertDelivery<T> {
-        return AssertDelivery(delivered)
-    }
+    private fun <T> assertOn(delivered: List<T>) = AssertDelivery(delivered)
+    private fun <T> assertOn(delivered: TestMailbox<T>) =
+        assertOn(delivered.messages)
 
-    private fun <T> assertOn(delivered: TestMailbox<T>): AssertDelivery<T> {
-        return assertOn(delivered.messages)
-    }
-
-    private fun with(message: Any): ReturnedMessage {
-        return ReturnedMessage(bus, message)
-    }
-
+    private fun with(message: Any) = ReturnedMessage(bus, message)
     private fun with(
         mailbox: Mailbox<*>,
         message: Any,
         failure: Exception
-    ): FailedMessage {
-        return FailedMessage(bus, mailbox, message, failure)
-    }
+    ) = FailedMessage(bus, mailbox, message, failure)
 
-    internal inner class AssertDelivery<T>(private val delivered: List<T>) {
-        internal fun noneDelivered(): AssertDelivery<T> {
+    private inner class AssertDelivery<T>(private val delivered: List<T>) {
+        fun noneDelivered() = apply {
             assertThat(delivered).isEmpty()
-            return this
         }
 
         @SafeVarargs
-        internal fun <U : T?> delivered(
-            vararg delivered: U
-        ): AssertDelivery<T> {
+        fun <U : T?> delivered(vararg delivered: U) = apply {
             assertThat(this.delivered).containsExactly(*delivered)
-            return this
         }
 
-        internal fun noneReturned(): AssertDelivery<T> {
+        fun noneReturned() = apply {
             assertThat(returned).isEmpty()
-            return this
         }
 
-        internal fun returned(
-            vararg returned: ReturnedMessage
-        ): AssertDelivery<T> {
+        fun returned(vararg returned: ReturnedMessage) = apply {
             assertThat(this@SimpleMagicBusTest.returned)
                 .containsExactly(*returned)
-            return this
         }
 
-        internal fun noneFailed(): AssertDelivery<T> {
+        fun noneFailed() = apply {
             assertThat(failed).isEmpty()
-            return this
         }
 
-        internal fun failed(vararg failed: FailedMessage): AssertDelivery<T> {
+        fun failed(vararg failed: FailedMessage) = apply {
             assertThat(this@SimpleMagicBusTest.failed)
                 .containsExactly(*failed)
-            return this
         }
     }
 
     companion object {
-        private fun <T> noMailbox(): List<T> {
-            return emptyList()
-        }
+        private fun <T> noMailbox() = emptyList<T>()
 
         private fun <T> record(
             order: AtomicInteger,
@@ -335,7 +314,7 @@ internal class SimpleMagicBusTest {
     }
 }
 
-internal class TestMailbox<T>(
+private class TestMailbox<T>(
     val messages: MutableList<T> = ArrayList(1)
 ) : Mailbox<T> {
     override operator fun invoke(message: T) {
@@ -343,7 +322,7 @@ internal class TestMailbox<T>(
     }
 }
 
-internal abstract class BaseType
-internal class LeftType : BaseType()
-internal open class RightType : BaseType()
-internal class FarRightType : RightType()
+private abstract class BaseType
+private class LeftType : BaseType()
+private open class RightType : BaseType()
+private class FarRightType : RightType()
