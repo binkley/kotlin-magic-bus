@@ -99,10 +99,9 @@ internal class SimpleMagicBusTest {
     @Test
     fun `should throw failed posts for unchecked exceptions`() {
         assertThatThrownBy {
-            bus.subscribe(
-                LeftType::class.java,
-                failWith { RuntimeException() }
-            )
+            val mailbox: Mailbox<LeftType> = failWith { RuntimeException() }
+            mailbox.deliverFrom(bus)
+
             bus.post(LeftType())
         }.isInstanceOf(RuntimeException::class.java)
     }
@@ -114,11 +113,13 @@ internal class SimpleMagicBusTest {
         val second = AtomicInteger()
         val third = AtomicInteger()
         val fourth = AtomicInteger()
-        bus.subscribe(RightType::class.java, record(delivery, first))
-        bus.subscribe(RightType::class.java, record(delivery, second))
-        bus.subscribe(RightType::class.java, record(delivery, third))
-        bus.subscribe(RightType::class.java, record(delivery, fourth))
+        record<RightType>(delivery, first).deliverFrom(bus)
+        record<RightType>(delivery, second).deliverFrom(bus)
+        record<RightType>(delivery, third).deliverFrom(bus)
+        record<RightType>(delivery, fourth).deliverFrom(bus)
+
         bus.post(RightType())
+
         assertThat(first.get()).isEqualTo(0)
         assertThat(second.get()).isEqualTo(1)
         assertThat(third.get()).isEqualTo(2)
@@ -135,11 +136,13 @@ internal class SimpleMagicBusTest {
         val right = AtomicInteger()
         val base = AtomicInteger()
         val anythingElse = AtomicInteger()
-        bus.subscribe(RightType::class.java, record(delivery, right))
-        bus.subscribe(FarRightType::class.java, record(delivery, farRight))
-        bus.subscribe(Any::class.java, record(delivery, anythingElse))
-        bus.subscribe(BaseType::class.java, record(delivery, base))
+        record<RightType>(delivery, right).deliverFrom(bus)
+        record<FarRightType>(delivery, farRight).deliverFrom(bus)
+        record<Any>(delivery, anythingElse).deliverFrom(bus)
+        record<BaseType>(delivery, base).deliverFrom(bus)
+
         bus.post(FarRightType())
+
         assertThat(anythingElse.get()).isEqualTo(0)
         assertThat(base.get()).isEqualTo(1)
         assertThat(right.get()).isEqualTo(2)
