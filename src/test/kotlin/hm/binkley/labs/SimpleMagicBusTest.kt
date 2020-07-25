@@ -277,16 +277,13 @@ internal class SimpleMagicBusTest {
         message: Any,
         failure: Exception
     ) = FailedMessage(bus, mailbox, message, failure)
-
-    companion object {
-        private fun <T> noMailbox() = emptyList<T>()
-
-        private fun <T> record(
-            order: AtomicInteger,
-            record: AtomicInteger
-        ): Mailbox<T> = { record.set(order.getAndIncrement()) }
-    }
 }
+
+private fun <T> noMailbox() = emptyList<T>()
+private fun <T> record(
+    order: AtomicInteger,
+    record: AtomicInteger
+): Mailbox<T> = { record.set(order.getAndIncrement()) }
 
 private class TestMailbox<T>(
     val messages: MutableList<T> = ArrayList(1)
