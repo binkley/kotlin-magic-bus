@@ -230,19 +230,15 @@ internal class SimpleMagicBusTest {
     }
 
     @Test
-    fun `should provide subscriber for message type`() {
-        val mailboxRight: Mailbox<RightType> = object : Mailbox<RightType> {
-            override operator fun invoke(message: RightType) {}
-            override fun toString() = "right-type mailbox"
-        }
+    fun `should provide subscribers for message type in base-up order`() {
+        // Subscription in child-parent order to show that the subscriber
+        // list is in parent-child order
+        val mailboxRight: Mailbox<RightType> = { }
         mailboxRight.deliverFrom(bus)
-        val mailboxBase: Mailbox<BaseType> = object : Mailbox<BaseType> {
-            override operator fun invoke(message: BaseType) {}
-            override fun toString() = "base-type mailbox"
-        }
+        val mailboxBase: Mailbox<BaseType> = { }
         mailboxBase.deliverFrom(bus)
 
-        assertThat((bus as SimpleMagicBus).subscribers(RightType::class.java))
+        assertThat((bus as SimpleMagicBus).subscribers<RightType>())
             .isEqualTo(listOf(mailboxBase, mailboxRight))
     }
 

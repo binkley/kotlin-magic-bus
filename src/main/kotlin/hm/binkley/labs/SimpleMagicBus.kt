@@ -49,6 +49,13 @@ class SimpleMagicBus(
             .map { mailbox: Mailbox<*> -> mailbox as Mailbox<T> }
             .collect(toList())
 
+    /**
+     * Helper to avoid requiring a class token.
+     *
+     * @see subscribers
+     */
+    inline fun <reified T> subscribers() = subscribers(T::class.java)
+
     @Suppress("TooGenericExceptionCaught", "RethrowCaughtException")
     private fun <T> receive(message: T): Consumer<Mailbox<T>> {
         return Consumer { mailbox: Mailbox<T> ->
