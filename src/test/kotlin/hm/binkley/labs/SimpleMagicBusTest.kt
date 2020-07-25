@@ -243,7 +243,7 @@ internal class SimpleMagicBusTest {
 
     @Test
     fun `should provide accurate details on dead letters`() {
-        val message = this
+        val message = RightType()
         bus.post(message)
         val dead = returned[0]
         assertThat(dead.bus).isSameAs(bus)
@@ -253,10 +253,11 @@ internal class SimpleMagicBusTest {
     @Test
     fun `should provide accurate details on failed posts`() {
         val reason = Exception()
-        val mailbox: Mailbox<SimpleMagicBusTest> = failWith { reason }
+        val mailbox: Mailbox<RightType> = failWith { reason }
         mailbox.deliverFrom(bus)
-        val message = this
+        val message = RightType()
         bus.post(message)
+
         val failed = failed[0]
         assertThat(failed.bus).isSameAs(bus)
         assertThat(failed.mailbox).isSameAs(mailbox)
