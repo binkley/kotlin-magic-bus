@@ -15,6 +15,9 @@ interface MagicBus {
     fun post(message: Any)
 }
 
+inline fun <reified T> MagicBus.subscribe(noinline mailbox: Mailbox<in T>) =
+    mailbox.deliverFrom(this)
+
 /**
  * Subscribes without caller providing a class object.
  *
