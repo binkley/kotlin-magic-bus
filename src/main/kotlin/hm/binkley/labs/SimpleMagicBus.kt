@@ -116,17 +116,15 @@ private class Subscribers {
         subscriptions.entries.stream()
             .filter(subscribedTo(messageType))
             .flatMap(toMailboxes())
-
-    companion object {
-        private fun <T> mailboxes(): MutableSet<Mailbox<T>> =
-            CopyOnWriteArraySet()
-
-        private fun subscribedTo(messageType: Class<*>) =
-            { e: Map.Entry<Class<*>, Set<Mailbox<*>>> ->
-                e.key.isAssignableFrom(messageType)
-            }
-    }
 }
+
+private fun <T> mailboxes(): MutableSet<Mailbox<T>> =
+    CopyOnWriteArraySet()
+
+private fun subscribedTo(messageType: Class<*>) =
+    { e: Map.Entry<Class<*>, Set<Mailbox<*>>> ->
+        e.key.isAssignableFrom(messageType)
+    }
 
 private fun toMailboxes():
     (Map.Entry<Class<Any>, Set<Mailbox<Any>>>) -> Stream<Mailbox<Any>> =
