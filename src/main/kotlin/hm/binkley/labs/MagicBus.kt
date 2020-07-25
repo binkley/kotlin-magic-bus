@@ -15,24 +15,21 @@ interface MagicBus {
     fun post(message: Any)
 }
 
-inline fun <reified T> MagicBus.subscribe(noinline mailbox: Mailbox<in T>) =
-    mailbox.deliverFrom(this)
-
 /**
  * Subscribes without caller providing a class object.
  *
  * @see MagicBus.subscribe
  */
-inline fun <reified T> Mailbox<in T>.deliverFrom(bus: MagicBus) =
-    bus.subscribe(T::class.java, this)
+inline fun <reified T> MagicBus.subscribe(noinline mailbox: Mailbox<in T>) =
+    subscribe(T::class.java, mailbox)
 
 /**
  * Unsubscribes without caller providing a class object.
  *
  * @see MagicBus.unsubscribe
  */
-inline fun <reified T> Mailbox<in T>.noDeliveryFrom(bus: MagicBus) =
-    bus.unsubscribe(T::class.java, this)
+inline fun <reified T> MagicBus.unsubscribe(noinline mailbox: Mailbox<in T>) =
+    unsubscribe(T::class.java, mailbox)
 
 /** Creates a mailbox which throws away messages of [messageType]. */
 @Generated // Lie to JaCoCo
