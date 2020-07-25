@@ -16,8 +16,11 @@ import java.util.stream.Stream
  *   without limits
  */
 class SimpleMagicBus(
+    /** A callback for successful posts with no mailboxes. */
     private val returned: (ReturnedMessage) -> Unit,
+    /** A callback from posts raising [Exception] from their mailboxes. */
     private val failed: (FailedMessage) -> Unit,
+    /** A callback for successful posts delivered to each mailbox. */
     private val delivered: (Mailbox<*>, Any) -> Unit
 ) : MagicBus {
     private val subscribers = Subscribers()
@@ -32,6 +35,13 @@ class SimpleMagicBus(
         mailbox: Mailbox<in T>
     ) = subscribers.unsubscribe(messageType, mailbox)
 
+    /**
+     * Posts [message] to any subscribed mailboxes.
+     *
+     * Successful posts with mailboxes call [delivered]; those with no
+     * mailbox call [returned] with details. [RuntimeException]s bubble
+     * out; other [Exception]s call [failed] with details.
+     */
     override fun post(message: Any) =
         subscribers.of(message.javaClass).use { mailboxes ->
             val deliveries = AtomicInteger()
@@ -57,8 +67,8 @@ class SimpleMagicBus(
     inline fun <reified T> subscribers() = subscribers(T::class.java)
 
     @Suppress("TooGenericExceptionCaught", "RethrowCaughtException")
-    private fun <T> receive(message: T): Consumer<Mailbox<T>> {
-        return Consumer { mailbox: Mailbox<T> ->
+    private fun <T> receive(message: T) =
+        Consumer { mailbox: Mailbox<T> ->
             try {
                 delivered(mailbox, message as Any)
                 mailbox(message)
@@ -68,7 +78,6 @@ class SimpleMagicBus(
                 failed(FailedMessage(this, mailbox, message as Any, e))
             }
         }
-    }
 
     private fun returnIfDead(deliveries: AtomicInteger, message: Any) {
         if (0 == deliveries.get()) {
@@ -88,6 +97,12 @@ class OnReturn(private val returned: (ReturnedMessage) -> Unit) {
     infix fun onFailure(failed: (FailedMessage) -> Unit) = OnFailure(failed)
 }
 
+/**
+ * Provides a cleaner API for creating simple magic busses.  Example:
+ * ```
+ * SimpleMagicBus.onReturn { ... } onFailure { ... } onDelivery { ... }
+ * ```
+ */
 fun SimpleMagicBus.Companion.onReturn(returned: (ReturnedMessage) -> Unit) =
     OnReturn(returned)
 
@@ -125,20 +140,18 @@ private class Subscribers {
             .flatMap(toMailboxes())
 }
 
-private fun <T> mailboxes(): MutableSet<Mailbox<T>> =
-    CopyOnWriteArraySet()
+private fun <T> mailboxes(): MutableSet<Mailbox<T>> = CopyOnWriteArraySet()
 
 private fun subscribedTo(messageType: Class<*>) =
     { e: Map.Entry<Class<*>, Set<Mailbox<*>>> ->
         e.key.isAssignableFrom(messageType)
     }
 
-private fun toMailboxes():
-    (Map.Entry<Class<Any>, Set<Mailbox<Any>>>) -> Stream<Mailbox<Any>> =
-        { e: Map.Entry<Class<Any>, Set<Mailbox<Any>>> -> e.value.stream() }
+private fun toMailboxes() =
+    { e: Map.Entry<Class<Any>, Set<Mailbox<Any>>> -> e.value.stream() }
 
 private fun messageTypeOrder(a: Class<*>, b: Class<*>) =
     b.isAssignableFrom(a).compareTo(a.isAssignableFrom(b))
 
-private fun record(deliveries: AtomicInteger): Consumer<Mailbox<*>> =
-    Consumer { deliveries.incrementAndGet() }
+private fun record(deliveries: AtomicInteger) =
+    Consumer<Mailbox<*>> { deliveries.incrementAndGet() }
