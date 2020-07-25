@@ -212,7 +212,9 @@ internal class SimpleMagicBusTest {
                 )
             ).isNotEqualTo(0)
             val message = RightType()
+
             bus.post(message)
+
             assertOn(noMailbox<Any>())
                 .returned(with(message))
                 .noneFailed()
@@ -233,12 +235,12 @@ internal class SimpleMagicBusTest {
             override operator fun invoke(message: RightType) {}
             override fun toString() = "right-type mailbox"
         }
+        mailboxRight.deliverFrom(bus)
         val mailboxBase: Mailbox<BaseType> = object : Mailbox<BaseType> {
             override operator fun invoke(message: BaseType) {}
             override fun toString() = "base-type mailbox"
         }
         mailboxBase.deliverFrom(bus)
-        mailboxRight.deliverFrom(bus)
 
         assertThat((bus as SimpleMagicBus).subscribers(RightType::class.java))
             .isEqualTo(listOf(mailboxBase, mailboxRight))
@@ -247,7 +249,9 @@ internal class SimpleMagicBusTest {
     @Test
     fun `should provide accurate details on dead letters`() {
         val message = RightType()
+
         bus.post(message)
+
         val dead = returned[0]
         assertThat(dead.bus).isSameAs(bus)
         assertThat(dead.message).isSameAs(message)
@@ -259,6 +263,7 @@ internal class SimpleMagicBusTest {
         val mailbox: Mailbox<RightType> = failWith { reason }
         mailbox.deliverFrom(bus)
         val message = RightType()
+
         bus.post(message)
 
         val failed = failed[0]
