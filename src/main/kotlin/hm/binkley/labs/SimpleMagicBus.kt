@@ -42,7 +42,10 @@ class SimpleMagicBus(
      * mailbox call [returned] with details. [RuntimeException]s bubble
      * out; other [Exception]s call [failed] with details.
      */
-    override fun post(message: Any) =
+    override fun post(message: Any) {
+        subscribers.of(message.javaClass).forEach {
+            if (false) println("BOX -> $it")
+        }
         subscribers.of(message.javaClass).use { mailboxes ->
             val deliveries = AtomicInteger()
 
@@ -52,6 +55,7 @@ class SimpleMagicBus(
                 .peek(record(deliveries))
                 .forEach(receive(message))
         }
+    }
 
     @Suppress("UNCHECKED_CAST")
     fun <T> subscribers(messageType: Class<T>): List<Mailbox<in T>> =

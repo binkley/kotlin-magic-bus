@@ -3,6 +3,7 @@ package hm.binkley.labs
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.awaitility.Awaitility.await
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.util.ArrayList
@@ -29,7 +30,7 @@ internal class SimpleMagicBusTest {
 
     @Test
     fun `should receive correct type`() {
-        val mailbox = TestMailbox<RightType>()
+        val mailbox = testMailbox<RightType>()
         bus.subscribe(mailbox)
         val message = RightType()
 
@@ -41,9 +42,30 @@ internal class SimpleMagicBusTest {
             .noneFailed()
     }
 
+    @Disabled("UNTIL NEXT COMMIT")
+    @Test
+    fun `should deliver correctly to multiple subscribers`() {
+        val mailboxA = testMailbox<RightType>()
+        bus.subscribe(mailboxA)
+        val mailboxB = testMailbox<LeftType>()
+        bus.subscribe(mailboxB)
+        val message = RightType()
+
+        bus.post(message)
+
+        assertOn(mailboxA)
+            .delivered(message)
+            .noneReturned()
+            .noneFailed()
+        assertOn(mailboxB)
+            .noneDelivered()
+            .noneReturned()
+            .noneFailed()
+    }
+
     @Test
     fun `should not receive wrong type`() {
-        val mailbox = TestMailbox<LeftType>()
+        val mailbox = testMailbox<LeftType>()
         bus.subscribe(mailbox)
         val message = RightType()
 
@@ -57,7 +79,7 @@ internal class SimpleMagicBusTest {
 
     @Test
     fun `should receive subtypes`() {
-        val mailbox = TestMailbox<BaseType>()
+        val mailbox = testMailbox<BaseType>()
         bus.subscribe(mailbox)
         val message = RightType()
 
@@ -154,7 +176,7 @@ internal class SimpleMagicBusTest {
 
     @Test
     fun `should unsubscribe exact type`() {
-        val mailbox = TestMailbox<LeftType>()
+        val mailbox = testMailbox<LeftType>()
         bus.subscribe(mailbox)
         bus.unsubscribe(mailbox)
         val message = LeftType()
@@ -169,7 +191,7 @@ internal class SimpleMagicBusTest {
 
     @Test
     fun `should unsubscribe exact mailbox`() {
-        val mailboxA = TestMailbox<RightType>()
+        val mailboxA = testMailbox<RightType>()
         val mailboxB: Mailbox<RightType> = failWith { Exception() }
         bus.subscribe(mailboxA)
         bus.subscribe(mailboxB)
@@ -186,7 +208,7 @@ internal class SimpleMagicBusTest {
 
     @Test
     fun `should fail to unsubscribe exact mailbox`() {
-        val mailboxA = TestMailbox<RightType>()
+        val mailboxA = testMailbox<RightType>()
         val mailboxB: Mailbox<RightType> = failWith { Exception() }
         bus.subscribe(mailboxA)
 
@@ -200,7 +222,7 @@ internal class SimpleMagicBusTest {
         await().atMost(2000L, MILLISECONDS).until {
             val latch = CountDownLatch(100)
             IntStream.range(0, 100).parallel().forEach { _: Int ->
-                val mailbox: Mailbox<RightType> = TestMailbox()
+                val mailbox: Mailbox<RightType> = testMailbox()
                 bus.subscribe(mailbox)
                 bus.unsubscribe(mailbox)
                 latch.countDown()
@@ -289,12 +311,19 @@ private fun <T> record(
     record: AtomicInteger
 ): Mailbox<T> = { record.set(order.getAndIncrement()) }
 
+private inline fun <reified T> testMailbox(
+    messages: MutableList<T> = ArrayList(1)
+) = TestMailbox(T::class.java, messages)
+
 private class TestMailbox<T>(
-    val messages: MutableList<T> = ArrayList(1)
+    private val messageType: Class<T>,
+    val messages: MutableList<T>
 ) : Mailbox<T> {
     override operator fun invoke(message: T) {
         messages.add(message)
     }
+
+    override fun toString() = "TEST MAILBOX OF ${messageType.name}"
 }
 
 private abstract class BaseType
