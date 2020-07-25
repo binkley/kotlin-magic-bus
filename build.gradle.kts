@@ -11,6 +11,7 @@ val lombokVersion: String by project
 
 plugins {
     `build-dashboard`
+    `project-report`
     kotlin("jvm")
     id("io.gitlab.arturbosch.detekt")
     id("org.jlleitschuh.gradle.ktlint")
