@@ -310,7 +310,6 @@ private class AssertDelivery<T>(
         assertThat(delivered).isEmpty()
     }
 
-    @SafeVarargs
     fun <U : T?> delivered(vararg delivered: U) = apply {
         assertThat(this.delivered).containsExactly(*delivered)
     }
