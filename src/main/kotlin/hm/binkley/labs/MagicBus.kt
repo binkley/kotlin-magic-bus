@@ -31,20 +31,6 @@ inline fun <reified T> Mailbox<in T>.deliverFrom(bus: MagicBus) =
 inline fun <reified T> Mailbox<in T>.noDeliveryFrom(bus: MagicBus) =
     bus.unsubscribe(T::class.java, this)
 
-/** Subscribe to [ReturnedMessage] to find out about posts with no mailbox. */
-data class ReturnedMessage(
-    val bus: MagicBus,
-    val message: Any
-)
-
-/** Subscribe to [FailedMessage] to find out about broken mailboxes. */
-data class FailedMessage(
-    val bus: MagicBus,
-    val mailbox: Mailbox<*>,
-    val message: Any,
-    val failure: Exception
-)
-
 /** Creates a mailbox which throws away messages of [messageType]. */
 @Generated // Lie to JaCoCo
 data class DiscardMailbox<T>(val messageType: Class<T>) : Mailbox<T> {

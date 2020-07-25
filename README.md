@@ -96,6 +96,12 @@ class VariationOnABus {
 
 ## TODO
 
+* [SimpleMessageBus](./src/main/kotlin/hm/binkley/labs/SimpleMagicBus.kt)
+  violates the contract of
+  [MessageBus](./src/main/kotlin/hm/binkley/labs/MagicBus.kt) for
+  [returned messages](./src/main/kotlin/hm/binkley/labs/FailedMessage.kt) and
+  [failed messages](./src/main/kotlin/hm/binkley/labs/FailedMessage.kt):
+  it should post messages, not invoke callbacks
 * JaCoCo shows 100% instruction coverage, but says there are missed branches
 * Replace use of `Stream` with `Sequence`
 * Pick one: Detekt or Ktlint
