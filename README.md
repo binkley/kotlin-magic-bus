@@ -101,7 +101,8 @@ class VariationOnABus {
   [MessageBus](./src/main/kotlin/hm/binkley/labs/MagicBus.kt) for
   [returned messages](./src/main/kotlin/hm/binkley/labs/FailedMessage.kt) and
   [failed messages](./src/main/kotlin/hm/binkley/labs/FailedMessage.kt):
-  it should post messages, not invoke callbacks
-* JaCoCo shows 100% instruction coverage, but says there are missed branches
-* Replace use of `Stream` with `Sequence`
-* Pick one: Detekt or Ktlint
+  it should post messages, not just invoke callbacks.  Even the "delivered"
+  callback is excessive: simply monitor mailboxes.
+* JaCoCo shows 100% instruction coverage, but says there are missed branches.
+* Replace use of `Stream` with `Sequence`.
+* Pick one: Detekt or Ktlint.
