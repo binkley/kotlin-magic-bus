@@ -42,7 +42,7 @@ internal class SimpleMagicBusTest {
             .noneFailed()
     }
 
-    @Disabled("UNTIL NEXT COMMIT")
+    @Disabled("TODO: This test breaks - why is LeftType mailbox involved?")
     @Test
     fun `should deliver correctly to multiple subscribers`() {
         val mailboxA = testMailbox<RightType>()
@@ -301,29 +301,29 @@ internal class SimpleMagicBusTest {
     private fun with(
         mailbox: Mailbox<*>,
         message: Any,
-        failure: Exception
+        failure: Exception,
     ) = FailedMessage(bus, mailbox, message, failure)
 }
 
 private fun <T> noMailbox() = emptyList<T>()
 private fun <T> record(
     order: AtomicInteger,
-    record: AtomicInteger
+    record: AtomicInteger,
 ): Mailbox<T> = { record.set(order.getAndIncrement()) }
 
 private inline fun <reified T> testMailbox(
-    messages: MutableList<T> = ArrayList(1)
+    messages: MutableList<T> = ArrayList(1),
 ) = TestMailbox(T::class.java, messages)
 
 private class TestMailbox<T>(
     private val messageType: Class<T>,
-    val messages: MutableList<T>
+    val messages: MutableList<T>,
 ) : Mailbox<T> {
     override operator fun invoke(message: T) {
         messages.add(message)
     }
 
-    override fun toString() = "TEST MAILBOX OF ${messageType.name}"
+    override fun toString() = "TEST-MAILBOX<${messageType.simpleName}>"
 }
 
 private abstract class BaseType
@@ -334,7 +334,7 @@ private class FarRightType : RightType()
 private class AssertDelivery<T>(
     private val returned: List<ReturnedMessage>,
     private val failed: List<FailedMessage>,
-    private val delivered: List<T>
+    private val delivered: List<T>,
 ) {
     fun noneDelivered() = apply {
         assertThat(delivered).isEmpty()
