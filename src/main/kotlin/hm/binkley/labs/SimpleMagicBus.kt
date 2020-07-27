@@ -21,18 +21,18 @@ class SimpleMagicBus(
     /** A callback from posts raising [Exception] from their mailboxes. */
     private val failed: (FailedMessage) -> Unit,
     /** A callback for successful posts delivered to each mailbox. */
-    private val delivered: (Mailbox<*>, Any) -> Unit
+    private val delivered: (Mailbox<*>, Any) -> Unit,
 ) : MagicBus {
     private val subscribers = Subscribers()
 
     override fun <T> subscribe(
         messageType: Class<T>,
-        mailbox: Mailbox<in T>
+        mailbox: Mailbox<in T>,
     ) = subscribers.subscribe(messageType, mailbox)
 
     override fun <T> unsubscribe(
         messageType: Class<T>,
-        mailbox: Mailbox<in T>
+        mailbox: Mailbox<in T>,
     ) = subscribers.unsubscribe(messageType, mailbox)
 
     /**
@@ -42,10 +42,7 @@ class SimpleMagicBus(
      * mailbox call [returned] with details. [RuntimeException]s bubble
      * out; other [Exception]s call [failed] with details.
      */
-    override fun post(message: Any) {
-        subscribers.of(message.javaClass).forEach {
-            if (false) println("BOX -> $it")
-        }
+    override fun post(message: Any) =
         subscribers.of(message.javaClass).use { mailboxes ->
             val deliveries = AtomicInteger()
 
@@ -55,7 +52,6 @@ class SimpleMagicBus(
                 .peek(record(deliveries))
                 .forEach(receive(message))
         }
-    }
 
     @Suppress("UNCHECKED_CAST")
     fun <T> subscribers(messageType: Class<T>): List<Mailbox<in T>> =
@@ -119,7 +115,7 @@ private class Subscribers {
     @Synchronized
     fun <T> subscribe(
         messageType: Class<T>,
-        mailbox: Mailbox<in T>
+        mailbox: Mailbox<in T>,
     ) {
         subscriptions.computeIfAbsent(messageType as Class<Any>) {
             mailboxes()
@@ -129,7 +125,7 @@ private class Subscribers {
     @Synchronized
     fun unsubscribe(
         messageType: Class<*>,
-        mailbox: Mailbox<*>
+        mailbox: Mailbox<*>,
     ) {
         val mailboxes = subscriptions[messageType]
             ?: throw NoSuchElementException()
