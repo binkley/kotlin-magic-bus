@@ -1,7 +1,5 @@
 package hm.binkley.labs
 
-import lombok.Generated
-
 typealias Mailbox<T> = (T) -> Unit
 
 interface MagicBus {
@@ -32,7 +30,6 @@ inline fun <reified T> MagicBus.unsubscribe(noinline mailbox: Mailbox<in T>) =
     unsubscribe(T::class.java, mailbox)
 
 /** Creates a mailbox which throws away messages of [messageType]. */
-@Generated // Lie to JaCoCo
 data class DiscardMailbox<T>(val messageType: Class<T>) : Mailbox<T> {
     override operator fun invoke(message: T) = Unit
 }

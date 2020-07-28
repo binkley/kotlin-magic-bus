@@ -217,7 +217,7 @@ internal class SimpleMagicBusTest {
 
     @Test
     fun `should fail to unsubscribe exact mailbox`() {
-        val mailbox: Mailbox<RightType> = failWith { Exception() }
+        val mailbox: Mailbox<RightType> = discard()
 
         assertThrows<NoSuchElementException> {
             bus.unsubscribe(mailbox)
@@ -227,8 +227,7 @@ internal class SimpleMagicBusTest {
     @Test
     fun `should fail to unsubscribe exact mailbox regardless of other mailboxes`() {
         val mailboxSubscribed = testMailbox<RightType>()
-        val mailboxNotSubscribed: Mailbox<RightType> =
-            failWith { Exception() }
+        val mailboxNotSubscribed: Mailbox<RightType> = discard()
 
         bus.subscribe(mailboxSubscribed)
 
@@ -266,6 +265,16 @@ internal class SimpleMagicBusTest {
     fun `should have default rejected letter box`() {
         assertThat(bus.subscribers<FailedMessage<*>>().toList())
             .hasSize(2)
+    }
+
+    @Test
+    fun `should discard in the discard letter box`() {
+        // TODO: A less lame test
+        bus.subscribe(discard<RightType>())
+
+        bus.post(RightType())
+
+        // Nothing happens
     }
 
     @Test
