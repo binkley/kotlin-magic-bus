@@ -8,6 +8,8 @@ package hm.binkley.labs
  * * No loop detection &mdash; no attempt is made to prevent "storms" whereby
  *   a single post results in mailboxes posting additional messages, possibly
  *   without limits
+ * * Default "do nothing" mailboxes for dead and rejected letters: subscribing
+ *   for these is optional by the caller
  */
 class SimpleMagicBus : MagicBus {
     private val subscriptions:
