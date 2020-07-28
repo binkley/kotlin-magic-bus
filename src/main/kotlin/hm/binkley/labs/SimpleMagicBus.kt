@@ -2,10 +2,6 @@ package hm.binkley.labs
 
 import java.util.concurrent.ConcurrentSkipListMap
 import java.util.concurrent.CopyOnWriteArraySet
-import java.util.concurrent.atomic.AtomicInteger
-import java.util.function.Consumer
-import java.util.stream.Collectors.toList
-import java.util.stream.Stream
 
 /**
  * A _simple_ implementation of [MagicBus].  Limitations include:
@@ -42,22 +38,19 @@ class SimpleMagicBus(
      * mailbox call [returned] with details. [RuntimeException]s bubble
      * out; other [Exception]s call [failed] with details.
      */
-    override fun post(message: Any) =
-        subscribers.of(message.javaClass).use { mailboxes ->
-            val deliveries = AtomicInteger()
-
-            mailboxes.onClose {
-                returnIfDead(deliveries, message)
-            }.use {
-                it.peek(record(deliveries)).forEach(receive(message))
-            }
+    override fun post(message: Any) {
+        var deliveries = 0
+        subscribers.of(message.javaClass).forEach { mailbox ->
+            ++deliveries
+            receive(mailbox, message)
         }
+        returnIfDead(deliveries, message)
+    }
 
     @Suppress("UNCHECKED_CAST")
-    fun <T> subscribers(messageType: Class<T>): List<Mailbox<in T>> =
+    fun <T> subscribers(messageType: Class<T>): Sequence<Mailbox<T>> =
         subscribers.of(messageType as Class<Any>)
             .map { mailbox: Mailbox<*> -> mailbox as Mailbox<T> }
-            .collect(toList())
 
     /**
      * Helper to avoid requiring a class token.
@@ -67,22 +60,18 @@ class SimpleMagicBus(
     inline fun <reified T> subscribers() = subscribers(T::class.java)
 
     @Suppress("TooGenericExceptionCaught", "RethrowCaughtException")
-    private fun <T> receive(message: T) =
-        Consumer { mailbox: Mailbox<T> ->
-            try {
-                delivered(mailbox, message as Any)
-                mailbox(message)
-            } catch (e: RuntimeException) {
-                throw e
-            } catch (e: Exception) {
-                failed(FailedMessage(this, mailbox, message as Any, e))
-            }
+    private fun <T> receive(mailbox: Mailbox<T>, message: T) =
+        try {
+            delivered(mailbox, message as Any)
+            mailbox(message)
+        } catch (e: RuntimeException) {
+            throw e
+        } catch (e: Exception) {
+            failed(FailedMessage(this, mailbox, message as Any, e))
         }
 
-    private fun returnIfDead(deliveries: AtomicInteger, message: Any) {
-        if (0 == deliveries.get()) {
-            returned(ReturnedMessage(this, message))
-        }
+    private fun returnIfDead(deliveries: Int, message: Any) {
+        if (0 == deliveries) returned(ReturnedMessage(this, message))
     }
 
     companion object
@@ -134,8 +123,8 @@ private class Subscribers {
 
     @Suppress("FunctionMinLength")
     @Synchronized
-    fun of(messageType: Class<Any>): Stream<Mailbox<Any>> =
-        subscriptions.entries.stream()
+    fun of(messageType: Class<Any>): Sequence<Mailbox<Any>> =
+        subscriptions.entries.asSequence()
             .filter(subscribedTo(messageType))
             .flatMap(toMailboxes())
 }
@@ -148,10 +137,7 @@ private fun subscribedTo(messageType: Class<*>) =
     }
 
 private fun toMailboxes() =
-    { e: Map.Entry<Class<Any>, Set<Mailbox<Any>>> -> e.value.stream() }
+    { e: Map.Entry<Class<Any>, Set<Mailbox<Any>>> -> e.value }
 
 private fun messageTypeOrder(a: Class<*>, b: Class<*>) =
     b.isAssignableFrom(a).compareTo(a.isAssignableFrom(b))
-
-private fun record(deliveries: AtomicInteger) =
-    Consumer<Mailbox<*>> { deliveries.incrementAndGet() }

@@ -260,7 +260,7 @@ internal class SimpleMagicBusTest {
         val mailboxBase: Mailbox<BaseType> = { }
         bus.subscribe(mailboxBase)
 
-        assertThat((bus as SimpleMagicBus).subscribers<RightType>())
+        assertThat((bus as SimpleMagicBus).subscribers<RightType>().toList())
             .isEqualTo(listOf(mailboxBase, mailboxRight))
     }
 
