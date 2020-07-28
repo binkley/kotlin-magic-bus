@@ -1,7 +1,5 @@
 package hm.binkley.labs
 
-import lombok.Generated
-
 /**
  * A _simple_ implementation of [MagicBus].  Limitations include:
  * * This is not a thread-safe implementation
@@ -86,14 +84,10 @@ class SimpleMagicBus : MagicBus {
         // Default do nothings: avoid stack overflow from reposting
         subscribe(object : Mailbox<ReturnedMessage<*>> {
             override fun invoke(message: ReturnedMessage<*>) = Unit
-
-            @Generated // Lie to JaCoCo
             override fun toString() = "DEFAULT-DEAD-LETTERBOX"
         })
         subscribe(object : Mailbox<FailedMessage<*>> {
             override fun invoke(message: FailedMessage<*>) = Unit
-
-            @Generated // Lie to JaCoCo
             override fun toString() = "DEFAULT-REJECTED-LETTERBOX"
         })
     }

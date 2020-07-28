@@ -268,6 +268,24 @@ internal class SimpleMagicBusTest {
     }
 
     @Test
+    fun `should deliver first to first subscriber for rejected messages`() {
+        val subscribers = bus.subscribers<ReturnedMessage<*>>()
+
+        assertThat(subscribers.first().toString()).isEqualTo(
+            "DEFAULT-DEAD-LETTERBOX"
+        )
+    }
+
+    @Test
+    fun `should deliver first to first subscriber for failed messages`() {
+        val subscribers = bus.subscribers<FailedMessage<*>>()
+
+        assertThat(subscribers.first().toString()).isEqualTo(
+            "DEFAULT-REJECTED-LETTERBOX"
+        )
+    }
+
+    @Test
     fun `should discard in the discard letter box`() {
         // TODO: A less lame test
         bus.subscribe(discard<RightType>())

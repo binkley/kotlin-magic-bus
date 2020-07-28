@@ -27,9 +27,6 @@ repositories {
 }
 
 dependencies {
-    // For selectively suppressing code coverage
-    compileOnly("org.projectlombok:lombok:$lombokVersion")
-
     implementation(kotlin("reflect"))
 
     testImplementation("org.junit.jupiter:junit-jupiter:$junitVersion")
