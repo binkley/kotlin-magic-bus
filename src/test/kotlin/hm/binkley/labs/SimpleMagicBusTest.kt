@@ -5,23 +5,14 @@ import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.util.ArrayList
-import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.atomic.AtomicInteger
 
 internal class SimpleMagicBusTest {
-    private val returned = CopyOnWriteArrayList<ReturnedMessage>()
-    private val failed = CopyOnWriteArrayList<FailedMessage>()
+    private val returned = mutableListOf<ReturnedMessage>()
+    private val failed = mutableListOf<FailedMessage>()
     private val delivered = mutableMapOf<Mailbox<*>, MutableList<Any>>()
 
-    private val bus = (
-        SimpleMagicBus.onReturn {
-        } onFailure {
-        } onDelivery { mailbox, message ->
-            delivered
-                .computeIfAbsent(mailbox) { mutableListOf() }
-                .add(message)
-        }
-        ).apply {
+    private val bus = SimpleMagicBus().apply {
         subscribe<ReturnedMessage> {
             returned += it
         }
@@ -51,7 +42,7 @@ internal class SimpleMagicBusTest {
         val mailboxLeft = testMailbox<LeftType>()
         bus.subscribe(mailboxLeft)
 
-        assertThat((bus as SimpleMagicBus).subscribers<RightType>().toList())
+        assertThat(bus.subscribers<RightType>().toList())
             .isEqualTo(listOf(mailboxRight))
 
         val message = RightType()
@@ -238,7 +229,7 @@ internal class SimpleMagicBusTest {
         val mailboxBase: Mailbox<BaseType> = { }
         bus.subscribe(mailboxBase)
 
-        assertThat((bus as SimpleMagicBus).subscribers<RightType>().toList())
+        assertThat(bus.subscribers<RightType>().toList())
             .isEqualTo(listOf(mailboxBase, mailboxRight))
     }
 
@@ -281,6 +272,24 @@ internal class SimpleMagicBusTest {
         message: Any,
         failure: Exception,
     ) = FailedMessage(bus, mailbox, message, failure)
+
+    private inline fun <reified T> testMailbox(
+        messages: MutableList<T> = ArrayList(1),
+    ) = TestMailbox(T::class.java, messages)
+
+    private inner class TestMailbox<T>(
+        private val messageType: Class<T>,
+        val messages: MutableList<T>,
+    ) : Mailbox<T> {
+        override operator fun invoke(message: T) {
+            messages.add(message)
+            delivered.getOrPut(this) {
+                mutableListOf()
+            } += (message as Any)
+        }
+
+        override fun toString() = "TEST-MAILBOX<${messageType.simpleName}>"
+    }
 }
 
 private fun <T> noMailbox() = emptyList<T>()
@@ -288,21 +297,6 @@ private fun <T> record(
     order: AtomicInteger,
     record: AtomicInteger,
 ): Mailbox<T> = { record.set(order.getAndIncrement()) }
-
-private inline fun <reified T> testMailbox(
-    messages: MutableList<T> = ArrayList(1),
-) = TestMailbox(T::class.java, messages)
-
-private class TestMailbox<T>(
-    private val messageType: Class<T>,
-    val messages: MutableList<T>,
-) : Mailbox<T> {
-    override operator fun invoke(message: T) {
-        messages.add(message)
-    }
-
-    override fun toString() = "TEST-MAILBOX<${messageType.simpleName}>"
-}
 
 private abstract class BaseType
 private class LeftType : BaseType()

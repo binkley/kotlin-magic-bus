@@ -9,14 +9,7 @@ package hm.binkley.labs
  *   a single post results in mailboxes posting additional messages, possibly
  *   without limits
  */
-class SimpleMagicBus(
-    /** A callback for successful posts with no mailboxes. */
-    private val returned: (ReturnedMessage) -> Unit,
-    /** A callback from posts raising [Exception] from their mailboxes. */
-    private val failed: (FailedMessage) -> Unit,
-    /** A callback for successful posts delivered to each mailbox. */
-    private val delivered: (Mailbox<*>, Any) -> Unit,
-) : MagicBus {
+class SimpleMagicBus : MagicBus {
     private val subscribers = Subscribers()
 
     override fun <T> subscribe(
@@ -29,13 +22,6 @@ class SimpleMagicBus(
         mailbox: Mailbox<in T>,
     ) = subscribers.unsubscribe(messageType, mailbox)
 
-    /**
-     * Posts [message] to any subscribed mailboxes.
-     *
-     * Successful posts with mailboxes call [delivered]; those with no
-     * mailbox call [returned] with details. [RuntimeException]s bubble
-     * out; other [Exception]s call [failed] with details.
-     */
     override fun post(message: Any) {
         var deliveries = 0
         subscribers.of(message.javaClass).forEach { mailbox ->
@@ -60,7 +46,6 @@ class SimpleMagicBus(
     @Suppress("TooGenericExceptionCaught", "RethrowCaughtException")
     private fun <T> receive(mailbox: Mailbox<T>, message: T) =
         try {
-            delivered(mailbox, message as Any)
             mailbox(message)
         } catch (e: RuntimeException) {
             throw e
@@ -74,24 +59,6 @@ class SimpleMagicBus(
 
     companion object
 }
-
-class OnReturn(private val returned: (ReturnedMessage) -> Unit) {
-    inner class OnFailure(private val failed: (FailedMessage) -> Unit) {
-        infix fun onDelivery(delivered: (Mailbox<*>, Any) -> Unit): MagicBus =
-            SimpleMagicBus(returned, failed, delivered)
-    }
-
-    infix fun onFailure(failed: (FailedMessage) -> Unit) = OnFailure(failed)
-}
-
-/**
- * Provides a cleaner API for creating simple magic busses.  Example:
- * ```
- * SimpleMagicBus.onReturn { ... } onFailure { ... } onDelivery { ... }
- * ```
- */
-fun SimpleMagicBus.Companion.onReturn(returned: (ReturnedMessage) -> Unit) =
-    OnReturn(returned)
 
 private class Subscribers {
     private val subscriptions:

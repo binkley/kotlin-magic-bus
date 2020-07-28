@@ -76,13 +76,17 @@ class QuitListening(private val bus: MagicBus) {
 ```kotlin
 class VariationOnABus {
     fun main() {
-        SimpleMagicBus.of(
-                { returned -> println("BUG: No receiver: $returned") },
-                { failed ->
-                    System.err.println(failed);
-                    failed.failure.printStackTrace();
-                })
-                { mailbox, observed -> println(mailbox + " " + observed) }
+        val returned = mutableListOf<ReturnedMessage>()
+        val failed = mutableListOf<FailedMessage>()
+
+        SimpleMagicBus().apply {
+            subscribe<ReturnedMessage> {
+                returned += it
+            }
+            subscribe<FailedMessage> {
+                failed += it
+            }
+        }
     }
 }
 ```
@@ -96,13 +100,5 @@ class VariationOnABus {
 
 ## TODO
 
-* [SimpleMessageBus](./src/main/kotlin/hm/binkley/labs/SimpleMagicBus.kt)
-  violates the contract of
-  [MessageBus](./src/main/kotlin/hm/binkley/labs/MagicBus.kt) for
-  [returned messages](./src/main/kotlin/hm/binkley/labs/FailedMessage.kt) and
-  [failed messages](./src/main/kotlin/hm/binkley/labs/FailedMessage.kt):
-  it should post messages, not just invoke callbacks.  Even the "delivered"
-  callback is excessive: simply monitor mailboxes.
 * JaCoCo shows 100% instruction coverage, but says there are missed branches.
-* Replace use of `Stream` with `Sequence`.
 * Pick one: Detekt or Ktlint.
