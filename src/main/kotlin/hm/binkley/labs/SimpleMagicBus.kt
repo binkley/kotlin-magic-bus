@@ -5,6 +5,7 @@ import java.util.concurrent.CopyOnWriteArraySet
 
 /**
  * A _simple_ implementation of [MagicBus].  Limitations include:
+ * * This is not a thread-safe implementation
  * * Single-threaded [post] &mdash; callers _block_ until all mailboxes
  *   process the message
  * * No loop detection &mdash; no attempt is made to prevent "storms" whereby
@@ -101,17 +102,15 @@ private class Subscribers {
             ConcurrentSkipListMap { a, b -> messageTypeOrder(a, b) }
 
     @Suppress("UNCHECKED_CAST")
-    @Synchronized
     fun <T> subscribe(
         messageType: Class<T>,
         mailbox: Mailbox<in T>,
     ) {
-        subscriptions.computeIfAbsent(messageType as Class<Any>) {
+        subscriptions.getOrPut(messageType as Class<Any>) {
             mailboxes()
         }.add(mailbox as Mailbox<Any>)
     }
 
-    @Synchronized
     fun unsubscribe(
         messageType: Class<*>,
         mailbox: Mailbox<*>,
@@ -122,7 +121,6 @@ private class Subscribers {
     }
 
     @Suppress("FunctionMinLength")
-    @Synchronized
     fun of(messageType: Class<Any>): Sequence<Mailbox<Any>> =
         subscriptions.entries.asSequence()
             .filter(subscribedTo(messageType))
