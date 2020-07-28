@@ -60,6 +60,7 @@ class SimpleMagicBus : MagicBus {
         subscriptions.entries.asSequence()
             .filter { it.key.isAssignableFrom(messageType) }
             .sortedWith { a, b ->
+                // TODO: Extract to explanatory function
                 b.key.isAssignableFrom(a.key)
                     .compareTo(a.key.isAssignableFrom(b.key))
             }
