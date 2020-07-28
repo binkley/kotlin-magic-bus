@@ -10,7 +10,8 @@ package hm.binkley.labs
  *   without limits
  */
 class SimpleMagicBus : MagicBus {
-    private val subscribers = Subscribers()
+    private val subscriptions:
+        MutableMap<Class<Any>, MutableSet<Mailbox<Any>>> = mutableMapOf()
 
     init {
         // Default do nothings: avoid stack overflow from reposting
@@ -27,26 +28,31 @@ class SimpleMagicBus : MagicBus {
     override fun <T> subscribe(
         messageType: Class<T>,
         mailbox: Mailbox<in T>,
-    ) = subscribers.subscribe(messageType, mailbox)
+    ) {
+        @Suppress("UNCHECKED_CAST")
+        subscriptions.getOrPut(messageType as Class<Any>) {
+            mutableSetOf()
+        } += mailbox as Mailbox<Any>
+    }
 
     override fun <T> unsubscribe(
         messageType: Class<T>,
         mailbox: Mailbox<in T>,
-    ) = subscribers.unsubscribe(messageType, mailbox)
+    ) {
+        @Suppress("TYPE_INFERENCE_ONLY_INPUT_TYPES_WARNING", "UNCHECKED_CAST")
+        subscriptions.getOrElse(messageType as Class<Any>) {
+            throw NoSuchElementException()
+        }.remove(mailbox) || throw NoSuchElementException()
+    }
 
     override fun post(message: Any) {
         var deliveries = 0
-        subscribers.of(message.javaClass).forEach { mailbox ->
+        subscribers(message.javaClass).forEach { mailbox ->
             ++deliveries
             receive(mailbox, message)
         }
         returnIfDead(deliveries, message)
     }
-
-    @Suppress("UNCHECKED_CAST")
-    fun <T> subscribers(messageType: Class<T>): Sequence<Mailbox<T>> =
-        subscribers.of(messageType as Class<Any>)
-            .map { mailbox: Mailbox<*> -> mailbox as Mailbox<T> }
 
     /**
      * Helper to avoid requiring a class token.
@@ -54,6 +60,16 @@ class SimpleMagicBus : MagicBus {
      * @see subscribers
      */
     inline fun <reified T> subscribers() = subscribers(T::class.java)
+
+    @Suppress("UNCHECKED_CAST")
+    fun <T> subscribers(messageType: Class<T>): Sequence<Mailbox<T>> =
+        subscriptions.entries.asSequence()
+            .filter { it.key.isAssignableFrom(messageType) }
+            .sortedWith { a, b ->
+                b.key.isAssignableFrom(a.key)
+                    .compareTo(a.key.isAssignableFrom(b.key))
+            }
+            .flatMap { it.value as Set<Mailbox<T>> }
 
     @Suppress("TooGenericExceptionCaught", "RethrowCaughtException")
     private fun <T> receive(mailbox: Mailbox<T>, message: T) =
@@ -70,39 +86,4 @@ class SimpleMagicBus : MagicBus {
     }
 
     companion object
-}
-
-private class Subscribers {
-    private val subscriptions:
-        MutableMap<Class<Any>, MutableSet<Mailbox<Any>>> = mutableMapOf()
-
-    fun <T> subscribe(
-        messageType: Class<T>,
-        mailbox: Mailbox<in T>,
-    ) {
-        @Suppress("UNCHECKED_CAST")
-        subscriptions.getOrPut(messageType as Class<Any>) {
-            mutableSetOf()
-        } += mailbox as Mailbox<Any>
-    }
-
-    fun <T> unsubscribe(
-        messageType: Class<T>,
-        mailbox: Mailbox<in T>,
-    ) {
-        @Suppress("TYPE_INFERENCE_ONLY_INPUT_TYPES_WARNING", "UNCHECKED_CAST")
-        subscriptions.getOrElse(messageType as Class<Any>) {
-            throw NoSuchElementException()
-        }.remove(mailbox) || throw NoSuchElementException()
-    }
-
-    @Suppress("FunctionMinLength")
-    fun of(messageType: Class<Any>): Sequence<Mailbox<Any>> =
-        subscriptions.entries.asSequence()
-            .filter { it.key.isAssignableFrom(messageType) }
-            .sortedWith { a, b ->
-                b.key.isAssignableFrom(a.key)
-                    .compareTo(a.key.isAssignableFrom(b.key))
-            }
-            .flatMap { it.value }
 }
