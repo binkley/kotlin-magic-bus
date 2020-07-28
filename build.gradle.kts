@@ -55,6 +55,7 @@ tasks {
 
     withType<KotlinCompile> {
         kotlinOptions {
+            allWarningsAsErrors = true
             jvmTarget = "11"
             javaParameters = true
         }

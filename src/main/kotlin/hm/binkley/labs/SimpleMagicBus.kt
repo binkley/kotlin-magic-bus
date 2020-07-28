@@ -107,9 +107,10 @@ private class Subscribers {
         } += mailbox as Mailbox<Any>
     }
 
-    fun unsubscribe(
-        messageType: Class<*>,
-        mailbox: Mailbox<*>,
+    @Suppress("TYPE_INFERENCE_ONLY_INPUT_TYPES_WARNING")
+    fun <T> unsubscribe(
+        messageType: Class<T>,
+        mailbox: Mailbox<in T>,
     ) {
         val mailboxes = subscriptions[messageType]
             ?: throw NoSuchElementException()
