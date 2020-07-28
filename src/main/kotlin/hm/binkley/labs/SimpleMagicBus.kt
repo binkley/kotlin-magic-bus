@@ -48,9 +48,9 @@ class SimpleMagicBus(
 
             mailboxes.onClose {
                 returnIfDead(deliveries, message)
+            }.use {
+                it.peek(record(deliveries)).forEach(receive(message))
             }
-                .peek(record(deliveries))
-                .forEach(receive(message))
         }
 
     @Suppress("UNCHECKED_CAST")
