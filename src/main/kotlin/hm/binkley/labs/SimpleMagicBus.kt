@@ -1,7 +1,5 @@
 package hm.binkley.labs
 
-import java.util.concurrent.ConcurrentSkipListMap
-
 /**
  * A _simple_ implementation of [MagicBus].  Limitations include:
  * * This is not a thread-safe implementation
@@ -97,8 +95,7 @@ fun SimpleMagicBus.Companion.onReturn(returned: (ReturnedMessage) -> Unit) =
 
 private class Subscribers {
     private val subscriptions:
-        MutableMap<Class<Any>, MutableSet<Mailbox<Any>>> =
-            ConcurrentSkipListMap { a, b -> messageTypeOrder(a, b) }
+        MutableMap<Class<Any>, MutableSet<Mailbox<Any>>> = mutableMapOf()
 
     @Suppress("UNCHECKED_CAST")
     fun <T> subscribe(
@@ -123,8 +120,9 @@ private class Subscribers {
     fun of(messageType: Class<Any>): Sequence<Mailbox<Any>> =
         subscriptions.entries.asSequence()
             .filter { it.key.isAssignableFrom(messageType) }
+            .sortedWith { a, b ->
+                b.key.isAssignableFrom(a.key)
+                    .compareTo(a.key.isAssignableFrom(b.key))
+            }
             .flatMap { it.value }
 }
-
-private fun messageTypeOrder(a: Class<*>, b: Class<*>) =
-    b.isAssignableFrom(a).compareTo(a.isAssignableFrom(b))
