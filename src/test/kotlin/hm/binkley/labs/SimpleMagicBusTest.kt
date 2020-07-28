@@ -19,9 +19,9 @@ internal class SimpleMagicBusTest {
     private val delivered = mutableMapOf<Mailbox<*>, MutableList<Any>>()
 
     private val bus = SimpleMagicBus.onReturn {
-        returned.add(it)
+        returned += it
     } onFailure {
-        failed.add(it)
+        failed += it
     } onDelivery { mailbox, message ->
         delivered
             .computeIfAbsent(mailbox) { mutableListOf() }
