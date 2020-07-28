@@ -107,14 +107,14 @@ private class Subscribers {
         } += mailbox as Mailbox<Any>
     }
 
-    @Suppress("TYPE_INFERENCE_ONLY_INPUT_TYPES_WARNING")
+    @Suppress("TYPE_INFERENCE_ONLY_INPUT_TYPES_WARNING", "UNCHECKED_CAST")
     fun <T> unsubscribe(
         messageType: Class<T>,
         mailbox: Mailbox<in T>,
     ) {
-        val mailboxes = subscriptions[messageType]
-            ?: throw NoSuchElementException()
-        if (!mailboxes.remove(mailbox)) throw NoSuchElementException()
+        subscriptions.getOrElse(messageType as Class<Any>) {
+            throw NoSuchElementException()
+        }.remove(mailbox) || throw NoSuchElementException()
     }
 
     @Suppress("FunctionMinLength")
