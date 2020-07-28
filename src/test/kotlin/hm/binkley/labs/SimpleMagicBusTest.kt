@@ -42,22 +42,26 @@ internal class SimpleMagicBusTest {
             .noneFailed()
     }
 
-    @Disabled("TODO: This test breaks - why is LeftType mailbox involved?")
+    @Disabled("TODO: Why is LeftType mailbox involved?")
     @Test
-    fun `should deliver correctly to multiple subscribers`() {
-        val mailboxA = testMailbox<RightType>()
-        bus.subscribe(mailboxA)
-        val mailboxB = testMailbox<LeftType>()
-        bus.subscribe(mailboxB)
+    fun `should deliver correctly to disparate subscribers`() {
+        val mailboxRight = testMailbox<RightType>()
+        bus.subscribe(mailboxRight)
+        val mailboxLeft = testMailbox<LeftType>()
+        bus.subscribe(mailboxLeft)
+
+        assertThat((bus as SimpleMagicBus).subscribers<RightType>().toList())
+            .isEqualTo(listOf(mailboxRight))
+
         val message = RightType()
 
         bus.post(message)
 
-        assertOn(mailboxA)
+        assertOn(mailboxRight)
             .delivered(message)
             .noneReturned()
             .noneFailed()
-        assertOn(mailboxB)
+        assertOn(mailboxLeft)
             .noneDelivered()
             .noneReturned()
             .noneFailed()
