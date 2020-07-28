@@ -13,7 +13,7 @@ package hm.binkley.labs
  */
 class SimpleMagicBus : MagicBus {
     private val subscriptions:
-        MutableMap<Class<Any>, MutableSet<Mailbox<Any>>> = mutableMapOf()
+            MutableMap<Class<Any>, MutableSet<Mailbox<Any>>> = mutableMapOf()
 
     init {
         installDefaultMailboxes()
@@ -49,12 +49,13 @@ class SimpleMagicBus : MagicBus {
     }
 
     /**
-     * Helper to avoid requiring a class token.
+     * Helper to avoid caller providing a class token.
      *
      * @see subscribers
      */
     inline fun <reified T> subscribers() = subscribers(T::class.java)
 
+    /** Return the mailboxes which would receive message of [messageType]. */
     @Suppress("UNCHECKED_CAST")
     fun <T> subscribers(messageType: Class<T>): Sequence<Mailbox<T>> =
         subscriptions.entries.asSequence()
