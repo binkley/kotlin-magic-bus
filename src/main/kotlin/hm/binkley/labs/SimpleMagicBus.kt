@@ -1,5 +1,7 @@
 package hm.binkley.labs
 
+import lombok.Generated
+
 /**
  * A _simple_ implementation of [MagicBus].  Limitations include:
  * * This is not a thread-safe implementation
@@ -63,7 +65,8 @@ class SimpleMagicBus : MagicBus {
                 b.key.isAssignableFrom(a.key)
                     .compareTo(a.key.isAssignableFrom(b.key))
             }
-            .flatMap { it.value as Set<Mailbox<T>> }
+            .flatMap { it.value }
+            .map { it as Mailbox<T> }
 
     @Suppress("TooGenericExceptionCaught", "RethrowCaughtException")
     private fun <T> receive(mailbox: Mailbox<T>, message: T) =
@@ -72,7 +75,7 @@ class SimpleMagicBus : MagicBus {
         } catch (e: RuntimeException) {
             throw e
         } catch (e: Exception) {
-            post(FailedMessage(this, mailbox, message as Any, e))
+            post(FailedMessage(this, mailbox, message, e))
         }
 
     private fun returnIfDead(deliveries: Int, message: Any) {
@@ -81,12 +84,16 @@ class SimpleMagicBus : MagicBus {
 
     private fun installDefaultMailboxes() {
         // Default do nothings: avoid stack overflow from reposting
-        subscribe(object : Mailbox<ReturnedMessage> {
-            override fun invoke(p1: ReturnedMessage) = Unit
+        subscribe(object : Mailbox<ReturnedMessage<*>> {
+            override fun invoke(message: ReturnedMessage<*>) = Unit
+
+            @Generated // Lie to JaCoCo
             override fun toString() = "DEFAULT-DEAD-LETTERBOX"
         })
-        subscribe(object : Mailbox<FailedMessage> {
-            override fun invoke(p1: FailedMessage) = Unit
+        subscribe(object : Mailbox<FailedMessage<*>> {
+            override fun invoke(message: FailedMessage<*>) = Unit
+
+            @Generated // Lie to JaCoCo
             override fun toString() = "DEFAULT-REJECTED-LETTERBOX"
         })
     }

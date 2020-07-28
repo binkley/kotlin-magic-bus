@@ -8,15 +8,15 @@ import java.util.ArrayList
 import java.util.concurrent.atomic.AtomicInteger
 
 internal class SimpleMagicBusTest {
-    private val returned = mutableListOf<ReturnedMessage>()
-    private val failed = mutableListOf<FailedMessage>()
+    private val returned = mutableListOf<ReturnedMessage<*>>()
+    private val failed = mutableListOf<FailedMessage<*>>()
     private val delivered = mutableMapOf<Mailbox<*>, MutableList<Any>>()
 
     private val bus = SimpleMagicBus().apply {
-        subscribe<ReturnedMessage> {
+        subscribe<ReturnedMessage<*>> {
             returned += it
         }
-        subscribe<FailedMessage> {
+        subscribe<FailedMessage<*>> {
             failed += it
         }
     }
@@ -37,23 +37,23 @@ internal class SimpleMagicBusTest {
 
     @Test
     fun `should deliver correctly to disparate subscribers`() {
-        val mailboxRight = testMailbox<RightType>()
-        bus.subscribe(mailboxRight)
-        val mailboxLeft = testMailbox<LeftType>()
-        bus.subscribe(mailboxLeft)
+        val mailboxForDelivery = testMailbox<RightType>()
+        bus.subscribe(mailboxForDelivery)
+        val mailboxForNoDelivery = testMailbox<LeftType>()
+        bus.subscribe(mailboxForNoDelivery)
 
         assertThat(bus.subscribers<RightType>().toList())
-            .isEqualTo(listOf(mailboxRight))
+            .isEqualTo(listOf(mailboxForDelivery))
 
         val message = RightType()
 
         bus.post(message)
 
-        assertOn(mailboxRight)
+        assertOn(mailboxForDelivery)
             .delivered(message)
             .noneReturned()
             .noneFailed()
-        assertOn(mailboxLeft)
+        assertOn(mailboxForNoDelivery)
             .noneDelivered()
             .noneReturned()
             .noneFailed()
@@ -115,13 +115,25 @@ internal class SimpleMagicBusTest {
     }
 
     @Test
-    fun `should throw failed posts for unchecked exceptions`() {
+    fun `should bubble out runtime exceptions`() {
+        val reason = RuntimeException()
         assertThatThrownBy {
-            val mailbox: Mailbox<LeftType> = failWith { RuntimeException() }
+            val mailbox: Mailbox<LeftType> = failWith { reason }
             bus.subscribe(mailbox)
 
             bus.post(LeftType())
-        }.isInstanceOf(RuntimeException::class.java)
+        }.isSameAs(reason)
+    }
+
+    @Test
+    fun `should bubble out JVM errors`() {
+        val reason = Error()
+        assertThatThrownBy {
+            val mailbox: Mailbox<LeftType> = failWith { reason }
+            bus.subscribe(mailbox)
+
+            bus.post(LeftType())
+        }.isSameAs(reason)
     }
 
     @Test
@@ -187,16 +199,17 @@ internal class SimpleMagicBusTest {
 
     @Test
     fun `should unsubscribe exact mailbox`() {
-        val mailboxA = testMailbox<RightType>()
-        val mailboxB: Mailbox<RightType> = failWith { Exception() }
-        bus.subscribe(mailboxA)
-        bus.subscribe(mailboxB)
-        bus.unsubscribe(mailboxB)
+        val mailboxForDelivery = testMailbox<RightType>()
+        val mailboxForNoDelivery: Mailbox<RightType> =
+            failWith { Exception() }
+        bus.subscribe(mailboxForDelivery)
+        bus.subscribe(mailboxForNoDelivery)
+        bus.unsubscribe(mailboxForNoDelivery)
         val message = RightType()
 
         bus.post(message)
 
-        assertOn(mailboxA)
+        assertOn(mailboxForDelivery)
             .delivered(message)
             .noneReturned()
             .noneFailed()
@@ -204,20 +217,25 @@ internal class SimpleMagicBusTest {
 
     @Test
     fun `should fail to unsubscribe exact mailbox`() {
-        val mailboxA = testMailbox<RightType>()
-        val mailboxB: Mailbox<RightType> = failWith { Exception() }
-        bus.subscribe(mailboxA)
+        val mailbox: Mailbox<RightType> = failWith { Exception() }
 
         assertThrows<NoSuchElementException> {
-            bus.unsubscribe(mailboxB)
+            bus.unsubscribe(mailbox)
         }
     }
 
     @Test
-    fun `should complain when unsubscribing from bad mailbox`() {
-        assertThatThrownBy {
-            bus.unsubscribe(discard<RightType>())
-        }.isInstanceOf(NoSuchElementException::class.java)
+    fun `should fail to unsubscribe exact mailbox regardless of other mailboxes`() {
+        val mailboxSubscribed = testMailbox<RightType>()
+        val mailboxNotSubscribed: Mailbox<RightType> =
+            failWith { Exception() }
+
+        bus.subscribe(mailboxSubscribed)
+
+        // TODO: Why isn't this raising branch coverage?
+        assertThrows<NoSuchElementException> {
+            bus.unsubscribe(mailboxNotSubscribed)
+        }
     }
 
     @Test
@@ -246,7 +264,7 @@ internal class SimpleMagicBusTest {
 
     @Test
     fun `should have default rejected letter box`() {
-        assertThat(bus.subscribers<FailedMessage>().toList())
+        assertThat(bus.subscribers<FailedMessage<*>>().toList())
             .hasSize(2)
     }
 
@@ -273,9 +291,9 @@ internal class SimpleMagicBusTest {
         assertOn(delivered.messages)
 
     private fun with(message: Any) = ReturnedMessage(bus, message)
-    private fun with(
-        mailbox: Mailbox<*>,
-        message: Any,
+    private fun <T> with(
+        mailbox: Mailbox<T>,
+        message: T,
         failure: Exception,
     ) = FailedMessage(bus, mailbox, message, failure)
 
@@ -310,8 +328,8 @@ private open class RightType : BaseType()
 private class FarRightType : RightType()
 
 private class AssertDelivery<T>(
-    private val returned: List<ReturnedMessage>,
-    private val failed: List<FailedMessage>,
+    private val returned: List<ReturnedMessage<*>>,
+    private val failed: List<FailedMessage<*>>,
     private val delivered: List<T>,
 ) {
     fun noneDelivered() = apply {
@@ -326,7 +344,7 @@ private class AssertDelivery<T>(
         assertThat(returned).isEmpty()
     }
 
-    fun returned(vararg returned: ReturnedMessage) = apply {
+    fun returned(vararg returned: ReturnedMessage<*>) = apply {
         assertThat(this.returned).containsExactly(*returned)
     }
 
@@ -334,7 +352,7 @@ private class AssertDelivery<T>(
         assertThat(failed).isEmpty()
     }
 
-    fun failed(vararg failed: FailedMessage) = apply {
+    fun failed(vararg failed: FailedMessage<*>) = apply {
         assertThat(this.failed).containsExactly(*failed)
     }
 }

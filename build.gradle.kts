@@ -72,7 +72,7 @@ tasks {
             rule {
                 limit {
                     // TODO: JaCoCo lies
-                    minimum = "0.94".toBigDecimal()
+                    minimum = "0.97".toBigDecimal()
                 }
             }
         }

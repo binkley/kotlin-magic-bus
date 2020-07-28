@@ -41,5 +41,5 @@ data class DiscardMailbox<T>(val messageType: Class<T>) : Mailbox<T> {
 inline fun <reified T> discard(): Mailbox<T> = DiscardMailbox(T::class.java)
 
 /** Creates a mailbox which always fails. */
-fun <T, E : Exception> failWith(exceptionCtor: () -> E): Mailbox<T> =
+fun <T, E : Throwable> failWith(exceptionCtor: () -> E): Mailbox<T> =
     { throw exceptionCtor() }
