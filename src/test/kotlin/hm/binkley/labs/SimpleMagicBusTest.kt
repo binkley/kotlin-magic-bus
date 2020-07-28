@@ -2,16 +2,12 @@ package hm.binkley.labs
 
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
-import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.util.ArrayList
 import java.util.concurrent.CopyOnWriteArrayList
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit.MILLISECONDS
 import java.util.concurrent.atomic.AtomicInteger
-import java.util.stream.IntStream
 
 internal class SimpleMagicBusTest {
     private val returned = CopyOnWriteArrayList<ReturnedMessage>()
@@ -218,33 +214,6 @@ internal class SimpleMagicBusTest {
 
         assertThrows<NoSuchElementException> {
             bus.unsubscribe(mailboxB)
-        }
-    }
-
-    @Test
-    fun `should unsubscribe safely across threads`() {
-        await().atMost(2000L, MILLISECONDS).until {
-            val latch = CountDownLatch(100)
-            IntStream.range(0, 100).parallel().forEach { _: Int ->
-                val mailbox: Mailbox<RightType> = testMailbox()
-                bus.subscribe(mailbox)
-                bus.unsubscribe(mailbox)
-                latch.countDown()
-            }
-            assertThat(
-                latch.await(
-                    1000L,
-                    MILLISECONDS
-                )
-            ).isNotEqualTo(0)
-            val message = RightType()
-
-            bus.post(message)
-
-            assertOn(noMailbox<Any>())
-                .returned(with(message))
-                .noneFailed()
-            true
         }
     }
 

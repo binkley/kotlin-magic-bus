@@ -3,7 +3,6 @@ import org.gradle.api.tasks.wrapper.Wrapper.DistributionType.ALL
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 val assertJVersion: String by project
-val awaitilityVersion: String by project
 val gradleWrapperVersion: String by project
 val junitVersion: String by project
 val kotlinVersion: String by project
@@ -35,7 +34,6 @@ dependencies {
 
     testImplementation("org.junit.jupiter:junit-jupiter:$junitVersion")
     testImplementation("org.assertj:assertj-core:$assertJVersion")
-    testImplementation("org.awaitility:awaitility:$awaitilityVersion")
 }
 
 detekt {
