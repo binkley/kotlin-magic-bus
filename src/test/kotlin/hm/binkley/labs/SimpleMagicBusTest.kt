@@ -245,6 +245,12 @@ internal class SimpleMagicBusTest {
     }
 
     @Test
+    fun `should have default rejected letter box`() {
+        assertThat(bus.subscribers<FailedMessage>().toList())
+            .hasSize(2)
+    }
+
+    @Test
     fun `should provide accurate details on failed posts`() {
         val reason = Exception()
         val mailbox: Mailbox<RightType> = failWith { reason }

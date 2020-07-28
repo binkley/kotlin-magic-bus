@@ -12,6 +12,18 @@ package hm.binkley.labs
 class SimpleMagicBus : MagicBus {
     private val subscribers = Subscribers()
 
+    init {
+        // Default do nothings: avoid stack overflow from reposting
+        subscribe(object : Mailbox<ReturnedMessage> {
+            override fun invoke(p1: ReturnedMessage) = Unit
+            override fun toString() = "DEFAULT-DEAD-LETTERBOX"
+        })
+        subscribe(object : Mailbox<FailedMessage> {
+            override fun invoke(p1: FailedMessage) = Unit
+            override fun toString() = "DEFAULT-REJECTED-LETTERBOX"
+        })
+    }
+
     override fun <T> subscribe(
         messageType: Class<T>,
         mailbox: Mailbox<in T>,
