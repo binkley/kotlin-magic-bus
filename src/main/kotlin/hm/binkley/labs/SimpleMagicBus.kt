@@ -65,11 +65,11 @@ class SimpleMagicBus(
         } catch (e: RuntimeException) {
             throw e
         } catch (e: Exception) {
-            failed(FailedMessage(this, mailbox, message as Any, e))
+            post(FailedMessage(this, mailbox, message as Any, e))
         }
 
     private fun returnIfDead(deliveries: Int, message: Any) {
-        if (0 == deliveries) returned(ReturnedMessage(this, message))
+        if (0 == deliveries) post(ReturnedMessage(this, message))
     }
 
     companion object

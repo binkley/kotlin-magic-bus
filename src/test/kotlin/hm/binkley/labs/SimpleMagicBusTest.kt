@@ -13,14 +13,21 @@ internal class SimpleMagicBusTest {
     private val failed = CopyOnWriteArrayList<FailedMessage>()
     private val delivered = mutableMapOf<Mailbox<*>, MutableList<Any>>()
 
-    private val bus = SimpleMagicBus.onReturn {
-        returned += it
-    } onFailure {
-        failed += it
-    } onDelivery { mailbox, message ->
-        delivered
-            .computeIfAbsent(mailbox) { mutableListOf() }
-            .add(message)
+    private val bus = (
+        SimpleMagicBus.onReturn {
+        } onFailure {
+        } onDelivery { mailbox, message ->
+            delivered
+                .computeIfAbsent(mailbox) { mutableListOf() }
+                .add(message)
+        }
+        ).apply {
+        subscribe<ReturnedMessage> {
+            returned += it
+        }
+        subscribe<FailedMessage> {
+            failed += it
+        }
     }
 
     @Test
