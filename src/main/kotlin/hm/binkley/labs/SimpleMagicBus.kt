@@ -107,7 +107,7 @@ private class Subscribers {
     ) {
         subscriptions.getOrPut(messageType as Class<Any>) {
             mutableSetOf()
-        }.add(mailbox as Mailbox<Any>)
+        } += mailbox as Mailbox<Any>
     }
 
     fun unsubscribe(
