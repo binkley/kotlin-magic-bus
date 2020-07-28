@@ -2,7 +2,6 @@ package hm.binkley.labs
 
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.util.ArrayList
@@ -38,7 +37,6 @@ internal class SimpleMagicBusTest {
             .noneFailed()
     }
 
-    @Disabled("TODO: Why is LeftType mailbox involved?")
     @Test
     fun `should deliver correctly to disparate subscribers`() {
         val mailboxRight = testMailbox<RightType>()
