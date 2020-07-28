@@ -1,7 +1,6 @@
 package hm.binkley.labs
 
 import java.util.concurrent.ConcurrentSkipListMap
-import java.util.concurrent.CopyOnWriteArraySet
 
 /**
  * A _simple_ implementation of [MagicBus].  Limitations include:
@@ -107,7 +106,7 @@ private class Subscribers {
         mailbox: Mailbox<in T>,
     ) {
         subscriptions.getOrPut(messageType as Class<Any>) {
-            mailboxes()
+            mutableSetOf()
         }.add(mailbox as Mailbox<Any>)
     }
 
@@ -123,19 +122,9 @@ private class Subscribers {
     @Suppress("FunctionMinLength")
     fun of(messageType: Class<Any>): Sequence<Mailbox<Any>> =
         subscriptions.entries.asSequence()
-            .filter(subscribedTo(messageType))
-            .flatMap(toMailboxes())
+            .filter { it.key.isAssignableFrom(messageType) }
+            .flatMap { it.value }
 }
-
-private fun <T> mailboxes(): MutableSet<Mailbox<T>> = CopyOnWriteArraySet()
-
-private fun subscribedTo(messageType: Class<*>) =
-    { e: Map.Entry<Class<*>, Set<Mailbox<*>>> ->
-        e.key.isAssignableFrom(messageType)
-    }
-
-private fun toMailboxes() =
-    { e: Map.Entry<Class<Any>, Set<Mailbox<Any>>> -> e.value }
 
 private fun messageTypeOrder(a: Class<*>, b: Class<*>) =
     b.isAssignableFrom(a).compareTo(a.isAssignableFrom(b))
