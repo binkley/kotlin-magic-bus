@@ -221,7 +221,6 @@ internal class SimpleMagicBusTest {
 
         bus.subscribe(mailboxSubscribed)
 
-        // TODO: Why is this failing branch coverage?
         assertThrows<NoSuchElementException> {
             bus.unsubscribe(mailboxNotSubscribed)
         }
