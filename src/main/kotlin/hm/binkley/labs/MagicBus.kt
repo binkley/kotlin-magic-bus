@@ -31,7 +31,7 @@ inline fun <reified T> MagicBus.unsubscribe(noinline mailbox: Mailbox<in T>) =
 
 /** Creates a mailbox which throws away messages of [messageType]. */
 @Suppress("UnusedPrivateMember")
-data class DiscardMailbox<T>(private val messageType: Class<T>) : Mailbox<T> {
+class DiscardMailbox<T>(private val messageType: Class<T>) : Mailbox<T> {
     override operator fun invoke(message: T) = Unit
     override fun toString() = "DISCARD-MAILBOX"
 }

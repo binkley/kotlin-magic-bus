@@ -184,8 +184,9 @@ internal class SimpleMagicBusTest {
 
     @Test
     fun `should unsubscribe exact type`() {
-        val mailbox = testMailbox<LeftType>()
+        val mailbox = discard<LeftType>()
         bus.subscribe(mailbox)
+
         bus.unsubscribe(mailbox)
 
         assertThat(bus.subscribers<LeftType>()).isEmpty()
@@ -193,10 +194,11 @@ internal class SimpleMagicBusTest {
 
     @Test
     fun `should unsubscribe exact mailbox`() {
-        val mailboxForDelivery = testMailbox<RightType>()
-        val mailboxForNoDelivery = discard<RightType>()
+        val mailboxForDelivery = discard<RightType>()
         bus.subscribe(mailboxForDelivery)
+        val mailboxForNoDelivery = discard<RightType>()
         bus.subscribe(mailboxForNoDelivery)
+
         bus.unsubscribe(mailboxForNoDelivery)
 
         assertThat(bus.subscribers<RightType>())
@@ -214,7 +216,7 @@ internal class SimpleMagicBusTest {
 
     @Test
     fun `should fail to unsubscribe exact mailbox regardless of other mailboxes`() {
-        val mailboxSubscribed = testMailbox<RightType>()
+        val mailboxSubscribed = discard<RightType>()
         val mailboxNotSubscribed = discard<RightType>()
 
         bus.subscribe(mailboxSubscribed)
@@ -227,11 +229,11 @@ internal class SimpleMagicBusTest {
 
     @Test
     fun `should provide subscribers for message type in base-up order`() {
-        // Subscription in child-parent order to show that the subscriber
-        // list is in parent-child order
-        val mailboxRight: Mailbox<RightType> = { }
+        // Subscription in derived-base order to show that the subscriber
+        // list is in base-derived order
+        val mailboxRight = testMailbox<RightType>()
         bus.subscribe(mailboxRight)
-        val mailboxBase: Mailbox<BaseType> = { }
+        val mailboxBase = testMailbox<BaseType>()
         bus.subscribe(mailboxBase)
 
         assertThat(bus.subscribers<RightType>().toList())
