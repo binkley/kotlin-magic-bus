@@ -13,7 +13,7 @@ package hm.binkley.labs
  */
 class SimpleMagicBus : MagicBus {
     private val subscriptions:
-            MutableMap<Class<Any>, MutableSet<Mailbox<Any>>> = mutableMapOf()
+        MutableMap<Class<Any>, MutableSet<Mailbox<Any>>> = mutableMapOf()
 
     init {
         installDefaultMailboxes()
@@ -40,12 +40,12 @@ class SimpleMagicBus : MagicBus {
     }
 
     override fun post(message: Any) {
-        var deliveries = 0
-        subscribers(message.javaClass).forEach { mailbox ->
-            ++deliveries
+        val mailboxes = subscribers(message.javaClass)
+        if (mailboxes.isEmpty()) return post(ReturnedMessage(this, message))
+
+        mailboxes.forEach { mailbox ->
             receive(mailbox, message)
         }
-        returnIfDead(deliveries, message)
     }
 
     /**
@@ -57,8 +57,8 @@ class SimpleMagicBus : MagicBus {
 
     /** Return the mailboxes which would receive message of [messageType]. */
     @Suppress("UNCHECKED_CAST")
-    fun <T> subscribers(messageType: Class<T>): Sequence<Mailbox<T>> =
-        subscriptions.entries.asSequence()
+    fun <T> subscribers(messageType: Class<T>): List<Mailbox<T>> =
+        subscriptions.entries
             .filter { it.key.isAssignableFrom(messageType) }
             .sortedWith { a, b ->
                 // TODO: Extract to explanatory function
@@ -77,10 +77,6 @@ class SimpleMagicBus : MagicBus {
         } catch (e: Exception) {
             post(FailedMessage(this, mailbox, message, e))
         }
-
-    private fun returnIfDead(deliveries: Int, message: Any) {
-        if (0 == deliveries) post(ReturnedMessage(this, message))
-    }
 
     private fun installDefaultMailboxes() {
         // Default do nothings: avoid stack overflow from reposting
