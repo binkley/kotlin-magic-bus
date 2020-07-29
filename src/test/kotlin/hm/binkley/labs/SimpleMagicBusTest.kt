@@ -206,7 +206,7 @@ internal class SimpleMagicBusTest {
     }
 
     @Test
-    fun `should fail to unsubscribe exact mailbox`() {
+    fun `should fail to unsubscribe for message type`() {
         val mailbox = discard<RightType>()
 
         assertThrows<NoSuchElementException> {
