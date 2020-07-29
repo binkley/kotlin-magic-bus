@@ -57,16 +57,15 @@ class SimpleMagicBus : MagicBus {
 
     /** Return the mailboxes which would receive message of [messageType]. */
     @Suppress("UNCHECKED_CAST")
-    fun <T> subscribers(messageType: Class<T>): List<Mailbox<T>> =
-        subscriptions.entries
-            .filter { it.key.isAssignableFrom(messageType) }
-            .sortedWith { a, b ->
-                // TODO: Extract to explanatory function
-                b.key.isAssignableFrom(a.key)
-                    .compareTo(a.key.isAssignableFrom(b.key))
-            }
-            .flatMap { it.value }
-            .map { it as Mailbox<T> }
+    fun <T> subscribers(messageType: Class<T>) = subscriptions.entries
+        .filter { it.key.isAssignableFrom(messageType) }
+        .sortedWith { a, b ->
+            // TODO: Extract to explanatory function
+            b.key.isAssignableFrom(a.key)
+                .compareTo(a.key.isAssignableFrom(b.key))
+        }
+        .flatMap { it.value }
+        .map { it as Mailbox<T> }
 
     @Suppress("TooGenericExceptionCaught", "RethrowCaughtException")
     private fun <T> receive(mailbox: Mailbox<T>, message: T) =
