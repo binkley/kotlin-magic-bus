@@ -64,8 +64,7 @@ class SimpleMagicBus : MagicBus {
             b.key.isAssignableFrom(a.key)
                 .compareTo(a.key.isAssignableFrom(b.key))
         }
-        .flatMap { it.value }
-        .map { it as Mailbox<T> }
+        .flatMap { it.value } as List<Mailbox<T>>
 
     @Suppress("TooGenericExceptionCaught", "RethrowCaughtException")
     private fun <T> receive(mailbox: Mailbox<T>, message: T) =
