@@ -30,7 +30,7 @@ internal class SimpleMagicBusTest {
         bus.post(message)
 
         assertOn(mailbox)
-            .delivered(message)
+            .deliveredInOrder(message)
             .noneReturned()
             .noneFailed()
     }
@@ -50,7 +50,7 @@ internal class SimpleMagicBusTest {
         bus.post(message)
 
         assertOn(mailboxForDelivery)
-            .delivered(message)
+            .deliveredInOrder(message)
             .noneReturned()
             .noneFailed()
         assertOn(mailboxForNoDelivery)
@@ -69,7 +69,7 @@ internal class SimpleMagicBusTest {
 
         assertOn(mailbox)
             .noneDelivered()
-            .returned(with(message))
+            .returnedInOrder(with(message))
             .noneFailed()
     }
 
@@ -82,7 +82,7 @@ internal class SimpleMagicBusTest {
         bus.post(message)
 
         assertOn(mailbox)
-            .delivered(message)
+            .deliveredInOrder(message)
             .noneReturned()
             .noneFailed()
     }
@@ -95,7 +95,7 @@ internal class SimpleMagicBusTest {
 
         assertOn(noMailbox<Any>())
             .noneDelivered()
-            .returned(with(message))
+            .returnedInOrder(with(message))
             .noneFailed()
     }
 
@@ -111,7 +111,7 @@ internal class SimpleMagicBusTest {
         assertOn(noMailbox<Any>())
             .noneDelivered()
             .noneReturned()
-            .failed(with(mailbox, message, reason))
+            .failedInOrder(with(mailbox, message, reason))
     }
 
     @Test
@@ -151,8 +151,8 @@ internal class SimpleMagicBusTest {
 
         assertOn(allMailbox)
             .noneReturned()
-            .failed(failure)
-            .delivered(message, failure)
+            .failedInOrder(failure)
+            .deliveredInOrder(message, failure)
     }
 
     @Test
@@ -371,23 +371,23 @@ private class AssertDelivery<T>(
         assertThat(delivered).isEmpty()
     }
 
-    fun <U : T?> delivered(vararg delivered: U) = apply {
-        assertThat(this.delivered).containsExactly(*delivered)
+    fun <U : T?> deliveredInOrder(vararg delivered: U) = apply {
+        assertThat(this.delivered).isEqualTo(delivered.toList())
     }
 
     fun noneReturned() = apply {
         assertThat(returned).isEmpty()
     }
 
-    fun returned(vararg returned: ReturnedMessage<*>) = apply {
-        assertThat(this.returned).containsExactly(*returned)
+    fun returnedInOrder(vararg returned: ReturnedMessage<*>) = apply {
+        assertThat(this.returned).isEqualTo(returned.toList())
     }
 
     fun noneFailed() = apply {
         assertThat(failed).isEmpty()
     }
 
-    fun failed(vararg failed: FailedMessage<*>) = apply {
-        assertThat(this.failed).containsExactly(*failed)
+    fun failedInOrder(vararg failed: FailedMessage<*>) = apply {
+        assertThat(this.failed).isEqualTo(failed.toList())
     }
 }
