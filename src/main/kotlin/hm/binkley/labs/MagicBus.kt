@@ -2,6 +2,10 @@ package hm.binkley.labs
 
 typealias Mailbox<T> = (T) -> Unit
 
+/**
+ * Represents a _minimal_ bus for an applications to self-communicate via
+ * _messaging_ by types.
+ */
 interface MagicBus {
     /** Delivers messages of [messageType] to [mailbox]. */
     fun <T> subscribe(messageType: Class<T>, mailbox: Mailbox<in T>)
@@ -9,12 +13,12 @@ interface MagicBus {
     /** Stops delivering messages of [messageType] to [mailbox]. */
     fun <T> unsubscribe(messageType: Class<T>, mailbox: Mailbox<in T>)
 
-    /** Posts [message] to any subscribed mailboxes. */
+    /** Posts [message] to any subscribed mailboxes based on message type. */
     fun post(message: Any)
 }
 
 /**
- * Subscribes without caller providing a class object.
+ * Subscribes without caller providing a type object.
  *
  * @see MagicBus.subscribe
  */
@@ -22,7 +26,7 @@ inline fun <reified T> MagicBus.subscribe(noinline mailbox: Mailbox<in T>) =
     subscribe(T::class.java, mailbox)
 
 /**
- * Unsubscribes without caller providing a class object.
+ * Unsubscribes without caller providing a type object.
  *
  * @see MagicBus.unsubscribe
  */
@@ -39,7 +43,8 @@ inline fun <reified T> MagicBus.unsubscribe(noinline mailbox: Mailbox<in T>) =
  * bus.subscribe(discard<ReturnedMessage>())
  * ```
  * which ignores all messages that have no mailboxes.  However, this is an
- * _anti-pattern_, as it covers up bugs in typing or messaging designs.
+ * _anti-pattern_, as it covers up bugs in typing hierarchies or messaging
+ * pattern implementations.
  *
  * @see discard
  */
@@ -50,7 +55,7 @@ class DiscardMailbox<T>(private val messageType: Class<T>) : Mailbox<T> {
 }
 
 /**
- * Creates a discard mailbox without providing a class object.
+ * Creates a discard mailbox without providing a type object.
  *
  * @see DiscardMailbox
  */
