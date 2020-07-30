@@ -145,7 +145,7 @@ internal class SimpleMagicBusTest {
         bus.subscribe(allMailbox)
 
         val message = RightType()
-        val failure = FailedMessage(bus, badMailbox, message, reason)
+        val failure = with(badMailbox, message, reason)
 
         bus.post(message)
 
