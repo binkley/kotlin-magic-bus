@@ -100,6 +100,12 @@ internal class SimpleMagicBusTest {
     }
 
     @Test
+    fun `should provide distinct failure mailboxes`() {
+        assertThat(failWith<RightType, Exception> { Exception() })
+            .isNotEqualTo(failWith<RightType, Exception> { Exception() })
+    }
+
+    @Test
     fun `should save failed posts`() {
         val reason = Exception()
         val mailbox: Mailbox<LeftType> = failWith { reason }
