@@ -94,6 +94,17 @@ class VariationOnABus {
 }
 ```
 
+Or, if you're _lazy_ like me (pun intended; see
+[implementation](src/main/kotlin/hm/binkley/labs/MagicBus.kt)):
+```kotlin
+class BeGlobal {
+    fun main() {
+        val bus = DEFAULT_GLOBAL_BUS
+        // Do bus stuff
+    }
+}
+```
+
 ## Tech features
 
 * Pure JDK, no 3<sup>rd</sup> parties
