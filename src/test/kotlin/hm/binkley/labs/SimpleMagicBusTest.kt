@@ -159,9 +159,9 @@ internal class SimpleMagicBusTest {
     fun `should be fatal for a failure mailbox to itself fail`() {
         val badMailbox: Mailbox<RightType> = failWith { Exception() }
         bus.subscribe(badMailbox)
-        val recursiveMailbox: Mailbox<FailedMessage<RightType>> =
+        val fatalMailbox: Mailbox<FailedMessage<RightType>> =
             failWith { Exception() }
-        bus.subscribe(recursiveMailbox)
+        bus.subscribe(fatalMailbox)
 
         assertThrows<StackOverflowError> {
             bus.post(RightType())
