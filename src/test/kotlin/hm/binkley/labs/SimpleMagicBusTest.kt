@@ -100,6 +100,11 @@ internal class SimpleMagicBusTest {
     }
 
     @Test
+    fun `should provide distinct discard mailboxes`() {
+        assertThat(discard<RightType>()).isNotEqualTo(discard<RightType>())
+    }
+
+    @Test
     fun `should provide distinct failure mailboxes`() {
         assertThat(failWith<RightType, Exception> { Exception() })
             .isNotEqualTo(failWith<RightType, Exception> { Exception() })
