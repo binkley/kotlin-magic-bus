@@ -272,6 +272,21 @@ internal class SimpleMagicBusTest {
     }
 
     @Test
+    fun `should provide subscribers for message type in subscribed-order`() {
+        val mailboxes = (1..10).map {
+            val mailbox = testMailbox<RightType>()
+            bus.subscribe(mailbox)
+            mailbox
+        }
+
+        // It is unusual to test the test code, but the production test relies
+        // critically on test mailbox instances being non-equal
+        assertThat(testMailbox<RightType>())
+            .isNotEqualTo(testMailbox<RightType>())
+        assertThat(bus.subscribers<RightType>().toList()).isEqualTo(mailboxes)
+    }
+
+    @Test
     fun `should provide accurate details on dead letters`() {
         val message = RightType()
 
