@@ -64,3 +64,9 @@ inline fun <reified T> discard(): Mailbox<T> = DiscardMailbox(T::class.java)
 /** Creates a mailbox which always fails. */
 fun <T, E : Throwable> failWith(exceptionCtor: () -> E): Mailbox<T> =
     { throw exceptionCtor() }
+
+/**
+ * A default, singleton bus.  The instance is a [SimpleMagicBus] with its
+ * additional methods and restrictions.
+ */
+val DEFAULT_GLOBAL_BUS: SimpleMagicBus by lazy { SimpleMagicBus() }
