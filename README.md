@@ -98,10 +98,12 @@ class VariationOnABus {
 
 * Pure JDK, no 3<sup>rd</sup> parties
 * _Almost_ 100% test coverage
-* Spotbugs is happy
+* [Detekt](https://detekt.github.io/detekt/) and
+  [Ktlint](https://ktlint.github.io/) are happy
 * Focus is on functions, not types, for subscriptions and bus behavior
 
 ## TODO
 
-* JaCoCo shows 100% instruction coverage, but says there are missed branches.
+* JaCoCo does not recognize branch coverage for "impossible" branches within
+  the Kotlin stdlib (`MutableCollection.remove`).
 * Pick one: Detekt or Ktlint.
