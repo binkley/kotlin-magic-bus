@@ -156,6 +156,19 @@ internal class SimpleMagicBusTest {
     }
 
     @Test
+    fun `should be fatal for a failure mailbox to itself fail`() {
+        val badMailbox: Mailbox<RightType> = failWith { Exception() }
+        bus.subscribe(badMailbox)
+        val recursiveMailbox: Mailbox<FailedMessage<RightType>> =
+            failWith { Exception() }
+        bus.subscribe(recursiveMailbox)
+
+        assertThrows<StackOverflowError> {
+            bus.post(RightType())
+        }
+    }
+
+    @Test
     fun `should receive earlier subscribers first`() {
         val delivery = AtomicInteger()
         val first = AtomicInteger()
