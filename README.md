@@ -36,7 +36,7 @@ class SendOff(bus: MagicBus) {
 ```kotlin
 class DiscussNumbersWithOneself(bus: MagicBus) {
     init {
-        bus.subscribe(Number::class.java) { message ->
+        bus.subscribe<Number> { message ->
             println("$message")
         }
         bus.post(1)
@@ -51,7 +51,7 @@ class DiscussNumbersWithOneself(bus: MagicBus) {
 ```kotlin
 class Debugging(bus: MagicBus) {
     init {
-        bus.subscribe(Any::class.java) { message ->
+        bus.subscribe<Any> { message ->
             println(message)
         }
     }
@@ -62,16 +62,14 @@ class Debugging(bus: MagicBus) {
 
 ```kotlin
 class QuitListening(private val bus: MagicBus) {
-    private val receiver: Mailbox<Exception> = { e -> e.printStackTrace() }
+    private val mailbox: Mailbox<Exception> = { e -> e.printStackTrace() }
 
     init {
-        bus.subscribe(Exception::class.java, receiver)
-        // Or: receiver.deliverFrom(bus)
+        bus.subscribe(mailbox)
     }
 
     fun silenceIsGolden() {
-        bus.unsubscribe(Exception::class.java, receiver)
-        // Or: receiver.noDeliveryFrom(bus)
+        bus.unsubscribe(mailbox)
     }
 }
 ```
