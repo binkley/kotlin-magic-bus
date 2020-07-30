@@ -137,6 +137,25 @@ internal class SimpleMagicBusTest {
     }
 
     @Test
+    fun `should post other exceptions and receive them`() {
+        val reason = Exception()
+        val badMailbox: Mailbox<RightType> = failWith { reason }
+        bus.subscribe(badMailbox)
+        val allMailbox = testMailbox<Any>()
+        bus.subscribe(allMailbox)
+
+        val message = RightType()
+        val failure = FailedMessage(bus, badMailbox, message, reason)
+
+        bus.post(message)
+
+        assertOn(allMailbox)
+            .noneReturned()
+            .failed(failure)
+            .delivered(message, failure)
+    }
+
+    @Test
     fun `should receive earlier subscribers first`() {
         val delivery = AtomicInteger()
         val first = AtomicInteger()
