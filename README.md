@@ -118,3 +118,4 @@ class BeGlobal {
 * JaCoCo does not recognize branch coverage for "impossible" branches within
   the Kotlin stdlib (`MutableCollection.remove`).
 * Pick one: Detekt or Ktlint.
+* Deep messaging paths (1K+): First try at `DeepRecursive` did not go well.
