@@ -4,7 +4,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import java.util.ArrayList
 import java.util.concurrent.atomic.AtomicInteger
 
 internal class SimpleMagicBusTest {
@@ -378,7 +377,7 @@ internal class SimpleMagicBusTest {
     ) = FailedMessage(bus, mailbox, message, failure)
 
     private inline fun <reified T> testMailbox(
-        messages: MutableList<T> = ArrayList(1),
+        messages: MutableList<T> = mutableListOf(),
     ) = TestMailbox(T::class.java, messages)
 
     private inner class TestMailbox<T>(
