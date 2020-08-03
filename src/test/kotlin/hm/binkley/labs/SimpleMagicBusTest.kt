@@ -112,9 +112,12 @@ internal class SimpleMagicBusTest {
 
     @Test
     fun `should save failed posts`() {
-        val reason = Exception()
-        val mailbox: Mailbox<LeftType> = failWith { reason }
-        bus.subscribe(mailbox)
+        val firstReason = Exception()
+        val firstBrokenMailbox: Mailbox<LeftType> = failWith { firstReason }
+        bus.subscribe(firstBrokenMailbox)
+        val secondReason = Exception()
+        val secondBrokenMailbox: Mailbox<LeftType> = failWith { secondReason }
+        bus.subscribe(secondBrokenMailbox)
         val message = LeftType()
 
         bus.post(message)
@@ -122,7 +125,10 @@ internal class SimpleMagicBusTest {
         assertOn(noMailbox<Any>())
             .noneDelivered()
             .noneReturned()
-            .failedInOrder(with(mailbox, message, reason))
+            .failedInOrder(
+                with(firstBrokenMailbox, message, firstReason),
+                with(secondBrokenMailbox, message, secondReason)
+            )
     }
 
     @Test
