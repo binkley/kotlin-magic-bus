@@ -2,14 +2,39 @@ package hm.binkley.labs
 
 /**
  * A _simple_ implementation of [MagicBus].  Limitations include:
- * * This is not a thread-safe implementation
+ * * No thread safety
  * * Single-threaded [post] &mdash; callers _block_ until all mailboxes
  *   process the message
  * * No loop detection &mdash; no attempt is made to prevent "storms" whereby
  *   a single post results in mailboxes posting additional messages, possibly
  *   without limits
- * * Default "do nothing" mailboxes for dead and rejected letters: subscribing
- *   for these is optional by the caller
+ *
+ * Upsides include:
+ * * Guaranteed ordering: Subscribers to parent classes always receive
+ *   a message before child class subscribers; the bus always sends
+ *   [FailedMessage] notifications in the order in which mailboxes failed,
+ *   interleaved with later subscribers to the original message
+ *
+ * Additional features include:
+ * * [subscribers] provides a correct list of mailboxes for a given message
+ *   type in the same order as message delivery
+ * * By default, if there are no mailboxes for either [ReturnedMessage] or
+ *   [FailedMessage], these are "dropped".  Code creating a new
+ *   `SimpleMessageBus` is responsible for subscribing to these message types
+ *
+ * Example bus creation with handling of returned and failed messages:
+ * ```
+ * val failed = mutableListOf<FailedMessage<*>>()
+ * val delivered = mutableMapOf<Mailbox<*>, MutableList<Any>>()
+ * val bus = SimpleMagicBus().apply {
+ *     subscribe<ReturnedMessage<*>> {
+ *         returned += it
+ *     }
+ *     subscribe<FailedMessage<*>> {
+ *         failed += it
+ *     }
+ * }
+ * ```
  */
 class SimpleMagicBus : MagicBus {
     private val subscriptions:
