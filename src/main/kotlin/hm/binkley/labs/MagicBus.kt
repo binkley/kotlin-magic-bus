@@ -7,10 +7,10 @@ typealias Mailbox<T> = (T) -> Unit
  * _messaging_ by types.
  */
 interface MagicBus {
-    /** Delivers messages of [messageType] to [mailbox]. */
+    /** Delivers future messages of [messageType] to [mailbox]. */
     fun <T> subscribe(messageType: Class<T>, mailbox: Mailbox<in T>)
 
-    /** Stops delivering messages of [messageType] to [mailbox]. */
+    /** Stops delivering future messages of [messageType] to [mailbox]. */
     fun <T> unsubscribe(messageType: Class<T>, mailbox: Mailbox<in T>)
 
     /** Posts [message] to any subscribed mailboxes based on message type. */
