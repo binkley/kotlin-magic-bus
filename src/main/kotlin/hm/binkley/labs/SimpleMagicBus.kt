@@ -44,7 +44,7 @@ class SimpleMagicBus : MagicBus {
         installDefaultMailboxes()
     }
 
-    override fun <T> subscribe(
+    override fun <T : Any> subscribe(
         messageType: Class<T>,
         mailbox: Mailbox<in T>,
     ) {
@@ -54,7 +54,7 @@ class SimpleMagicBus : MagicBus {
         } += mailbox as Mailbox<Any>
     }
 
-    override fun <T> unsubscribe(
+    override fun <T : Any> unsubscribe(
         messageType: Class<T>,
         mailbox: Mailbox<in T>,
     ) {
@@ -100,7 +100,7 @@ class SimpleMagicBus : MagicBus {
         .flatMap { it.value } as List<Mailbox<T>>
 
     @Suppress("TooGenericExceptionCaught", "RethrowCaughtException")
-    private fun <T> receive(mailbox: Mailbox<T>, message: T) =
+    private fun <T : Any> receive(mailbox: Mailbox<T>, message: T) =
         try {
             mailbox(message)
         } catch (e: RuntimeException) {
@@ -111,12 +111,12 @@ class SimpleMagicBus : MagicBus {
 
     private fun installDefaultMailboxes() {
         // Default do nothings: avoid stack overflow from reposting
-        subscribe(object : Mailbox<ReturnedMessage<*>> {
-            override fun invoke(message: ReturnedMessage<*>) = Unit
+        subscribe(object : Mailbox<ReturnedMessage<Any>> {
+            override fun invoke(message: ReturnedMessage<Any>) = Unit
             override fun toString() = "DEFAULT-DEAD-LETTERBOX"
         })
-        subscribe(object : Mailbox<FailedMessage<*>> {
-            override fun invoke(message: FailedMessage<*>) = Unit
+        subscribe(object : Mailbox<FailedMessage<Any>> {
+            override fun invoke(message: FailedMessage<Any>) = Unit
             override fun toString() = "DEFAULT-REJECTED-LETTERBOX"
         })
     }

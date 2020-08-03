@@ -315,13 +315,13 @@ internal class SimpleMagicBusTest {
 
     @Test
     fun `should have default rejected letter box`() {
-        assertThat(bus.subscribers<FailedMessage<*>>().toList())
+        assertThat(bus.subscribers<FailedMessage<Any>>().toList())
             .hasSize(2)
     }
 
     @Test
     fun `should deliver first to first subscriber for rejected messages`() {
-        val subscribers = bus.subscribers<ReturnedMessage<*>>()
+        val subscribers = bus.subscribers<ReturnedMessage<Any>>()
 
         assertThat(subscribers.first().toString()).isEqualTo(
             "DEFAULT-DEAD-LETTERBOX"
@@ -330,7 +330,7 @@ internal class SimpleMagicBusTest {
 
     @Test
     fun `should deliver first to first subscriber for failed messages`() {
-        val subscribers = bus.subscribers<FailedMessage<*>>()
+        val subscribers = bus.subscribers<FailedMessage<Any>>()
 
         assertThat(subscribers.first().toString()).isEqualTo(
             "DEFAULT-REJECTED-LETTERBOX"
@@ -370,7 +370,7 @@ internal class SimpleMagicBusTest {
         assertOn(delivered.messages)
 
     private fun with(message: Any) = ReturnedMessage(bus, message)
-    private fun <T> with(
+    private fun <T : Any> with(
         mailbox: Mailbox<T>,
         message: T,
         failure: Exception,

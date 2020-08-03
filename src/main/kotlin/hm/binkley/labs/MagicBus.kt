@@ -8,10 +8,10 @@ typealias Mailbox<T> = (T) -> Unit
  */
 interface MagicBus {
     /** Delivers future messages of [messageType] to [mailbox]. */
-    fun <T> subscribe(messageType: Class<T>, mailbox: Mailbox<in T>)
+    fun <T : Any> subscribe(messageType: Class<T>, mailbox: Mailbox<in T>)
 
     /** Stops delivering future messages of [messageType] to [mailbox]. */
-    fun <T> unsubscribe(messageType: Class<T>, mailbox: Mailbox<in T>)
+    fun <T : Any> unsubscribe(messageType: Class<T>, mailbox: Mailbox<in T>)
 
     /** Posts [message] to any subscribed mailboxes based on message type. */
     fun post(message: Any)
@@ -22,7 +22,9 @@ interface MagicBus {
  *
  * @see MagicBus.subscribe
  */
-inline fun <reified T> MagicBus.subscribe(noinline mailbox: Mailbox<in T>) =
+inline fun <reified T : Any> MagicBus.subscribe(
+    noinline mailbox: Mailbox<in T>,
+) =
     subscribe(T::class.java, mailbox)
 
 /**
@@ -30,7 +32,9 @@ inline fun <reified T> MagicBus.subscribe(noinline mailbox: Mailbox<in T>) =
  *
  * @see MagicBus.unsubscribe
  */
-inline fun <reified T> MagicBus.unsubscribe(noinline mailbox: Mailbox<in T>) =
+inline fun <reified T : Any> MagicBus.unsubscribe(
+    noinline mailbox: Mailbox<in T>,
+) =
     unsubscribe(T::class.java, mailbox)
 
 /**
@@ -49,7 +53,8 @@ inline fun <reified T> MagicBus.unsubscribe(noinline mailbox: Mailbox<in T>) =
  * @see discard
  */
 @Suppress("UnusedPrivateMember")
-class DiscardMailbox<T>(private val messageType: Class<T>) : Mailbox<T> {
+class DiscardMailbox<T : Any>(private val messageType: Class<T>) :
+    Mailbox<T> {
     override operator fun invoke(message: T) = Unit
     override fun toString() = "DISCARD-MAILBOX"
 }
@@ -59,10 +64,11 @@ class DiscardMailbox<T>(private val messageType: Class<T>) : Mailbox<T> {
  *
  * @see DiscardMailbox
  */
-inline fun <reified T> discard(): Mailbox<T> = DiscardMailbox(T::class.java)
+inline fun <reified T : Any> discard(): Mailbox<T> =
+    DiscardMailbox(T::class.java)
 
 /** Creates a mailbox which always fails. */
-fun <T, E : Throwable> failWith(exceptionCtor: () -> E): Mailbox<T> =
+fun <T : Any, E : Throwable> failWith(exceptionCtor: () -> E): Mailbox<T> =
     { throw exceptionCtor() }
 
 /**
