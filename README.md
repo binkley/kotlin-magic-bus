@@ -15,81 +15,73 @@ Kotlin version of self-messaging
 
 ## What is this?
 
-_Magic Bus_ is an an _internal_ message bus for JVM programs to talk with
-themselves.  It uses message type-inheritance, not string topics, for
-subscribers to receive dispatched messages.  Methods are type-safe.
+_Magic Bus_ is an _internal_ message bus for JVM programs to talk with
+themselves.  It uses type-inheritance of messages, not string topics, for
+subscribers indicate interest in posted messages.  Methods are type-safe.
 
 ## Examples
 
 ### Post a message
 
 ```kotlin
-class SendOff(bus: MagicBus) {
-    init {
-        bus.post(UUID.randomUUID())
-    }
-}
+val bus: MagicBus // assigned elsewhere
+
+bus.post(UUID.randomUUID()) // Only received by subscribers of `UUID`
 ```
 
 ### Receive messages
 
 ```kotlin
-class DiscussNumbersWithOneself(bus: MagicBus) {
-    init {
-        bus.subscribe<Number> { message ->
-            println("$message")
-        }
-        bus.post(1)
-        bus.post(3.14f)
-        bus.post(BigDecimal("1000000"))
-    }
+val bus: MagicBus // assigned elsewhere
+
+bus.subscribe<Number> { message ->
+    println("$message")
 }
+
+bus.post(1) // An Int is a Number
+bus.post(3.14f) // An Float is a Number
+bus.post(BigDecimal("1000000")) // A BigDecimal is a Number
+bus.post("Frodo lives!") // Nothing happens: not a Number
 ```
 
 ### See all messages, regardless of type or sender
 
 ```kotlin
-class Debugging(bus: MagicBus) {
-    init {
-        bus.subscribe<Any> { message ->
-            println(message)
-        }
-    }
+val bus: MagicBus // assigned elsewhere
+
+bus.subscribe<Any> { message ->
+    println(message) // Messages are never null; any type of message
 }
 ```
 
 ### Stop receiving messages
 
 ```kotlin
-class QuitListening(private val bus: MagicBus) {
-    private val mailbox: Mailbox<Exception> = { e -> e.printStackTrace() }
+val bus: MagicBus // assigned elsewhere
 
-    init {
-        bus.subscribe(mailbox)
-    }
+val mailbox: Mailbox<SomeType> = { println(it) }
+bus.subscribe(mailbox)
 
-    fun silenceIsGolden() {
-        bus.unsubscribe(mailbox)
-    }
-}
+bus.post(SomeType()) // printed
+
+bus.unsubscribe(mailbox) // Stop receiving messages
+
+bus.post(SomeType()) // Not printed
 ```
 
 ### Make me a bus
 
 ```kotlin
-class VariationOnABus {
-    fun main() {
-        val returned = mutableListOf<ReturnedMessage>()
-        val failed = mutableListOf<FailedMessage>()
-
-        SimpleMagicBus().apply {
-            subscribe<ReturnedMessage> {
-                returned += it
-            }
-            subscribe<FailedMessage> {
-                failed += it
-            }
-        }
+// Track returned (no mailbox) messages, and failed (mailbox throws exception)
+// messages, say for testing
+val returned = mutableListOf<ReturnedMessage>()
+val failed = mutableListOf<FailedMessage>()
+val bus = SimpleMagicBus().apply {
+    subscribe<ReturnedMessage> {
+        returned += it
+    }
+    subscribe<FailedMessage> {
+        failed += it
     }
 }
 ```
