@@ -93,9 +93,7 @@ class SimpleMagicBus : MagicBus {
     fun <T> subscribers(messageType: Class<T>) = subscriptions.entries
         .filter { it.key.isAssignableFrom(messageType) }
         .sortedWith { a, b ->
-            // TODO: Extract to explanatory function
-            b.key.isAssignableFrom(a.key)
-                .compareTo(a.key.isAssignableFrom(b.key))
+            parentFirstAndFifoOrdering(a.key, b.key)
         }
         .flatMap { it.value } as List<Mailbox<T>>
 
@@ -121,3 +119,10 @@ class SimpleMagicBus : MagicBus {
         })
     }
 }
+
+// Notes:
+// * Inverted order so that parents come first
+// * Ordering is stable so that FIFO on ties
+// * Boolean sorts with `false` coming before `true`
+private fun parentFirstAndFifoOrdering(a: Class<*>, b: Class<*>) =
+    b.isAssignableFrom(a).compareTo(a.isAssignableFrom(b))
