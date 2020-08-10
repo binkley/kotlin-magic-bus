@@ -3,6 +3,12 @@ package hm.binkley.labs
 typealias Mailbox<T> = (T) -> Unit
 
 /**
+ * A default, singleton bus.  The instance is a [SimpleMagicBus] with its
+ * additional methods and restrictions.
+ */
+val DEFAULT_GLOBAL_BUS: SimpleMagicBus by lazy { SimpleMagicBus() }
+
+/**
  * Represents a _minimal_ bus for an applications to self-communicate via
  * _messaging_ by types.
  */
@@ -70,9 +76,3 @@ inline fun <reified T : Any> discard(): Mailbox<T> =
 /** Creates a mailbox which always fails. */
 fun <T : Any, E : Throwable> failWith(exceptionCtor: () -> E): Mailbox<T> =
     { throw exceptionCtor() }
-
-/**
- * A default, singleton bus.  The instance is a [SimpleMagicBus] with its
- * additional methods and restrictions.
- */
-val DEFAULT_GLOBAL_BUS: SimpleMagicBus by lazy { SimpleMagicBus() }

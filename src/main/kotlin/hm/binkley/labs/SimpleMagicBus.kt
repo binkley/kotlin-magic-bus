@@ -76,9 +76,7 @@ class SimpleMagicBus : MagicBus {
         val mailboxes = subscribers(message.javaClass)
         if (mailboxes.isEmpty()) return post(ReturnedMessage(this, message))
 
-        mailboxes.forEach { mailbox ->
-            receive(mailbox, message)
-        }
+        mailboxes.forEach { mailbox -> receive(mailbox, message) }
     }
 
     /**
