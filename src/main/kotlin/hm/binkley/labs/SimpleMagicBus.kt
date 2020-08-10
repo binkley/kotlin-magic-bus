@@ -92,9 +92,7 @@ class SimpleMagicBus : MagicBus {
     @Suppress("UNCHECKED_CAST")
     fun <T> subscribers(messageType: Class<T>) = subscriptions.entries
         .filter { it.key.isAssignableFrom(messageType) }
-        .sortedWith { a, b ->
-            parentFirstAndFifoOrdering(a.key, b.key)
-        }
+        .sortedWith { a, b -> parentFirstAndFifoOrdering(a.key, b.key) }
         .flatMap { it.value } as List<Mailbox<T>>
 
     @Suppress("TooGenericExceptionCaught", "RethrowCaughtException")
