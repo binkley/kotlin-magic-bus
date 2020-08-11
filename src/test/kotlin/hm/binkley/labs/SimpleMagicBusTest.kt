@@ -434,3 +434,6 @@ private class AssertDelivery<T>(
         assertThat(this.failed).isEqualTo(failed.toList())
     }
 }
+
+fun <T : Any, E : Throwable> failWith(reason: () -> E): Mailbox<T> =
+    { throw reason() }

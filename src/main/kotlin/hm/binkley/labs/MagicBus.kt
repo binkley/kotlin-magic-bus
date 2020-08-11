@@ -72,12 +72,3 @@ class DiscardMailbox<T : Any>(private val messageType: Class<T>) :
  */
 inline fun <reified T : Any> discard(): Mailbox<T> =
     DiscardMailbox(T::class.java)
-
-/**
- * Creates a mailbox which always fails.  Example scenario: were a particular
- * message to be posted, that would be an application bug.
- *
- * @todo This feels like a wart.  Does it belong in the test class?
- */
-fun <T : Any, E : Throwable> failWith(reason: () -> E): Mailbox<T> =
-    { throw reason() }
