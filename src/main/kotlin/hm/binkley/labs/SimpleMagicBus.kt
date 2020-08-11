@@ -41,7 +41,7 @@ class SimpleMagicBus : MagicBus {
         MutableMap<Class<Any>, MutableSet<Mailbox<Any>>> = mutableMapOf()
 
     init {
-        installDefaultMailboxes()
+        installFallbackMailboxes()
     }
 
     override fun <T : Any> subscribe(
@@ -103,7 +103,7 @@ class SimpleMagicBus : MagicBus {
             post(FailedMessage(this, mailbox, message, e))
         }
 
-    private fun installDefaultMailboxes() {
+    private fun installFallbackMailboxes() {
         // Default do nothings: avoid stack overflow from reposting
         subscribe(object : Mailbox<ReturnedMessage<Any>> {
             override fun invoke(message: ReturnedMessage<Any>) = Unit
