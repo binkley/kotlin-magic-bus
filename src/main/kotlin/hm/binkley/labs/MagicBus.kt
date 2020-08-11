@@ -79,5 +79,5 @@ inline fun <reified T : Any> discard(): Mailbox<T> =
  *
  * @todo This feels like a wart.  Does it belong in the test class?
  */
-fun <T : Any, E : Throwable> failWith(exceptionCtor: () -> E): Mailbox<T> =
-    { throw exceptionCtor() }
+fun <T : Any, E : Throwable> failWith(reason: () -> E): Mailbox<T> =
+    { throw reason() }
