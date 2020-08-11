@@ -435,5 +435,5 @@ private class AssertDelivery<T>(
     }
 }
 
-fun <T : Any, E : Throwable> failWith(reason: () -> E): Mailbox<T> =
+private fun <T : Any, E : Throwable> failWith(reason: () -> E): Mailbox<T> =
     { throw reason() }
