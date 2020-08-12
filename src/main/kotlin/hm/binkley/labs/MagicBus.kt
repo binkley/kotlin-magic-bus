@@ -22,9 +22,3 @@ interface MagicBus {
     /** Posts [message] to any subscribed mailboxes based on message type. */
     fun post(message: Any)
 }
-
-// data class InvalidMailbox(
-//    val bus: MagicBus,
-//    val mailbox: Mailbox<*>,
-//    val busMesage: Any
-// ) : Exception("BUG: Mailbox $mailbox reposts $busMesage")

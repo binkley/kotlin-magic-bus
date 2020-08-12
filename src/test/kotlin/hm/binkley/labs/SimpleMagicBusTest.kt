@@ -2,7 +2,6 @@ package hm.binkley.labs
 
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.util.concurrent.atomic.AtomicInteger
@@ -363,21 +362,6 @@ internal class SimpleMagicBusTest {
         assertThat(failed.mailbox).isSameAs(mailbox)
         assertThat(failed.message).isSameAs(message)
         assertThat(failed.failure).isSameAs(reason)
-    }
-
-    @Disabled("Make test pass") // TODO
-    @Test
-    fun `should fail when a mailbox reposts the same message`() {
-//        val mailbox = { it: RightType -> bus.post(it) }
-//        mailbox.subscribeTo(bus)
-//
-//        val message = RightType()
-//        val failure = assertThrows<InvalidMailbox> {
-//            bus.post(message)
-//        }
-//
-//        assertThat(failure)
-//            .isEqualTo(InvalidMailbox(bus, mailbox, message))
     }
 
     private fun <T> assertOn(delivered: List<T>) =
