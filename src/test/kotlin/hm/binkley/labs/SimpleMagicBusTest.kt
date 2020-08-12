@@ -11,6 +11,7 @@ internal class SimpleMagicBusTest {
     private val failed = mutableListOf<FailedMessage<*>>()
     private val delivered = mutableMapOf<Mailbox<*>, MutableList<Any>>()
 
+    // Do *not* use `DEFAULT_BUS`.  The test needs a new instance each run.
     private val bus = SimpleMagicBus().also { bus ->
         namedMailbox<ReturnedMessage<Any>>("TEST-DEAD-LETTERBOX") {
             returned += it

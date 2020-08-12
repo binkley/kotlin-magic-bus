@@ -6,7 +6,7 @@ typealias Mailbox<T> = (T) -> Unit
  * A default, singleton bus.  The instance is a [SimpleMagicBus] with its
  * additional methods and restrictions.
  */
-val DEFAULT_GLOBAL_BUS: SimpleMagicBus by lazy { SimpleMagicBus() }
+val DEFAULT_BUS: SimpleMagicBus by lazy { SimpleMagicBus() }
 
 /**
  * Represents a _minimal_ bus for an applications to self-communicate via
