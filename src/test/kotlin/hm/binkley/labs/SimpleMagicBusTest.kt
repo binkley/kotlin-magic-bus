@@ -88,7 +88,7 @@ internal class SimpleMagicBusTest {
 
         bus.post(message)
 
-        assertOn(noMailbox<Any>())
+        assertOn(noMailbox())
             .noneDelivered()
             .returnedInOrder(with(message))
             .noneFailed()
@@ -117,7 +117,7 @@ internal class SimpleMagicBusTest {
 
         bus.post(message)
 
-        assertOn(noMailbox<Any>())
+        assertOn(noMailbox())
             .noneDelivered()
             .noneReturned()
             .failedInOrder(
@@ -178,32 +178,29 @@ internal class SimpleMagicBusTest {
 
     @Test
     fun `should receive mailboxes for same type in subscription order`() {
-        val delivery = AtomicInteger()
+        val ordering = AtomicInteger()
         val firstMailbox =
-            orderedMailbox<RightType>(delivery).subscribeTo(bus)
+            orderedMailbox<RightType>(ordering).subscribeTo(bus)
         val secondMailbox =
-            orderedMailbox<RightType>(delivery).subscribeTo(bus)
+            orderedMailbox<RightType>(ordering).subscribeTo(bus)
 
         bus.post(RightType())
 
         assertThat(firstMailbox.order).isEqualTo(0)
         assertThat(secondMailbox.order).isEqualTo(1)
-        assertOn(noMailbox<Any>())
-            .noneReturned()
-            .noneFailed()
     }
 
     @Test
     fun `should receive parent types first`() {
-        val delivery = AtomicInteger()
+        val ordering = AtomicInteger()
         val rightMailbox =
-            orderedMailbox<RightType>(delivery).subscribeTo(bus)
+            orderedMailbox<RightType>(ordering).subscribeTo(bus)
         val farRightMailbox =
-            orderedMailbox<FarRightType>(delivery).subscribeTo(bus)
+            orderedMailbox<FarRightType>(ordering).subscribeTo(bus)
         val allMailbox =
-            orderedMailbox<Any>(delivery).subscribeTo(bus)
+            orderedMailbox<Any>(ordering).subscribeTo(bus)
         val baseMailbox =
-            orderedMailbox<BaseType>(delivery).subscribeTo(bus)
+            orderedMailbox<BaseType>(ordering).subscribeTo(bus)
 
         bus.post(FarRightType())
 
@@ -211,9 +208,6 @@ internal class SimpleMagicBusTest {
         assertThat(baseMailbox.order).isEqualTo(1)
         assertThat(rightMailbox.order).isEqualTo(2)
         assertThat(farRightMailbox.order).isEqualTo(3)
-        assertOn(noMailbox<Any>())
-            .noneReturned()
-            .noneFailed()
     }
 
     @Test
@@ -382,7 +376,7 @@ internal class SimpleMagicBusTest {
     }
 }
 
-private fun <T> noMailbox() = emptyList<T>()
+private fun noMailbox() = emptyList<Mailbox<Any>>()
 
 private data class OrderedMailbox<T>(
     private val masterOrder: AtomicInteger,
