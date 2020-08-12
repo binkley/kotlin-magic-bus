@@ -183,10 +183,10 @@ internal class SimpleMagicBusTest {
         val second = AtomicInteger()
         val third = AtomicInteger()
         val fourth = AtomicInteger()
-        record<RightType>(delivery, first).subscribeTo(bus)
-        record<RightType>(delivery, second).subscribeTo(bus)
-        record<RightType>(delivery, third).subscribeTo(bus)
-        record<RightType>(delivery, fourth).subscribeTo(bus)
+        trackingMailbox<RightType>(delivery, first).subscribeTo(bus)
+        trackingMailbox<RightType>(delivery, second).subscribeTo(bus)
+        trackingMailbox<RightType>(delivery, third).subscribeTo(bus)
+        trackingMailbox<RightType>(delivery, fourth).subscribeTo(bus)
 
         bus.post(RightType())
 
@@ -206,10 +206,10 @@ internal class SimpleMagicBusTest {
         val right = AtomicInteger()
         val base = AtomicInteger()
         val anythingElse = AtomicInteger()
-        record<RightType>(delivery, right).subscribeTo(bus)
-        record<FarRightType>(delivery, farRight).subscribeTo(bus)
-        record<Any>(delivery, anythingElse).subscribeTo(bus)
-        record<BaseType>(delivery, base).subscribeTo(bus)
+        trackingMailbox<RightType>(delivery, right).subscribeTo(bus)
+        trackingMailbox<FarRightType>(delivery, farRight).subscribeTo(bus)
+        trackingMailbox<Any>(delivery, anythingElse).subscribeTo(bus)
+        trackingMailbox<BaseType>(delivery, base).subscribeTo(bus)
 
         bus.post(FarRightType())
 
@@ -389,10 +389,13 @@ internal class SimpleMagicBusTest {
 }
 
 private fun <T> noMailbox() = emptyList<T>()
-private fun <T> record(
+private fun <T> trackingMailbox(
     order: AtomicInteger,
-    record: AtomicInteger,
+    record: AtomicInteger
 ): Mailbox<T> = { record.set(order.getAndIncrement()) }
+
+private fun <T : Any> failWith(reason: () -> Throwable): Mailbox<T> =
+    { throw reason() }
 
 private abstract class BaseType
 private class LeftType : BaseType()
@@ -428,6 +431,3 @@ private class AssertDelivery<T>(
         assertThat(this.failed).isEqualTo(failed.toList())
     }
 }
-
-private fun <T : Any> failWith(reason: () -> Throwable): Mailbox<T> =
-    { throw reason() }
