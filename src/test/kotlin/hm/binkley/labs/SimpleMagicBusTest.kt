@@ -364,6 +364,14 @@ internal class SimpleMagicBusTest {
         assertThat(failed.failure).isSameAs(reason)
     }
 
+    @Test
+    fun `should have named mailboxes`() {
+        val name = "BOB'S YER UNKEL"
+        val mailbox = mailbox<RightType>(name) {}
+
+        assertThat(mailbox.toString()).isEqualTo(name)
+    }
+
     private fun <T> assertOn(delivered: List<T>) =
         AssertDelivery(returned, failed, delivered)
 
