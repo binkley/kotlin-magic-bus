@@ -11,7 +11,9 @@ inline fun <reified T : Any> MagicBus.subscribe(
 ) = subscribe(T::class.java, mailbox)
 
 /** An alternative, fluent syntax to [subscribe]. */
-inline fun <reified T : Any, M : Mailbox<T>> M.subscribeTo(bus: MagicBus): M {
+inline fun <reified T : Any, M : Mailbox<T>> M.subscribeTo(
+    bus: MagicBus,
+): M {
     bus.subscribe(this)
     return this
 }
@@ -26,20 +28,23 @@ inline fun <reified T : Any> MagicBus.unsubscribe(
 ) = unsubscribe(T::class.java, mailbox)
 
 /** An alternative, fluent syntax to [unsubscribe]. */
-inline fun <reified T : Any, M : Mailbox<T>> M.unsubscribeFrom(bus: MagicBus): M {
+inline fun <reified T : Any, M : Mailbox<T>> M.unsubscribeFrom(
+    bus: MagicBus,
+): M {
     bus.unsubscribe(this)
     return this
 }
 
 /** Creates a mailbox wrapping [receive], and a `toString` of [name]. */
-fun <T> namedMailbox(name: String, receive: Mailbox<T>) = object : Mailbox<T> {
-    override fun invoke(message: T) = receive(message)
-    override fun toString() = name
-}
+fun <T> namedMailbox(name: String, receive: Mailbox<T>) =
+    object : Mailbox<T> {
+        override fun invoke(message: T) = receive(message)
+        override fun toString() = name
+    }
 
 /**
- * Creates a mailbox which throws away messages of [messageType].  Use case:
- * To avoid [ReturnedMessage] posts for message types not of interest, use a
+ * Creates a mailbox which throws away messages.  Use case: To avoid
+ * [ReturnedMessage] posts for message types not of interest, use a
  * discard mailbox.
  *
  * *NB* &mdash; An extreme example is:
