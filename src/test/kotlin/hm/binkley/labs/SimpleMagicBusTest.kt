@@ -11,13 +11,13 @@ internal class SimpleMagicBusTest {
     private val failed = mutableListOf<FailedMessage<*>>()
     private val delivered = mutableMapOf<Mailbox<*>, MutableList<Any>>()
 
-    private val bus = SimpleMagicBus().apply {
+    private val bus = SimpleMagicBus().also { bus ->
         namedMailbox<ReturnedMessage<Any>>("TEST-DEAD-LETTERBOX") {
             returned += it
-        }.subscribeTo(this)
+        }.subscribeTo(bus)
         namedMailbox<FailedMessage<Any>>("TEST-FAILED-LETTERBOX") {
             failed += it
-        }.subscribeTo(this)
+        }.subscribeTo(bus)
     }
 
     @Test
