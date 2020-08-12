@@ -29,12 +29,9 @@ inline fun <reified T : Any> MagicBus.unsubscribe(
 ) = unsubscribe(T::class.java, mailbox)
 
 /** An alternative, fluent syntax to [unsubscribe]. */
-inline fun <reified T : Any, M : Mailbox<T>> M.unsubscribeFrom(
+inline fun <reified T : Any> Mailbox<T>.unsubscribeFrom(
     bus: MagicBus,
-): M {
-    bus.unsubscribe(this)
-    return this
-}
+) = bus.unsubscribe(this)
 
 /** Creates a mailbox wrapping [receive], and a [toString] of [name]. */
 fun <T> namedMailbox(name: String, receive: Mailbox<T>) =
