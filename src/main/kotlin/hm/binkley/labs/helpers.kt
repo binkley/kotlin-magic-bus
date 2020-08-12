@@ -41,17 +41,8 @@ fun <T> namedMailbox(name: String, receive: Mailbox<T>) =
     }
 
 /**
- * Creates a mailbox which throws away messages.  Use case: To avoid
- * [ReturnedMessage] posts for message types not of interest, use a
- * discard mailbox.
- *
- * *NB* &mdash; An extreme example is:
- * ```
- * bus.subscribe(discard<ReturnedMessage>())
- * ```
- * which ignores all messages that have no mailboxes.  However, this is an
- * _anti-pattern_, as it covers up bugs in typing hierarchies or messaging
- * pattern implementations.
+ * Creates a mailbox which throws away messages.  Use case: To ignore posts
+ * for messages of type [T], use a discard mailbox.
  */
 inline fun <reified T : Any> discard(): Mailbox<T> =
     namedMailbox("DISCARD-MAILBOX<${T::class.java.name}>") { }
