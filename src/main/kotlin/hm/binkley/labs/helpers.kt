@@ -22,6 +22,7 @@ inline fun <reified T : Any, M : Mailbox<T>> M.subscribeTo(
  * Unsubscribes without caller providing a type object.
  *
  * @see MagicBus.unsubscribe
+ * @see unsubscribeFrom
  */
 inline fun <reified T : Any> MagicBus.unsubscribe(
     noinline mailbox: Mailbox<in T>,
@@ -35,7 +36,7 @@ inline fun <reified T : Any, M : Mailbox<T>> M.unsubscribeFrom(
     return this
 }
 
-/** Creates a mailbox wrapping [receive], and a `toString` of [name]. */
+/** Creates a mailbox wrapping [receive], and a [toString] of [name]. */
 fun <T> namedMailbox(name: String, receive: Mailbox<T>) =
     object : Mailbox<T> {
         override fun invoke(message: T) = receive(message)
@@ -56,4 +57,4 @@ fun <T> namedMailbox(name: String, receive: Mailbox<T>) =
  * pattern implementations.
  */
 inline fun <reified T : Any> discard(): Mailbox<T> =
-    namedMailbox("DISCARD-MAILBOX") { }
+    namedMailbox("DISCARD-MAILBOX<${T::class.java.name}>") { }
