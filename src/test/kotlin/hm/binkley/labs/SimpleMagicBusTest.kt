@@ -177,23 +177,17 @@ internal class SimpleMagicBusTest {
     }
 
     @Test
-    fun `should receive earlier subscribers first`() {
+    fun `should receive mailboxes for same type in subscription order`() {
         val delivery = AtomicInteger()
-        val first = AtomicInteger()
-        val second = AtomicInteger()
-        val third = AtomicInteger()
-        val fourth = AtomicInteger()
-        trackingMailbox<RightType>(delivery, first).subscribeTo(bus)
-        trackingMailbox<RightType>(delivery, second).subscribeTo(bus)
-        trackingMailbox<RightType>(delivery, third).subscribeTo(bus)
-        trackingMailbox<RightType>(delivery, fourth).subscribeTo(bus)
+        val firstMailbox =
+            orderedMailbox<RightType>(delivery).subscribeTo(bus)
+        val secondMailbox =
+            orderedMailbox<RightType>(delivery).subscribeTo(bus)
 
         bus.post(RightType())
 
-        assertThat(first.get()).isEqualTo(0)
-        assertThat(second.get()).isEqualTo(1)
-        assertThat(third.get()).isEqualTo(2)
-        assertThat(fourth.get()).isEqualTo(3)
+        assertThat(firstMailbox.order).isEqualTo(0)
+        assertThat(secondMailbox.order).isEqualTo(1)
         assertOn(noMailbox<Any>())
             .noneReturned()
             .noneFailed()
@@ -202,21 +196,21 @@ internal class SimpleMagicBusTest {
     @Test
     fun `should receive parent types first`() {
         val delivery = AtomicInteger()
-        val farRight = AtomicInteger()
-        val right = AtomicInteger()
-        val base = AtomicInteger()
-        val anythingElse = AtomicInteger()
-        trackingMailbox<RightType>(delivery, right).subscribeTo(bus)
-        trackingMailbox<FarRightType>(delivery, farRight).subscribeTo(bus)
-        trackingMailbox<Any>(delivery, anythingElse).subscribeTo(bus)
-        trackingMailbox<BaseType>(delivery, base).subscribeTo(bus)
+        val rightMailbox =
+            orderedMailbox<RightType>(delivery).subscribeTo(bus)
+        val farRightMailbox =
+            orderedMailbox<FarRightType>(delivery).subscribeTo(bus)
+        val allMailbox =
+            orderedMailbox<Any>(delivery).subscribeTo(bus)
+        val baseMailbox =
+            orderedMailbox<BaseType>(delivery).subscribeTo(bus)
 
         bus.post(FarRightType())
 
-        assertThat(anythingElse.get()).isEqualTo(0)
-        assertThat(base.get()).isEqualTo(1)
-        assertThat(right.get()).isEqualTo(2)
-        assertThat(farRight.get()).isEqualTo(3)
+        assertThat(allMailbox.order).isEqualTo(0)
+        assertThat(baseMailbox.order).isEqualTo(1)
+        assertThat(rightMailbox.order).isEqualTo(2)
+        assertThat(farRightMailbox.order).isEqualTo(3)
         assertOn(noMailbox<Any>())
             .noneReturned()
             .noneFailed()
@@ -389,10 +383,19 @@ internal class SimpleMagicBusTest {
 }
 
 private fun <T> noMailbox() = emptyList<T>()
-private fun <T> trackingMailbox(
-    order: AtomicInteger,
-    record: AtomicInteger
-): Mailbox<T> = { record.set(order.getAndIncrement()) }
+
+private data class OrderedMailbox<T>(
+    private val masterOrder: AtomicInteger,
+    private val myOrder: AtomicInteger = AtomicInteger()
+) : Mailbox<T> {
+    val order: Int get() = myOrder.get()
+
+    override fun invoke(message: T) =
+        myOrder.set(masterOrder.getAndIncrement())
+}
+
+private fun <T> orderedMailbox(order: AtomicInteger) =
+    OrderedMailbox<T>(order)
 
 private fun <T : Any> failWith(reason: () -> Throwable): Mailbox<T> =
     { throw reason() }
