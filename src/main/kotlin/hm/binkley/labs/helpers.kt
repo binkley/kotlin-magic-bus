@@ -32,7 +32,7 @@ inline fun <reified T : Any, M : Mailbox<T>> M.unsubscribeFrom(bus: MagicBus): M
 }
 
 /** Creates a mailbox wrapping [receive], and a `toString` of [name]. */
-fun <T> mailbox(name: String, receive: Mailbox<T>) = object : Mailbox<T> {
+fun <T> namedMailbox(name: String, receive: Mailbox<T>) = object : Mailbox<T> {
     override fun invoke(message: T) = receive(message)
     override fun toString() = name
 }
@@ -51,4 +51,4 @@ fun <T> mailbox(name: String, receive: Mailbox<T>) = object : Mailbox<T> {
  * pattern implementations.
  */
 inline fun <reified T : Any> discard(): Mailbox<T> =
-    mailbox("DISCARD-MAILBOX") { }
+    namedMailbox("DISCARD-MAILBOX") { }

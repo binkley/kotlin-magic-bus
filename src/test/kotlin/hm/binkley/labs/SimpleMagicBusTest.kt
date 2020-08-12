@@ -12,10 +12,10 @@ internal class SimpleMagicBusTest {
     private val delivered = mutableMapOf<Mailbox<*>, MutableList<Any>>()
 
     private val bus = SimpleMagicBus().apply {
-        mailbox<ReturnedMessage<Any>>("TEST-DEAD-LETTERBOX") {
+        namedMailbox<ReturnedMessage<Any>>("TEST-DEAD-LETTERBOX") {
             returned += it
         }.subscribeTo(this)
-        mailbox<FailedMessage<Any>>("TEST-FAILED-LETTERBOX") {
+        namedMailbox<FailedMessage<Any>>("TEST-FAILED-LETTERBOX") {
             failed += it
         }.subscribeTo(this)
     }
@@ -339,7 +339,7 @@ internal class SimpleMagicBusTest {
     @Test
     fun `should have named mailboxes`() {
         val name = "BOB'S YER UNKEL"
-        val mailbox = mailbox<RightType>(name) {}
+        val mailbox = namedMailbox<RightType>(name) {}
 
         assertThat(mailbox.toString()).isEqualTo(name)
     }
