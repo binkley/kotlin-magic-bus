@@ -23,7 +23,7 @@ internal class SimpleMagicBusTest {
     @Test
     fun `should receive correct type`() {
         val mailbox = testMailbox<RightType>()
-        bus.subscribe(mailbox)
+        mailbox.subscribeTo(bus)
         val message = RightType()
 
         bus.post(message)
@@ -36,10 +36,8 @@ internal class SimpleMagicBusTest {
 
     @Test
     fun `should deliver correctly to disparate subscribers`() {
-        val mailboxForDelivery = testMailbox<RightType>()
-        bus.subscribe(mailboxForDelivery)
-        val mailboxForNoDelivery = testMailbox<LeftType>()
-        bus.subscribe(mailboxForNoDelivery)
+        val mailboxForDelivery = testMailbox<RightType>().subscribeTo(bus)
+        val mailboxForNoDelivery = testMailbox<LeftType>().subscribeTo(bus)
 
         assertThat(bus.subscribers<RightType>().toList())
             .isEqualTo(listOf(mailboxForDelivery))
@@ -60,8 +58,7 @@ internal class SimpleMagicBusTest {
 
     @Test
     fun `should not receive wrong type`() {
-        val mailbox = testMailbox<LeftType>()
-        bus.subscribe(mailbox)
+        val mailbox = testMailbox<LeftType>().subscribeTo(bus)
         val message = RightType()
 
         bus.post(message)
@@ -74,8 +71,7 @@ internal class SimpleMagicBusTest {
 
     @Test
     fun `should receive subtypes`() {
-        val mailbox = testMailbox<BaseType>()
-        bus.subscribe(mailbox)
+        val mailbox = testMailbox<BaseType>().subscribeTo(bus)
         val message = RightType()
 
         bus.post(message)
@@ -157,8 +153,7 @@ internal class SimpleMagicBusTest {
         val reason = Exception()
         val badMailbox: Mailbox<RightType> = failWith { reason }
         bus.subscribe(badMailbox)
-        val allMailbox = testMailbox<Any>()
-        bus.subscribe(allMailbox)
+        val allMailbox = testMailbox<Any>().subscribeTo(bus)
 
         val message = RightType()
         val failure = with(badMailbox, message, reason)
@@ -190,10 +185,10 @@ internal class SimpleMagicBusTest {
         val second = AtomicInteger()
         val third = AtomicInteger()
         val fourth = AtomicInteger()
-        bus.subscribe(record<RightType>(delivery, first))
-        bus.subscribe(record<RightType>(delivery, second))
-        bus.subscribe(record<RightType>(delivery, third))
-        bus.subscribe(record<RightType>(delivery, fourth))
+        record<RightType>(delivery, first).subscribeTo(bus)
+        record<RightType>(delivery, second).subscribeTo(bus)
+        record<RightType>(delivery, third).subscribeTo(bus)
+        record<RightType>(delivery, fourth).subscribeTo(bus)
 
         bus.post(RightType())
 
@@ -213,10 +208,10 @@ internal class SimpleMagicBusTest {
         val right = AtomicInteger()
         val base = AtomicInteger()
         val anythingElse = AtomicInteger()
-        bus.subscribe(record<RightType>(delivery, right))
-        bus.subscribe(record<FarRightType>(delivery, farRight))
-        bus.subscribe(record<Any>(delivery, anythingElse))
-        bus.subscribe(record<BaseType>(delivery, base))
+        record<RightType>(delivery, right).subscribeTo(bus)
+        record<FarRightType>(delivery, farRight).subscribeTo(bus)
+        record<Any>(delivery, anythingElse).subscribeTo(bus)
+        record<BaseType>(delivery, base).subscribeTo(bus)
 
         bus.post(FarRightType())
 
@@ -231,20 +226,17 @@ internal class SimpleMagicBusTest {
 
     @Test
     fun `should unsubscribe exact type`() {
-        val mailbox = discard<LeftType>()
-        bus.subscribe(mailbox)
+        val mailbox = discard<LeftType>().subscribeTo(bus)
 
-        bus.unsubscribe(mailbox)
+        mailbox.unsubscribeFrom(bus)
 
         assertThat(bus.subscribers<LeftType>()).isEmpty()
     }
 
     @Test
     fun `should unsubscribe exact mailbox`() {
-        val mailboxForDelivery = discard<RightType>()
-        bus.subscribe(mailboxForDelivery)
-        val mailboxForNoDelivery = discard<RightType>()
-        bus.subscribe(mailboxForNoDelivery)
+        val mailboxForDelivery = discard<RightType>().subscribeTo(bus)
+        val mailboxForNoDelivery = discard<RightType>().subscribeTo(bus)
 
         mailboxForNoDelivery.unsubscribeFrom(bus)
 
@@ -259,19 +251,17 @@ internal class SimpleMagicBusTest {
         val mailbox = discard<RightType>()
 
         assertThrows<NoSuchElementException> {
-            bus.unsubscribe(mailbox)
+            mailbox.unsubscribeFrom(bus)
         }
     }
 
     @Test
     fun `should fail to unsubscribe exact mailbox regardless of other mailboxes`() {
-        val mailboxSubscribed = discard<RightType>()
+        discard<RightType>().subscribeTo(bus)
         val mailboxNotSubscribed = discard<RightType>()
 
-        bus.subscribe(mailboxSubscribed)
-
         assertThrows<NoSuchElementException> {
-            bus.unsubscribe(mailboxNotSubscribed)
+            mailboxNotSubscribed.unsubscribeFrom(bus)
         }
     }
 
@@ -279,10 +269,8 @@ internal class SimpleMagicBusTest {
     fun `should provide subscribers for message type in base-up order`() {
         // Subscription in derived-base order to show that the subscriber
         // list is in base-derived order
-        val mailboxRight = testMailbox<RightType>()
-        bus.subscribe(mailboxRight)
-        val mailboxBase = testMailbox<BaseType>()
-        bus.subscribe(mailboxBase)
+        val mailboxRight = testMailbox<RightType>().subscribeTo(bus)
+        val mailboxBase = testMailbox<BaseType>().subscribeTo(bus)
 
         assertThat(bus.subscribers<RightType>().toList())
             .isEqualTo(listOf(mailboxBase, mailboxRight))
@@ -291,9 +279,7 @@ internal class SimpleMagicBusTest {
     @Test
     fun `should provide subscribers for message type in subscribed-order`() {
         val mailboxes = (1..10).map {
-            val mailbox = testMailbox<RightType>()
-            bus.subscribe(mailbox)
-            mailbox
+            testMailbox<RightType>().subscribeTo(bus)
         }
 
         // It is unusual to test the test code, but the production test relies
@@ -341,7 +327,7 @@ internal class SimpleMagicBusTest {
     @Test
     fun `should discard in the discard letter box`() {
         // TODO: A less lame test
-        bus.subscribe(discard<RightType>())
+        discard<RightType>().subscribeTo(bus)
 
         bus.post(RightType())
 
@@ -352,7 +338,7 @@ internal class SimpleMagicBusTest {
     fun `should provide accurate details on failed posts`() {
         val reason = Exception()
         val mailbox: Mailbox<RightType> = failWith { reason }
-        bus.subscribe(mailbox)
+        mailbox.subscribeTo(bus)
         val message = RightType()
 
         bus.post(message)
