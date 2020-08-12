@@ -24,14 +24,21 @@ interface MagicBus {
 }
 
 /**
- * Subscribes without caller providing a type object.
+ * Subscribes [mailbox] to [this] bus without caller providing a type object.
  *
  * @see MagicBus.subscribe
+ * @see subscribeTo
  */
 inline fun <reified T : Any> MagicBus.subscribe(
     noinline mailbox: Mailbox<in T>,
 ) =
     subscribe(T::class.java, mailbox)
+
+/** An alternative, fluent syntax to [subscribe]. */
+inline fun <reified T : Any> Mailbox<T>.subscribeTo(bus: MagicBus): Mailbox<T> {
+    bus.subscribe(this)
+    return this
+}
 
 /**
  * Unsubscribes without caller providing a type object.
@@ -42,6 +49,18 @@ inline fun <reified T : Any> MagicBus.unsubscribe(
     noinline mailbox: Mailbox<in T>,
 ) =
     unsubscribe(T::class.java, mailbox)
+
+/** An alternative, fluent syntax to [unsubscribe]. */
+inline fun <reified T : Any> Mailbox<T>.unsubscribeFrom(bus: MagicBus): Mailbox<T> {
+    bus.unsubscribe(this)
+    return this
+}
+
+/** Creates a mailbox wrapping [receive], and a `toString` of [name]. */
+fun <T> mailbox(name: String, receive: Mailbox<T>) = object : Mailbox<T> {
+    override fun invoke(message: T) = receive(message)
+    override fun toString() = name
+}
 
 /**
  * Creates a mailbox which throws away messages of [messageType].  Use case:
@@ -55,20 +74,12 @@ inline fun <reified T : Any> MagicBus.unsubscribe(
  * which ignores all messages that have no mailboxes.  However, this is an
  * _anti-pattern_, as it covers up bugs in typing hierarchies or messaging
  * pattern implementations.
- *
- * @see discard
- */
-@Suppress("UnusedPrivateMember")
-class DiscardMailbox<T : Any>(private val messageType: Class<T>) :
-    Mailbox<T> {
-    override operator fun invoke(message: T) = Unit
-    override fun toString() = "DISCARD-MAILBOX"
-}
-
-/**
- * Creates a discard mailbox without providing a type object.
- *
- * @see DiscardMailbox
  */
 inline fun <reified T : Any> discard(): Mailbox<T> =
-    DiscardMailbox(T::class.java)
+    mailbox("DISCARD-MAILBOX") { }
+
+// data class InvalidMailbox(
+//    val bus: MagicBus,
+//    val mailbox: Mailbox<*>,
+//    val busMesage: Any
+// ) : Exception("BUG: Mailbox $mailbox reposts $busMesage")
