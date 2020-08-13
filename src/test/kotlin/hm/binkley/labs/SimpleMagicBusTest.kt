@@ -337,7 +337,7 @@ internal class SimpleMagicBusTest {
     }
 
     private fun <T> assertOn(delivered: List<T>) =
-        AssertDelivery(returned, failed, delivered)
+        AssertDelivery(delivered, returned, failed)
 
     private fun <T> assertOn(delivered: TestMailbox<T>) =
         assertOn(delivered.messages)
@@ -392,9 +392,9 @@ private open class RightType : BaseType()
 private class FarRightType : RightType()
 
 private class AssertDelivery<T>(
-    private val returned: List<ReturnedMessage<*>>,
-    private val failed: List<FailedMessage<*>>,
     private val delivered: List<T>,
+    private val returned: List<ReturnedMessage<*>>,
+    private val failed: List<FailedMessage<*>>
 ) {
     fun noMessageDelivered() = apply {
         assertThat(delivered).isEmpty()
