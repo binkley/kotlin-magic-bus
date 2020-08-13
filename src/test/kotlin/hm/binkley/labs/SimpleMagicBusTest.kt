@@ -108,9 +108,9 @@ internal class SimpleMagicBusTest {
 
     @Test
     fun `should post failed messages separately for each mailbox`() {
-        val failureA = Exception()
+        val failureA = Exception("A")
         val brokenMailboxA = failWith<LeftType> { failureA }.subscribeTo(bus)
-        val failureB = Exception()
+        val failureB = Exception("B")
         val brokenMailboxB = failWith<LeftType> { failureB }.subscribeTo(bus)
         val message = LeftType()
 
