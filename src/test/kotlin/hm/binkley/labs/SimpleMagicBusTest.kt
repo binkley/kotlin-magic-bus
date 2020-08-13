@@ -107,11 +107,11 @@ internal class SimpleMagicBusTest {
     }
 
     @Test
-    fun `should save failed posts`() {
-        val reason1 = Exception()
-        val brokenMailbox1 = failWith<LeftType> { reason1 }.subscribeTo(bus)
-        val reason2 = Exception()
-        val brokenMailbox2 = failWith<LeftType> { reason2 }.subscribeTo(bus)
+    fun `should post failed messages separately for each mailbox`() {
+        val failureA = Exception()
+        val brokenMailboxA = failWith<LeftType> { failureA }.subscribeTo(bus)
+        val failureB = Exception()
+        val brokenMailboxB = failWith<LeftType> { failureB }.subscribeTo(bus)
         val message = LeftType()
 
         bus.post(message)
@@ -120,46 +120,46 @@ internal class SimpleMagicBusTest {
             .noneDeliveredToTestClass()
             .noneReturnedToTestClass()
             .failedInOrder(
-                with(brokenMailbox1, message, reason1),
-                with(brokenMailbox2, message, reason2)
+                with(brokenMailboxA, message, failureA),
+                with(brokenMailboxB, message, failureB)
             )
     }
 
     @Test
     fun `should bubble out runtime exceptions`() {
-        val reason = RuntimeException()
+        val failure = RuntimeException()
         assertThatThrownBy {
-            failWith<LeftType> { reason }.subscribeTo(bus)
+            failWith<LeftType> { failure }.subscribeTo(bus)
 
             bus.post(LeftType())
-        }.isSameAs(reason)
+        }.isSameAs(failure)
     }
 
     @Test
     fun `should bubble out JVM errors (Error vs Exception)`() {
-        val reason = CoderMalfunctionError(Exception())
+        val failure = CoderMalfunctionError(Exception())
         assertThatThrownBy {
-            failWith<LeftType> { reason }.subscribeTo(bus)
+            failWith<LeftType> { failure }.subscribeTo(bus)
 
             bus.post(LeftType())
-        }.isSameAs(reason)
+        }.isSameAs(failure)
     }
 
     @Test
     fun `should post other exceptions and receive them`() {
-        val reason = Exception()
-        val badMailbox = failWith<RightType> { reason }.subscribeTo(bus)
+        val failure = Exception()
+        val badMailbox = failWith<RightType> { failure }.subscribeTo(bus)
         val allMailbox = testMailbox<Any>().subscribeTo(bus)
 
         val message = RightType()
-        val failure = with(badMailbox, message, reason)
+        val failedMessage = with(badMailbox, message, failure)
 
         bus.post(message)
 
         assertOn(allMailbox)
             .noneReturnedToTestClass()
-            .failedInOrder(failure)
-            .deliveredInOrder(message, failure)
+            .failedInOrder(failedMessage)
+            .deliveredInOrder(message, failedMessage)
     }
 
     @Test
@@ -318,14 +318,14 @@ internal class SimpleMagicBusTest {
 
     @Test
     fun `should provide accurate details on failed posts`() {
-        val reason = Exception()
-        val mailbox = failWith<RightType> { reason }.subscribeTo(bus)
+        val failure = Exception()
+        val mailbox = failWith<RightType> { failure }.subscribeTo(bus)
         val message = RightType()
 
         bus.post(message)
 
         assertThat(failed)
-            .isEqualTo(listOf(FailedMessage(bus, mailbox, message, reason)))
+            .isEqualTo(listOf(FailedMessage(bus, mailbox, message, failure)))
     }
 
     @Test
@@ -383,8 +383,8 @@ private data class OrderedMailbox<T>(
 private fun <T> orderedMailbox(order: AtomicInteger) =
     OrderedMailbox<T>(order)
 
-private fun <T : Any> failWith(reason: () -> Throwable): Mailbox<T> =
-    { throw reason() }
+private fun <T : Any> failWith(failure: () -> Throwable): Mailbox<T> =
+    { throw failure() }
 
 private abstract class BaseType
 private class LeftType : BaseType()
