@@ -8,11 +8,14 @@ import java.nio.charset.CoderMalfunctionError
 import java.util.concurrent.atomic.AtomicInteger
 
 internal class SimpleMagicBusTest {
-    private val returned = mutableListOf<ReturnedMessage<*>>()
-    private val failed = mutableListOf<FailedMessage<*>>()
+    // TODO: Why is the key `<*>` but the value is `<Any>`?
     private val delivered = mutableMapOf<Mailbox<*>, MutableList<Any>>()
+    // TODO: Why returned `<Any>` but failed is `<*>`?
+    private val returned = mutableListOf<ReturnedMessage<Any>>()
+    private val failed = mutableListOf<FailedMessage<*>>()
 
-    // Do *not* use `DEFAULT_BUS`.  The test needs a new instance each run.
+    // Do *not* use `DEFAULT_BUS`.  The test needs a new instance each run,
+    // and `DEFAULT_BUS` is a global static
     private val bus = SimpleMagicBus().also { bus ->
         namedMailbox<ReturnedMessage<Any>>("TEST-DEAD-LETTERBOX") {
             returned += it
