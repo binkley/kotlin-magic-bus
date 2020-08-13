@@ -4,6 +4,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.nio.charset.CoderMalfunctionError
 import java.util.concurrent.atomic.AtomicInteger
 
 internal class SimpleMagicBusTest {
@@ -136,7 +137,7 @@ internal class SimpleMagicBusTest {
 
     @Test
     fun `should bubble out JVM errors (Error vs Exception)`() {
-        val reason = Error()
+        val reason = CoderMalfunctionError(Exception())
         assertThatThrownBy {
             failWith<LeftType> { reason }.subscribeTo(bus)
 
