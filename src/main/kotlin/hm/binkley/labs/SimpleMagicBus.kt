@@ -96,6 +96,8 @@ class SimpleMagicBus : MagicBus {
         try {
             mailbox(message)
         } catch (e: RuntimeException) {
+            // NB -- `RuntimeException` is a subtype of `Exception`
+            // No need to handle `Error`: it is not a subtype
             throw e
         } catch (e: Exception) {
             post(FailedMessage(this, mailbox, message, e))
