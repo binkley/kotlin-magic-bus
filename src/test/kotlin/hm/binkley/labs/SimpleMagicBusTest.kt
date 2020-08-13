@@ -40,8 +40,8 @@ internal class SimpleMagicBusTest {
         val mailboxForDelivery = testMailbox<RightType>().subscribeTo(bus)
         val mailboxForNoDelivery = testMailbox<LeftType>().subscribeTo(bus)
 
-        assertThat(bus.subscribers<RightType>().toList())
-            .isEqualTo(listOf(mailboxForDelivery))
+        assertThat(bus.subscribers<RightType>())
+            .containsOnly(mailboxForDelivery)
 
         val message = RightType()
 
@@ -221,7 +221,7 @@ internal class SimpleMagicBusTest {
         mailboxForNoDelivery.unsubscribeFrom(bus)
 
         assertThat(bus.subscribers<RightType>())
-            .isEqualTo(listOf(mailboxForDelivery))
+            .containsOnly(mailboxForDelivery)
 
         println(bus.subscribers<RightType>())
     }
@@ -252,8 +252,8 @@ internal class SimpleMagicBusTest {
         val mailboxRight = testMailbox<RightType>().subscribeTo(bus)
         val mailboxBase = testMailbox<BaseType>().subscribeTo(bus)
 
-        assertThat(bus.subscribers<RightType>().toList())
-            .isEqualTo(listOf(mailboxBase, mailboxRight))
+        assertThat(bus.subscribers<RightType>())
+            .containsOnly(mailboxBase, mailboxRight)
     }
 
     @Test
@@ -275,7 +275,7 @@ internal class SimpleMagicBusTest {
 
         bus.post(message)
 
-        assertThat(returned).isEqualTo(listOf(ReturnedMessage(bus, message)))
+        assertThat(returned).containsOnly(ReturnedMessage(bus, message))
     }
 
     @Test
@@ -325,7 +325,7 @@ internal class SimpleMagicBusTest {
         bus.post(message)
 
         assertThat(failed)
-            .isEqualTo(listOf(FailedMessage(bus, mailbox, message, failure)))
+            .containsOnly(FailedMessage(bus, mailbox, message, failure))
     }
 
     @Test
@@ -336,11 +336,11 @@ internal class SimpleMagicBusTest {
         assertThat(mailbox.toString()).isEqualTo(name)
     }
 
-    private fun <T> assertOn(delivered: List<T>) =
-        AssertDelivery(delivered, returned, failed)
+    private fun <T> assertOn(vararg delivered: TestMailbox<T>) =
+        assertOn(delivered.asList())
 
-    private fun <T> assertOn(delivered: TestMailbox<T>) =
-        assertOn(delivered.messages)
+    private fun <T> assertOn(delivered: List<TestMailbox<T>>) =
+        AssertDelivery(delivered.flatMap { it.messages }, returned, failed)
 
     private fun with(message: Any) = ReturnedMessage(bus, message)
     private fun <T : Any> with(
@@ -366,9 +366,9 @@ internal class SimpleMagicBusTest {
 
         override fun toString() = "TEST-MAILBOX<${messageType.simpleName}>"
     }
-}
 
-private fun allMailboxes() = emptyList<Mailbox<Any>>()
+    private fun allMailboxes() = listOf<TestMailbox<Any>>()
+}
 
 private data class OrderedMailbox<T>(
     private val masterOrder: AtomicInteger,
