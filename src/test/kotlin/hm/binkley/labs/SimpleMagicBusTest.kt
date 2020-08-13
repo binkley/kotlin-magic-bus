@@ -31,8 +31,8 @@ internal class SimpleMagicBusTest {
 
         assertOn(mailbox)
             .deliveredInOrder(message)
-            .noneReturnedToTestClass()
-            .noneFailedForTestClass()
+            .noMessageReturned()
+            .noFailingMailbox()
     }
 
     @Test
@@ -49,12 +49,12 @@ internal class SimpleMagicBusTest {
 
         assertOn(mailboxForDelivery)
             .deliveredInOrder(message)
-            .noneReturnedToTestClass()
-            .noneFailedForTestClass()
+            .noMessageReturned()
+            .noFailingMailbox()
         assertOn(mailboxForNoDelivery)
-            .noneDeliveredToTestClass()
-            .noneReturnedToTestClass()
-            .noneFailedForTestClass()
+            .noMessageDelivered()
+            .noMessageReturned()
+            .noFailingMailbox()
     }
 
     @Test
@@ -65,9 +65,9 @@ internal class SimpleMagicBusTest {
         bus.post(message)
 
         assertOn(mailbox)
-            .noneDeliveredToTestClass()
+            .noMessageDelivered()
             .returnedInOrder(with(message))
-            .noneFailedForTestClass()
+            .noFailingMailbox()
     }
 
     @Test
@@ -79,8 +79,8 @@ internal class SimpleMagicBusTest {
 
         assertOn(mailbox)
             .deliveredInOrder(message)
-            .noneReturnedToTestClass()
-            .noneFailedForTestClass()
+            .noMessageReturned()
+            .noFailingMailbox()
     }
 
     @Test
@@ -90,9 +90,9 @@ internal class SimpleMagicBusTest {
         bus.post(message)
 
         assertOn(allMailboxes())
-            .noneDeliveredToTestClass()
+            .noMessageDelivered()
             .returnedInOrder(with(message))
-            .noneFailedForTestClass()
+            .noFailingMailbox()
     }
 
     @Test
@@ -117,8 +117,8 @@ internal class SimpleMagicBusTest {
         bus.post(message)
 
         assertOn(allMailboxes())
-            .noneDeliveredToTestClass()
-            .noneReturnedToTestClass()
+            .noMessageDelivered()
+            .noMessageReturned()
             .failedInOrder(
                 with(brokenMailboxA, message, failureA),
                 with(brokenMailboxB, message, failureB)
@@ -157,9 +157,9 @@ internal class SimpleMagicBusTest {
         bus.post(message)
 
         assertOn(allMailbox)
-            .noneReturnedToTestClass()
-            .failedInOrder(failedMessage)
+            .noMessageReturned()
             .deliveredInOrder(message, failedMessage)
+            .failedInOrder(failedMessage)
     }
 
     @Test
@@ -311,9 +311,9 @@ internal class SimpleMagicBusTest {
         bus.post(RightType())
 
         assertOn(allMailboxes())
-            .noneDeliveredToTestClass()
-            .noneReturnedToTestClass()
-            .noneFailedForTestClass()
+            .noMessageDelivered()
+            .noMessageReturned()
+            .noFailingMailbox()
     }
 
     @Test
@@ -396,7 +396,7 @@ private class AssertDelivery<T>(
     private val failed: List<FailedMessage<*>>,
     private val delivered: List<T>,
 ) {
-    fun noneDeliveredToTestClass() = apply {
+    fun noMessageDelivered() = apply {
         assertThat(delivered).isEmpty()
     }
 
@@ -404,7 +404,7 @@ private class AssertDelivery<T>(
         assertThat(this.delivered).isEqualTo(delivered.toList())
     }
 
-    fun noneReturnedToTestClass() = apply {
+    fun noMessageReturned() = apply {
         assertThat(returned).isEmpty()
     }
 
@@ -412,7 +412,7 @@ private class AssertDelivery<T>(
         assertThat(this.returned).isEqualTo(returned.toList())
     }
 
-    fun noneFailedForTestClass() = apply {
+    fun noFailingMailbox() = apply {
         assertThat(failed).isEmpty()
     }
 
