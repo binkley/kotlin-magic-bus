@@ -74,8 +74,20 @@ class SimpleMagicBus : MagicBus {
         val mailboxes = subscribers(message.javaClass)
         if (mailboxes.isEmpty()) return post(ReturnedMessage(this, message))
 
-        mailboxes.forEach { mailbox -> receive(mailbox, message) }
+        mailboxes.forEach { it.receive(message) }
     }
+
+    @Suppress("TooGenericExceptionCaught", "RethrowCaughtException")
+    private fun <T : Any> Mailbox<T>.receive(message: T) =
+        try {
+            this(message)
+        } catch (e: RuntimeException) {
+            // NB -- `RuntimeException` is a subtype of `Exception`
+            // No need to handle `Error`: it is not a subtype
+            throw e
+        } catch (e: Exception) {
+            post(FailedMessage(this@SimpleMagicBus, this, message, e))
+        }
 
     /**
      * Helper to avoid caller providing a class token.
@@ -90,18 +102,6 @@ class SimpleMagicBus : MagicBus {
         .filter { it.key.isAssignableFrom(messageType) }
         .sortedWith { a, b -> parentFirstAndFifoOrdering(a.key, b.key) }
         .flatMap { it.value } as List<Mailbox<T>>
-
-    @Suppress("TooGenericExceptionCaught", "RethrowCaughtException")
-    private fun <T : Any> receive(mailbox: Mailbox<T>, message: T) =
-        try {
-            mailbox(message)
-        } catch (e: RuntimeException) {
-            // NB -- `RuntimeException` is a subtype of `Exception`
-            // No need to handle `Error`: it is not a subtype
-            throw e
-        } catch (e: Exception) {
-            post(FailedMessage(this, mailbox, message, e))
-        }
 
     private fun installFallbackMailboxes() {
         // Default do nothings: avoid stack overflow from reposting
