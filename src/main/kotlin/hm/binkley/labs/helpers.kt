@@ -45,4 +45,4 @@ fun <T> namedMailbox(name: String, receive: Mailbox<T>) =
  * for messages of type [T], use a discard mailbox.
  */
 inline fun <reified T : Any> discard(): Mailbox<T> =
-    namedMailbox("DISCARD-MAILBOX<${T::class.java.name}>") { }
+    namedMailbox("DISCARD-MAILBOX<${T::class.java.simpleName}>") { }
