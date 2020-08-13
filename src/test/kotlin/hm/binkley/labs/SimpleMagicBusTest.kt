@@ -266,7 +266,7 @@ internal class SimpleMagicBusTest {
         // critically on test mailbox instances being non-equal
         assertThat(testMailbox<RightType>())
             .isNotEqualTo(testMailbox<RightType>())
-        assertThat(bus.subscribers<RightType>().toList()).isEqualTo(mailboxes)
+        assertThat(bus.subscribers<RightType>()).isEqualTo(mailboxes)
     }
 
     @Test
@@ -282,7 +282,7 @@ internal class SimpleMagicBusTest {
     fun `should have default rejected letter box`() {
         val defaultMailboxCountForReturnedAndFailedMessages = 2
 
-        assertThat(bus.subscribers<FailedMessage<Any>>().toList())
+        assertThat(bus.subscribers<FailedMessage<Any>>())
             .hasSize(defaultMailboxCountForReturnedAndFailedMessages)
     }
 
