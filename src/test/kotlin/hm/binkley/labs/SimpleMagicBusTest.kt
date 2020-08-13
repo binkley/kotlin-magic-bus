@@ -132,8 +132,9 @@ internal class SimpleMagicBusTest {
     @Test
     fun `should bubble out runtime exceptions`() {
         val failure = RuntimeException()
+
         assertThatThrownBy {
-            failWith<LeftType> { failure }.subscribeTo(bus)
+            bus += failWith<LeftType> { failure }
 
             bus.post(LeftType())
         }.isSameAs(failure)
@@ -143,7 +144,7 @@ internal class SimpleMagicBusTest {
     fun `should bubble out JVM errors (Error vs Exception)`() {
         val failure = CoderMalfunctionError(Exception())
         assertThatThrownBy {
-            failWith<LeftType> { failure }.subscribeTo(bus)
+            bus += failWith<LeftType> { failure }
 
             bus.post(LeftType())
         }.isSameAs(failure)
@@ -168,8 +169,8 @@ internal class SimpleMagicBusTest {
 
     @Test
     fun `should be fatal for a failure mailbox to itself fail`() {
-        failWith<RightType> { Exception() }.subscribeTo(bus)
-        failWith<FailedMessage<Any>> { Exception() }.subscribeTo(bus)
+        bus += failWith<RightType> { Exception() }
+        bus += failWith<FailedMessage<Any>> { Exception() }
 
         assertThrows<StackOverflowError> {
             bus.post(RightType())
@@ -179,13 +180,13 @@ internal class SimpleMagicBusTest {
     @Test
     fun `should receive mailboxes for same type in subscription order`() {
         val ordering = AtomicInteger()
-        val mailbox1 = orderedMailbox<RightType>(ordering).subscribeTo(bus)
-        val mailbox2 = orderedMailbox<RightType>(ordering).subscribeTo(bus)
+        val mailboxA = orderedMailbox<RightType>(ordering).subscribeTo(bus)
+        val mailboxB = orderedMailbox<RightType>(ordering).subscribeTo(bus)
 
         bus.post(RightType())
 
-        assertThat(mailbox1.order).isEqualTo(0)
-        assertThat(mailbox2.order).isEqualTo(1)
+        assertThat(mailboxA.order).isEqualTo(0)
+        assertThat(mailboxB.order).isEqualTo(1)
     }
 
     @Test
@@ -235,17 +236,17 @@ internal class SimpleMagicBusTest {
         val mailbox = discard<RightType>()
 
         assertThrows<NoSuchElementException> {
-            mailbox.unsubscribeFrom(bus)
+            bus -= mailbox
         }
     }
 
     @Test
     fun `should fail to unsubscribe exact mailbox regardless of other mailboxes`() {
-        discard<RightType>().subscribeTo(bus)
+        bus += discard<RightType>()
         val mailboxNotSubscribed = discard<RightType>()
 
         assertThrows<NoSuchElementException> {
-            mailboxNotSubscribed.unsubscribeFrom(bus)
+            bus -= mailboxNotSubscribed
         }
     }
 
@@ -263,6 +264,11 @@ internal class SimpleMagicBusTest {
     @Test
     fun `should provide subscribers for message type in subscribed-order`() {
         val mailboxes = (1..10).map {
+            // An interesting example of when the return type is needed:
+            // 1) Kotlin returns the final value of the lambda
+            // 2) `bus += mailbox` return Unit
+            // 3) `subscribeTo` returns the mailbox, fluent style
+            // 4) The test wants to compare mailboxes, so Unit is wrong
             testMailbox<RightType>().subscribeTo(bus)
         }
 
@@ -310,7 +316,7 @@ internal class SimpleMagicBusTest {
 
     @Test
     fun `should discard in the discard letter box`() {
-        discard<RightType>().subscribeTo(bus)
+        bus += discard<RightType>()
 
         bus.post(RightType())
 

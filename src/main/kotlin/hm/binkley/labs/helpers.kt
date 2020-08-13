@@ -14,7 +14,7 @@ inline fun <reified T : Any> MagicBus.subscribe(
 inline fun <reified T : Any, M : Mailbox<T>> M.subscribeTo(
     bus: MagicBus,
 ): M {
-    bus.subscribe(this)
+    bus += this
     return this
 }
 
@@ -34,9 +34,12 @@ inline fun <reified T : Any> MagicBus.unsubscribe(
 ) = unsubscribe(T::class.java, mailbox)
 
 /** An alternative, fluent syntax to [unsubscribe]. */
-inline fun <reified T : Any> Mailbox<T>.unsubscribeFrom(
+inline fun <reified T : Any, M : Mailbox<T>> M.unsubscribeFrom(
     bus: MagicBus,
-) = bus.unsubscribe(this)
+): M {
+    bus -= this
+    return this
+}
 
 /** A syntactic alternative to [unsubscribe]. */
 inline operator fun <reified T : Any, M : Mailbox<T>> MagicBus.minusAssign(
