@@ -38,7 +38,7 @@ package hm.binkley.labs
  */
 class SimpleMagicBus : MagicBus {
     private val subscriptions:
-        MutableMap<Class<Any>, MutableSet<Mailbox<Any>>> = mutableMapOf()
+        MutableMap<Class<*>, MutableSet<Mailbox<*>>> = mutableMapOf()
 
     init {
         installFallbackMailboxes()
@@ -48,18 +48,16 @@ class SimpleMagicBus : MagicBus {
         messageType: Class<T>,
         mailbox: Mailbox<in T>,
     ) {
-        @Suppress("UNCHECKED_CAST")
-        subscriptions.getOrPut(messageType as Class<Any>) {
+        subscriptions.getOrPut(messageType) {
             mutableSetOf()
-        } += mailbox as Mailbox<Any>
+        } += mailbox
     }
 
     override fun <T : Any> unsubscribe(
         messageType: Class<T>,
         mailbox: Mailbox<in T>,
     ) {
-        @Suppress("UNCHECKED_CAST")
-        val mailboxes = subscriptions.getOrElse(messageType as Class<Any>) {
+        val mailboxes = subscriptions.getOrElse(messageType) {
             throw NoSuchElementException()
         }
         // TODO: Kotlin's "remove" is inlined and includes a type cast which
