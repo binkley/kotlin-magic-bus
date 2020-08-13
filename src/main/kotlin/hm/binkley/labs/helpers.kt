@@ -18,6 +18,11 @@ inline fun <reified T : Any, M : Mailbox<T>> M.subscribeTo(
     return this
 }
 
+/** A syntactic alternative to [subscribe]. */
+inline operator fun <reified T : Any, M : Mailbox<T>> MagicBus.plusAssign(
+    mailbox: M
+) = subscribe(mailbox)
+
 /**
  * Unsubscribes without caller providing a type object.
  *
@@ -32,6 +37,11 @@ inline fun <reified T : Any> MagicBus.unsubscribe(
 inline fun <reified T : Any> Mailbox<T>.unsubscribeFrom(
     bus: MagicBus,
 ) = bus.unsubscribe(this)
+
+/** A syntactic alternative to [unsubscribe]. */
+inline operator fun <reified T : Any, M : Mailbox<T>> MagicBus.minusAssign(
+    mailbox: M
+) = unsubscribe(mailbox)
 
 /** Creates a mailbox wrapping [receive], and a [toString] of [name]. */
 fun <T> namedMailbox(name: String, receive: Mailbox<T>) =

@@ -10,6 +10,7 @@ import java.util.concurrent.atomic.AtomicInteger
 internal class SimpleMagicBusTest {
     // TODO: Why is the key `<*>` but the value is `<Any>`?
     private val delivered = mutableMapOf<Mailbox<*>, MutableList<Any>>()
+
     // TODO: Why returned `<Any>` but failed is `<*>`?
     private val returned = mutableListOf<ReturnedMessage<Any>>()
     private val failed = mutableListOf<FailedMessage<*>>()
@@ -17,12 +18,12 @@ internal class SimpleMagicBusTest {
     // Do *not* use `DEFAULT_BUS`.  The test needs a new instance each run,
     // and `DEFAULT_BUS` is a global static
     private val bus = SimpleMagicBus().also { bus ->
-        namedMailbox<ReturnedMessage<Any>>("TEST-DEAD-LETTERBOX") {
+        bus += namedMailbox<ReturnedMessage<Any>>("TEST-DEAD-LETTERBOX") {
             returned += it
-        }.subscribeTo(bus)
-        namedMailbox<FailedMessage<Any>>("TEST-FAILED-LETTERBOX") {
+        }
+        bus += namedMailbox<FailedMessage<Any>>("TEST-FAILED-LETTERBOX") {
             failed += it
-        }.subscribeTo(bus)
+        }
     }
 
     @Test
@@ -221,7 +222,7 @@ internal class SimpleMagicBusTest {
         val mailboxForDelivery = discard<RightType>().subscribeTo(bus)
         val mailboxForNoDelivery = discard<RightType>().subscribeTo(bus)
 
-        mailboxForNoDelivery.unsubscribeFrom(bus)
+        bus -= mailboxForNoDelivery
 
         assertThat(bus.subscribers<RightType>())
             .containsOnly(mailboxForDelivery)
