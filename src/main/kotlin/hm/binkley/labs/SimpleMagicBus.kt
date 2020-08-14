@@ -75,11 +75,11 @@ class SimpleMagicBus : MagicBus {
         val mailboxes = subscribers(message.javaClass)
         if (mailboxes.isEmpty()) return post(ReturnedMessage(this, message))
 
-        mailboxes.forEach { it.receive(message) }
+        mailboxes.forEach { it.post(message) }
     }
 
     @Suppress("TooGenericExceptionCaught", "RethrowCaughtException")
-    private fun <T : Any> Mailbox<in T>.receive(message: T) =
+    private fun <T : Any> Mailbox<in T>.post(message: T) =
         try {
             this(message)
         } catch (e: RuntimeException) {
