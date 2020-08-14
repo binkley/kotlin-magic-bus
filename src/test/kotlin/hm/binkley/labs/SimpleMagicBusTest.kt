@@ -27,6 +27,12 @@ internal class SimpleMagicBusTest {
     }
 
     @Test
+    fun `should have distinct named mailboxes`() {
+        assertThat(namedMailbox<RightType>("BOB") {})
+            .isNotEqualTo(namedMailbox<RightType>("BOB") {})
+    }
+
+    @Test
     fun `should receive correct type`() {
         val mailbox = testMailbox<RightType>().subscribeTo(bus)
         val message = RightType()
@@ -404,7 +410,7 @@ private class FarRightType : RightType()
 private class AssertDelivery<T>(
     private val delivered: List<T>,
     private val returned: List<ReturnedMessage<*>>,
-    private val failed: List<FailedMessage<*>>
+    private val failed: List<FailedMessage<*>>,
 ) {
     fun noMessageDelivered() = apply {
         assertThat(delivered).isEmpty()
