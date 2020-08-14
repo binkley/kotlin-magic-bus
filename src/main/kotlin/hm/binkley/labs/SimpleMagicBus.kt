@@ -90,13 +90,6 @@ class SimpleMagicBus : MagicBus {
             post(FailedMessage(this@SimpleMagicBus, this, message, e))
         }
 
-    /**
-     * Helper to avoid caller providing a class token.
-     *
-     * @see subscribers
-     */
-    inline fun <reified T> subscribers() = subscribers(T::class.java)
-
     /** Return the mailboxes which would receive message of [messageType]. */
     @Suppress("UNCHECKED_CAST")
     fun <T> subscribers(messageType: Class<T>) = subscriptions.entries
@@ -106,6 +99,13 @@ class SimpleMagicBus : MagicBus {
         //       ordering between unrelated classes
         .sortedWith { a, b -> parentFirstAndFifoOrdering(a.key, b.key) }
         .flatMap { it.value } as List<Mailbox<T>>
+
+    /**
+     * Helper to avoid caller providing a class token.
+     *
+     * @see subscribers
+     */
+    inline fun <reified T> subscribers() = subscribers(T::class.java)
 
     private fun installFallbackMailboxes() {
         // Default do nothings: avoid stack overflow from reposting
