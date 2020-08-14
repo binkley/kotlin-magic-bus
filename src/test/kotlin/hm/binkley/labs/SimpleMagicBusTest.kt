@@ -315,9 +315,8 @@ internal class SimpleMagicBusTest {
     fun `should deliver to first subscriber for failed messages before default`() {
         val subscribers = bus.subscribers<FailedMessage<Any>>()
 
-        assertThat(subscribers.first().toString()).isEqualTo(
-            "DEFAULT-REJECTED-LETTERBOX"
-        )
+        assertThat(subscribers.first().toString())
+            .isEqualTo("DEFAULT-FAILED-LETTERBOX")
     }
 
     @Test

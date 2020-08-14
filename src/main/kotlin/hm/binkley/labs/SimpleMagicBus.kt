@@ -105,14 +105,12 @@ class SimpleMagicBus : MagicBus {
 
     private fun installFallbackMailboxes() {
         // Default do nothings: avoid stack overflow from reposting
-        subscribe(object : Mailbox<ReturnedMessage<Any>> {
-            override fun invoke(message: ReturnedMessage<Any>) = Unit
-            override fun toString() = "DEFAULT-DEAD-LETTERBOX"
-        })
-        subscribe(object : Mailbox<FailedMessage<Any>> {
-            override fun invoke(message: FailedMessage<Any>) = Unit
-            override fun toString() = "DEFAULT-REJECTED-LETTERBOX"
-        })
+        subscribe(
+            namedMailbox<ReturnedMessage<*>>("DEFAULT-DEAD-LETTERBOX") {}
+        )
+        subscribe(
+            namedMailbox<FailedMessage<*>>("DEFAULT-FAILED-LETTERBOX") {}
+        )
     }
 }
 
