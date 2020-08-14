@@ -197,15 +197,18 @@ internal class SimpleMagicBusTest {
 
     @Test
     fun `should receive parent types before child types`() {
+        // FYI -- it is important that mailboxes subscribe *not* in class
+        // hierarchy order, so that the test can verify messages are received
+        // in the correct order nonetheless
         val ordering = AtomicInteger()
         val rightMailbox =
             orderedMailbox<RightType>(ordering).subscribeTo(bus)
         val farRightMailbox =
             orderedMailbox<FarRightType>(ordering).subscribeTo(bus)
-        val allMailbox =
-            orderedMailbox<Any>(ordering).subscribeTo(bus)
         val baseMailbox =
             orderedMailbox<BaseType>(ordering).subscribeTo(bus)
+        val allMailbox =
+            orderedMailbox<Any>(ordering).subscribeTo(bus)
 
         bus.post(FarRightType())
 
