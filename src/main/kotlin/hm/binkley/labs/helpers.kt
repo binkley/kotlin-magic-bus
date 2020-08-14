@@ -10,7 +10,7 @@ inline fun <reified T : Any> MagicBus.subscribe(
     noinline mailbox: Mailbox<in T>,
 ) = subscribe(T::class.java, mailbox)
 
-/** An alternative, fluent syntax to [subscribe]. */
+/** An fluent alternative syntax to [subscribe]. */
 inline fun <reified T : Any, M : Mailbox<T>> M.subscribeTo(
     bus: MagicBus,
 ): M {
@@ -33,7 +33,7 @@ inline fun <reified T : Any> MagicBus.unsubscribe(
     noinline mailbox: Mailbox<in T>,
 ) = unsubscribe(T::class.java, mailbox)
 
-/** An alternative, fluent syntax to [unsubscribe]. */
+/** An fluent alternative syntax to [unsubscribe]. */
 inline fun <reified T : Any, M : Mailbox<T>> M.unsubscribeFrom(
     bus: MagicBus,
 ): M {
