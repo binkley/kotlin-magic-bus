@@ -100,6 +100,9 @@ class SimpleMagicBus : MagicBus {
     @Suppress("UNCHECKED_CAST")
     fun <T> subscribers(messageType: Class<T>) = subscriptions.entries
         .filter { it.key.isAssignableFrom(messageType) }
+        // TODO: Moving the sort into the map leads to ClassCastException; the
+        //       filter is needed to prevent this.  There is no defined
+        //       ordering between unrelated classes
         .sortedWith { a, b -> parentFirstAndFifoOrdering(a.key, b.key) }
         .flatMap { it.value } as List<Mailbox<T>>
 
