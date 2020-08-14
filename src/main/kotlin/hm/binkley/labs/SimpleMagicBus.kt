@@ -19,8 +19,9 @@ package hm.binkley.labs
  * * [subscribers] provides a correct list of mailboxes for a given message
  *   type in the same order as message delivery
  * * By default, if there are no mailboxes for either [ReturnedMessage] or
- *   [FailedMessage], these are "dropped".  Code creating a new
- *   `SimpleMessageBus` is responsible for subscribing to these message types
+ *   [FailedMessage]; the result is a `StackOverflowError` in these cases.
+ *   Code creating a new `SimpleMessageBus` is responsible for subscribing
+ *   to these message types
  *
  * Example bus creation with handling of returned and failed messages:
  * ```
