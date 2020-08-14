@@ -13,11 +13,17 @@ val DEFAULT_BUS: SimpleMagicBus by lazy { SimpleMagicBus() }
  * _messaging_ by types.
  */
 interface MagicBus {
-    /** Delivers future messages of [messageType] to [mailbox]. */
-    fun <T : Any> subscribe(messageType: Class<T>, mailbox: Mailbox<in T>)
+    /** Delivers messages of [messageType] to [mailbox]. */
+    fun <T : Any> subscribe(
+        messageType: Class<in T>,
+        mailbox: Mailbox<in T>,
+    )
 
-    /** Stops delivering future messages of [messageType] to [mailbox]. */
-    fun <T : Any> unsubscribe(messageType: Class<T>, mailbox: Mailbox<in T>)
+    /** Stops delivering messages of [messageType] to [mailbox]. */
+    fun <T : Any> unsubscribe(
+        messageType: Class<in T>,
+        mailbox: Mailbox<in T>,
+    )
 
     /** Posts [message] to any subscribed mailboxes based on message type. */
     fun post(message: Any)

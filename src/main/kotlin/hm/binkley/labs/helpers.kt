@@ -11,7 +11,7 @@ inline fun <reified T : Any> MagicBus.subscribe(
 ) = subscribe(T::class.java, mailbox)
 
 /** An fluent alternative syntax to [subscribe]. */
-inline fun <reified T : Any, M : Mailbox<T>> M.subscribeTo(
+inline fun <reified T : Any, M : Mailbox<in T>> M.subscribeTo(
     bus: MagicBus,
 ): M {
     bus += this
@@ -19,7 +19,7 @@ inline fun <reified T : Any, M : Mailbox<T>> M.subscribeTo(
 }
 
 /** A syntactic alternative to [subscribe]. */
-inline operator fun <reified T : Any, M : Mailbox<T>> MagicBus.plusAssign(
+inline operator fun <reified T : Any, M : Mailbox<in T>> MagicBus.plusAssign(
     mailbox: M
 ) = subscribe(mailbox)
 
@@ -34,7 +34,7 @@ inline fun <reified T : Any> MagicBus.unsubscribe(
 ) = unsubscribe(T::class.java, mailbox)
 
 /** An fluent alternative syntax to [unsubscribe]. */
-inline fun <reified T : Any, M : Mailbox<T>> M.unsubscribeFrom(
+inline fun <reified T : Any, M : Mailbox<in T>> M.unsubscribeFrom(
     bus: MagicBus,
 ): M {
     bus -= this
@@ -42,12 +42,12 @@ inline fun <reified T : Any, M : Mailbox<T>> M.unsubscribeFrom(
 }
 
 /** A syntactic alternative to [unsubscribe]. */
-inline operator fun <reified T : Any, M : Mailbox<T>> MagicBus.minusAssign(
+inline operator fun <reified T : Any, M : Mailbox<in T>> MagicBus.minusAssign(
     mailbox: M
 ) = unsubscribe(mailbox)
 
 /** Creates a mailbox wrapping [receive], and a [toString] of [name]. */
-fun <T> namedMailbox(name: String, receive: Mailbox<T>) =
+fun <T> namedMailbox(name: String, receive: Mailbox<in T>) =
     object : Mailbox<T> {
         override fun invoke(message: T) = receive(message)
         override fun toString() = name

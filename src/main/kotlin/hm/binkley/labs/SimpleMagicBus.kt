@@ -46,7 +46,7 @@ class SimpleMagicBus : MagicBus {
     }
 
     override fun <T : Any> subscribe(
-        messageType: Class<T>,
+        messageType: Class<in T>,
         mailbox: Mailbox<in T>,
     ) {
         subscriptions.getOrPut(messageType) {
@@ -55,7 +55,7 @@ class SimpleMagicBus : MagicBus {
     }
 
     override fun <T : Any> unsubscribe(
-        messageType: Class<T>,
+        messageType: Class<in T>,
         mailbox: Mailbox<in T>,
     ) {
         val mailboxes = subscriptions.getOrElse(messageType) {
@@ -79,7 +79,7 @@ class SimpleMagicBus : MagicBus {
     }
 
     @Suppress("TooGenericExceptionCaught", "RethrowCaughtException")
-    private fun <T : Any> Mailbox<T>.receive(message: T) =
+    private fun <T : Any> Mailbox<in T>.receive(message: T) =
         try {
             this(message)
         } catch (e: RuntimeException) {
@@ -92,7 +92,7 @@ class SimpleMagicBus : MagicBus {
 
     /** Return the mailboxes which would receive message of [messageType]. */
     @Suppress("UNCHECKED_CAST")
-    fun <T> subscribers(messageType: Class<T>) = subscriptions.entries
+    fun <T> subscribers(messageType: Class<in T>) = subscriptions.entries
         .filter { it.key.isAssignableFrom(messageType) }
         // TODO: Moving the sort into the map leads to ClassCastException; the
         //       filter is needed to prevent this.  There is no defined
