@@ -390,16 +390,20 @@ internal class SimpleMagicBusTest {
 
 private data class OrderedMailbox<T>(
     private val masterOrder: AtomicInteger,
-    private val myOrder: AtomicInteger = AtomicInteger(),
+    private val messageType: Class<T>,
+    private val myOrder: AtomicInteger = AtomicInteger(-1),
 ) : Mailbox<T> {
     val order: Int get() = myOrder.get()
 
     override fun invoke(message: T) =
         myOrder.set(masterOrder.getAndIncrement())
+
+    override fun toString() =
+        "TEST-ORDERED-MAILBOX<${messageType.simpleName}@$myOrder>"
 }
 
-private fun <T> orderedMailbox(order: AtomicInteger) =
-    OrderedMailbox<T>(order)
+private inline fun <reified T> orderedMailbox(order: AtomicInteger) =
+    OrderedMailbox(order, T::class.java)
 
 private fun <T : Any> failWith(failure: () -> Throwable): Mailbox<T> =
     { throw failure() }
