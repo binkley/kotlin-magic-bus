@@ -398,32 +398,31 @@ internal class SimpleMagicBusTest {
     private fun allMailboxes() = listOf<TestMailbox<Any>>()
 }
 
-private class OrderedMailbox<T>(
-    private val sequence: AtomicInteger,
-    private val messageType: Class<T>,
-    private val myOrder: AtomicInteger = AtomicInteger(-1),
-) : Mailbox<T> {
-    val order: Int get() = myOrder.get()
-
-    override fun invoke(message: T) =
-        myOrder.set(sequence.incrementAndGet())
-
-    override fun toString() =
-        "TEST-ORDERED-MAILBOX<${messageType.simpleName}@$myOrder>"
-}
-
 private class OrderedMailboxes {
-    private val ordering = AtomicInteger(-1)
+    private val sequence = AtomicInteger(-1)
     private val mailboxes = mutableListOf<OrderedMailbox<*>>()
 
     inline fun <reified T> orderedMailbox(): Mailbox<T> =
-        OrderedMailbox(ordering, T::class.java).also { mailboxes.add(it) }
+        OrderedMailbox(T::class.java).also { mailboxes.add(it) }
 
     fun deliveriesInOrder(): List<Mailbox<*>> = mailboxes
-        .filter { -1 < it.order }
+        .filter { -1 < it.order } // -1 means no deliveries
         .sortedBy {
             it.order
         }
+
+    private inner class OrderedMailbox<T>(
+        private val messageType: Class<T>,
+    ) : Mailbox<T> {
+        private val myOrder: AtomicInteger = AtomicInteger(-1)
+        val order: Int get() = myOrder.get()
+
+        override fun invoke(message: T) =
+            myOrder.set(sequence.incrementAndGet())
+
+        override fun toString() =
+            "TEST-ORDERED-MAILBOX<${messageType.simpleName}@$myOrder>"
+    }
 }
 
 private fun <T : Any> failWith(failure: () -> Throwable): Mailbox<T> =
