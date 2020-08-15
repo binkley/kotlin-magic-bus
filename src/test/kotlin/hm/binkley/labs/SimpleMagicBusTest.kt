@@ -185,14 +185,18 @@ internal class SimpleMagicBusTest {
 
     @Test
     fun `should receive mailboxes for same type in subscription order`() {
-        val ordering = AtomicInteger()
-        val mailboxA = orderedMailbox<RightType>(ordering).subscribeTo(bus)
-        val mailboxB = orderedMailbox<RightType>(ordering).subscribeTo(bus)
+        val mailboxes = OrderedMailboxes()
+        val mailboxA = mailboxes.orderedMailbox<RightType>().subscribeTo(bus)
+        val mailboxB = mailboxes.orderedMailbox<RightType>().subscribeTo(bus)
 
         bus.post(RightType())
 
-        assertThat(mailboxA.order).isEqualTo(0)
-        assertThat(mailboxB.order).isEqualTo(1)
+        assertThat(mailboxes.deliveriesInOrder()).isEqualTo(
+            listOf(
+                mailboxA,
+                mailboxB
+            )
+        )
     }
 
     @Test
@@ -200,22 +204,28 @@ internal class SimpleMagicBusTest {
         // FYI -- it is important that mailboxes subscribe *not* in class
         // hierarchy order, so that the test can verify messages are received
         // in the correct order nonetheless
-        val ordering = AtomicInteger()
+        val mailboxes = OrderedMailboxes()
         val rightMailbox =
-            orderedMailbox<RightType>(ordering).subscribeTo(bus)
+            mailboxes.orderedMailbox<RightType>().subscribeTo(bus)
         val farRightMailbox =
-            orderedMailbox<FarRightType>(ordering).subscribeTo(bus)
+            mailboxes.orderedMailbox<FarRightType>().subscribeTo(bus)
         val baseMailbox =
-            orderedMailbox<BaseType>(ordering).subscribeTo(bus)
+            mailboxes.orderedMailbox<BaseType>().subscribeTo(bus)
         val allMailbox =
-            orderedMailbox<Any>(ordering).subscribeTo(bus)
+            mailboxes.orderedMailbox<Any>().subscribeTo(bus)
+        //  And an unrelated type which should *not* show up
+        mailboxes.orderedMailbox<LeftType>().subscribeTo(bus)
 
         bus.post(FarRightType())
 
-        assertThat(allMailbox.order).isEqualTo(0)
-        assertThat(baseMailbox.order).isEqualTo(1)
-        assertThat(rightMailbox.order).isEqualTo(2)
-        assertThat(farRightMailbox.order).isEqualTo(3)
+        assertThat(mailboxes.deliveriesInOrder()).isEqualTo(
+            listOf(
+                allMailbox,
+                baseMailbox,
+                rightMailbox,
+                farRightMailbox
+            )
+        )
     }
 
     @Test
@@ -388,22 +398,33 @@ internal class SimpleMagicBusTest {
     private fun allMailboxes() = listOf<TestMailbox<Any>>()
 }
 
-private data class OrderedMailbox<T>(
-    private val masterOrder: AtomicInteger,
+private class OrderedMailbox<T>(
+    private val sequence: AtomicInteger,
     private val messageType: Class<T>,
     private val myOrder: AtomicInteger = AtomicInteger(-1),
 ) : Mailbox<T> {
     val order: Int get() = myOrder.get()
 
     override fun invoke(message: T) =
-        myOrder.set(masterOrder.getAndIncrement())
+        myOrder.set(sequence.incrementAndGet())
 
     override fun toString() =
         "TEST-ORDERED-MAILBOX<${messageType.simpleName}@$myOrder>"
 }
 
-private inline fun <reified T> orderedMailbox(order: AtomicInteger) =
-    OrderedMailbox(order, T::class.java)
+private class OrderedMailboxes {
+    private val ordering = AtomicInteger(-1)
+    private val mailboxes = mutableListOf<OrderedMailbox<*>>()
+
+    inline fun <reified T> orderedMailbox(): Mailbox<T> =
+        OrderedMailbox(ordering, T::class.java).also { mailboxes.add(it) }
+
+    fun deliveriesInOrder(): List<Mailbox<*>> = mailboxes
+        .filter { -1 < it.order }
+        .sortedBy {
+            it.order
+        }
+}
 
 private fun <T : Any> failWith(failure: () -> Throwable): Mailbox<T> =
     { throw failure() }
