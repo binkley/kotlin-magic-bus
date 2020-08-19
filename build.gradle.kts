@@ -75,10 +75,13 @@ tasks {
         }
     }
 
+    ktlintCheck {
+        dependsOn += ktlintFormat
+    }
+
     check {
-        dependsOn(jacocoTestCoverageVerification)
-        dependsOn(ktlintFormat) // Before checking formatting
-        dependsOn(ktlintCheck)
+        dependsOn += jacocoTestCoverageVerification
+        dependsOn += ktlintCheck
     }
 
     withType<Wrapper> {
