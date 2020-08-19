@@ -32,6 +32,7 @@ internal class SimpleMagicBusTest {
             .isNotEqualTo(namedMailbox<RightType>("BOB") {})
     }
 
+    @Test
     fun `should do nothing when unsubscribing`() {
         val mailbox = testMailbox<RightType>()
             .subscribeTo(bus)
@@ -42,7 +43,7 @@ internal class SimpleMagicBusTest {
 
         assertOn(mailbox)
             .noMessageDelivered()
-            .returnedInOrder(ReturnedMessage(bus, message))
+            .returnedInOrder(message)
             .noFailingMailbox()
     }
 
@@ -90,7 +91,7 @@ internal class SimpleMagicBusTest {
 
         assertOn(mailbox)
             .noMessageDelivered()
-            .returnedInOrder(with(message))
+            .returnedInOrder(message)
             .noFailingMailbox()
     }
 
@@ -115,7 +116,7 @@ internal class SimpleMagicBusTest {
 
         assertOn(allMailboxes())
             .noMessageDelivered()
-            .returnedInOrder(with(message))
+            .returnedInOrder(message)
             .noFailingMailbox()
     }
 
@@ -385,7 +386,6 @@ internal class SimpleMagicBusTest {
     private fun <T> assertOn(delivered: List<TestMailbox<T>>) =
         AssertDelivery(delivered.flatMap { it.messages }, returned, failed)
 
-    private fun with(message: Any) = ReturnedMessage(bus, message)
     private fun <T : Any> with(
         mailbox: Mailbox<T>,
         message: T,
@@ -411,6 +411,40 @@ internal class SimpleMagicBusTest {
     }
 
     private fun allMailboxes() = listOf<TestMailbox<Any>>()
+
+    private inner class AssertDelivery<T>(
+        private val delivered: List<T>,
+        private val returned: List<ReturnedMessage<*>>,
+        private val failed: List<FailedMessage<*>>,
+    ) {
+        fun noMessageDelivered() = apply {
+            assertThat(delivered).isEmpty()
+        }
+
+        fun <U : T?> deliveredInOrder(vararg delivered: U) = apply {
+            assertThat(this.delivered).isEqualTo(delivered.toList())
+        }
+
+        fun noMessageReturned() = apply {
+            assertThat(returned).isEmpty()
+        }
+
+        fun returnedInOrder(vararg returned: Any) = apply {
+            assertThat(this.returned).isEqualTo(
+                returned.map {
+                    ReturnedMessage(bus, it)
+                }
+            )
+        }
+
+        fun noFailingMailbox() = apply {
+            assertThat(failed).isEmpty()
+        }
+
+        fun failedInOrder(vararg failed: FailedMessage<*>) = apply {
+            assertThat(this.failed).isEqualTo(failed.toList())
+        }
+    }
 }
 
 private class OrderedMailboxes {
@@ -447,33 +481,3 @@ private abstract class BaseType
 private class LeftType : BaseType()
 private open class RightType : BaseType()
 private class FarRightType : RightType()
-
-private class AssertDelivery<T>(
-    private val delivered: List<T>,
-    private val returned: List<ReturnedMessage<*>>,
-    private val failed: List<FailedMessage<*>>,
-) {
-    fun noMessageDelivered() = apply {
-        assertThat(delivered).isEmpty()
-    }
-
-    fun <U : T?> deliveredInOrder(vararg delivered: U) = apply {
-        assertThat(this.delivered).isEqualTo(delivered.toList())
-    }
-
-    fun noMessageReturned() = apply {
-        assertThat(returned).isEmpty()
-    }
-
-    fun returnedInOrder(vararg returned: ReturnedMessage<*>) = apply {
-        assertThat(this.returned).isEqualTo(returned.toList())
-    }
-
-    fun noFailingMailbox() = apply {
-        assertThat(failed).isEmpty()
-    }
-
-    fun failedInOrder(vararg failed: FailedMessage<*>) = apply {
-        assertThat(this.failed).isEqualTo(failed.toList())
-    }
-}
