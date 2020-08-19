@@ -6,6 +6,7 @@ val assertJVersion: String by project
 val gradleWrapperVersion: String by project
 val junitVersion: String by project
 val kotlinVersion: String by project
+val ktlintVersion: String by project
 val lombokVersion: String by project
 
 plugins {
@@ -39,6 +40,7 @@ detekt {
 
 ktlint {
     outputColorName.set("RED")
+    version.set(ktlintVersion)
 }
 
 tasks {
@@ -75,7 +77,7 @@ tasks {
 
     check {
         dependsOn(jacocoTestCoverageVerification)
-        // TODO: Do not run both ktlintCheck and ktlintFormat
+        dependsOn(ktlintCheck)
         dependsOn(ktlintFormat)
     }
 
