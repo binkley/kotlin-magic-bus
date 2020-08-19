@@ -38,8 +38,8 @@ package hm.binkley.labs
  * ```
  */
 class SimpleMagicBus : MagicBus {
-    private val subscriptions: MutableMap<Class<*>, MutableSet<Mailbox<*>>> =
-        mutableMapOf()
+    private val subscriptions =
+        mutableMapOf<Class<*>, MutableSet<Mailbox<*>>>()
 
     init {
         installFallbackMailboxes()
