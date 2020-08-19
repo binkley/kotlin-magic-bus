@@ -145,8 +145,8 @@ internal class SimpleMagicBusTest {
             .noMessageDelivered()
             .noMessageReturned()
             .failedInOrder(
-                failed(brokenMailboxA, message, failureA),
-                failed(brokenMailboxB, message, failureB)
+                brokenMailboxA with message and failureA,
+                brokenMailboxB with message and failureB,
             )
     }
 
@@ -178,14 +178,14 @@ internal class SimpleMagicBusTest {
         val allMailbox = testMailbox<Any>().subscribeTo(bus)
 
         val message = RightType()
-        val failedMessage = failed(badMailbox, message, failure)
+        val failedMessage = FailedMessage(bus, badMailbox, message, failure)
 
         bus.post(message)
 
         assertOn(allMailbox)
             .noMessageReturned()
             .deliveredInOrder(message, failedMessage)
-            .failedInOrder(failedMessage)
+            .failedInOrder(badMailbox with message and failure)
     }
 
     @Test
@@ -386,11 +386,9 @@ internal class SimpleMagicBusTest {
     private fun <T> assertOn(delivered: List<TestMailbox<T>>) =
         AssertDelivery(delivered.flatMap { it.messages }, returned, failed)
 
-    private fun <T : Any> failed(
-        mailbox: Mailbox<T>,
-        message: T,
-        failure: Exception,
-    ) = FailedMessage(bus, mailbox, message, failure)
+    private infix fun <T> Mailbox<T>.with(message: T) = this to message
+    private infix fun <T> Pair<Mailbox<T>, T>.and(failure: Exception) =
+        this to failure
 
     private inline fun <reified T> testMailbox(
         messages: MutableList<T> = mutableListOf(),
@@ -421,7 +419,7 @@ internal class SimpleMagicBusTest {
             assertThat(delivered).isEmpty()
         }
 
-        fun <U : T?> deliveredInOrder(vararg delivered: U) = apply {
+        fun <U : T> deliveredInOrder(vararg delivered: U) = apply {
             assertThat(this.delivered).isEqualTo(delivered.toList())
         }
 
@@ -441,9 +439,16 @@ internal class SimpleMagicBusTest {
             assertThat(failed).isEmpty()
         }
 
-        fun failedInOrder(vararg failed: FailedMessage<*>) = apply {
-            assertThat(this.failed).isEqualTo(failed.toList())
-        }
+        fun <U : T> failedInOrder(vararg failed: Pair<Pair<Mailbox<U>, U>, Exception>) =
+            apply {
+                assertThat(this.failed).isEqualTo(
+                    failed.map {
+                        val (first, failure) = it
+                        val (mailbox, message) = first
+                        FailedMessage(bus, mailbox, message, failure)
+                    }
+                )
+            }
     }
 }
 

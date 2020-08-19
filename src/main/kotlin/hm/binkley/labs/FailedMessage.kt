@@ -10,7 +10,7 @@ import lombok.Generated
  * those immediately bubble out to the message poster as thrown exceptions.
  */
 @Generated // Lie to JaCoCo
-data class FailedMessage<T : Any>(
+data class FailedMessage<T>(
     val bus: MagicBus,
     val mailbox: Mailbox<T>,
     val message: T,
