@@ -32,6 +32,20 @@ internal class SimpleMagicBusTest {
             .isNotEqualTo(namedMailbox<RightType>("BOB") {})
     }
 
+    fun `should do nothing when unsubscribing`() {
+        val mailbox = testMailbox<RightType>()
+            .subscribeTo(bus)
+            .unsubscribeFrom(bus)
+        val message = RightType()
+
+        bus.post(message)
+
+        assertOn(mailbox)
+            .noMessageDelivered()
+            .returnedInOrder(ReturnedMessage(bus, message))
+            .noFailingMailbox()
+    }
+
     @Test
     fun `should receive correct type`() {
         val mailbox = testMailbox<RightType>().subscribeTo(bus)
