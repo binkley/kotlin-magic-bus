@@ -27,7 +27,7 @@ internal class SimpleMagicBusTest {
     }
 
     @Test
-    fun `should have distinct named mailboxes`() {
+    fun `should have distinct named mailboxes even with the same name`() {
         assertThat(namedMailbox<RightType>("BOB") {})
             .isNotEqualTo(namedMailbox<RightType>("BOB") {})
     }
