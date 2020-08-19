@@ -321,9 +321,8 @@ internal class SimpleMagicBusTest {
     fun `should deliver to first subscriber for returned messages before default`() {
         val subscribers = bus.subscribers<ReturnedMessage<Any>>()
 
-        assertThat(subscribers.first().toString()).isEqualTo(
-            "DEFAULT-DEAD-LETTERBOX"
-        )
+        assertThat(subscribers.first().toString())
+            .isEqualTo("DISCARD-MAILBOX<ReturnedMessage>")
     }
 
     @Test
@@ -331,7 +330,7 @@ internal class SimpleMagicBusTest {
         val subscribers = bus.subscribers<FailedMessage<Any>>()
 
         assertThat(subscribers.first().toString())
-            .isEqualTo("DEFAULT-FAILED-LETTERBOX")
+            .isEqualTo("DISCARD-MAILBOX<FailedMessage>")
     }
 
     @Test

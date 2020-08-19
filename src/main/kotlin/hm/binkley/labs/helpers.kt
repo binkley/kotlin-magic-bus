@@ -20,7 +20,7 @@ inline fun <reified T : Any, M : Mailbox<in T>> M.subscribeTo(
 
 /** A syntactic alternative to [subscribe]. */
 inline operator fun <reified T : Any, M : Mailbox<in T>> MagicBus.plusAssign(
-    mailbox: M
+    mailbox: M,
 ) = subscribe(mailbox)
 
 /**
@@ -43,7 +43,7 @@ inline fun <reified T : Any, M : Mailbox<in T>> M.unsubscribeFrom(
 
 /** A syntactic alternative to [unsubscribe]. */
 inline operator fun <reified T : Any, M : Mailbox<in T>> MagicBus.minusAssign(
-    mailbox: M
+    mailbox: M,
 ) = unsubscribe(mailbox)
 
 /** Creates a mailbox wrapping [receive], and a [toString] of [name]. */
@@ -59,3 +59,11 @@ fun <T> namedMailbox(name: String, receive: Mailbox<in T>) =
  */
 inline fun <reified T : Any> discard(): Mailbox<T> =
     namedMailbox("DISCARD-MAILBOX<${T::class.java.simpleName}>") { }
+
+/**
+ * Helper to avoid caller providing a class token.
+ *
+ * @see SimpleMagicBus.subscribers
+ */
+inline fun <reified T> SimpleMagicBus.subscribers() =
+    subscribers(T::class.java)

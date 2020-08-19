@@ -38,8 +38,8 @@ package hm.binkley.labs
  * ```
  */
 class SimpleMagicBus : MagicBus {
-    private val subscriptions:
-        MutableMap<Class<*>, MutableSet<Mailbox<*>>> = mutableMapOf()
+    private val subscriptions: MutableMap<Class<*>, MutableSet<Mailbox<*>>> =
+        mutableMapOf()
 
     init {
         installFallbackMailboxes()
@@ -100,21 +100,10 @@ class SimpleMagicBus : MagicBus {
         .sortedWith { a, b -> parentFirstAndFifoOrdering(a.key, b.key) }
         .flatMap { it.value } as List<Mailbox<T>>
 
-    /**
-     * Helper to avoid caller providing a class token.
-     *
-     * @see subscribers
-     */
-    inline fun <reified T> subscribers() = subscribers(T::class.java)
-
     private fun installFallbackMailboxes() {
         // Default do nothings: avoid stack overflow from reposting
-        subscribe(
-            namedMailbox<ReturnedMessage<*>>("DEFAULT-DEAD-LETTERBOX") {}
-        )
-        subscribe(
-            namedMailbox<FailedMessage<*>>("DEFAULT-FAILED-LETTERBOX") {}
-        )
+        subscribe(discard<ReturnedMessage<*>>())
+        subscribe(discard<FailedMessage<*>>())
     }
 }
 
