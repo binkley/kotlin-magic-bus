@@ -194,7 +194,7 @@ internal class SimpleMagicBusTest {
         assertThat(mailboxes.deliveriesInOrder()).isEqualTo(
             listOf(
                 mailboxA,
-                mailboxB
+                mailboxB,
             )
         )
     }
@@ -207,13 +207,15 @@ internal class SimpleMagicBusTest {
         val mailboxes = OrderedMailboxes()
         val rightMailbox =
             mailboxes.orderedMailbox<RightType>().subscribeTo(bus)
+        //  And an unrelated type which should *not* show up
+        mailboxes.orderedMailbox<LeftType>().subscribeTo(bus)
         val farRightMailbox =
             mailboxes.orderedMailbox<FarRightType>().subscribeTo(bus)
         val baseMailbox =
             mailboxes.orderedMailbox<BaseType>().subscribeTo(bus)
         val allMailbox =
             mailboxes.orderedMailbox<Any>().subscribeTo(bus)
-        //  And an unrelated type which should *not* show up
+        //  And another unrelated type which should *not* show up
         mailboxes.orderedMailbox<LeftType>().subscribeTo(bus)
 
         bus.post(FarRightType())
