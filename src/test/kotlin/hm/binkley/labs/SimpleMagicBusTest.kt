@@ -145,8 +145,8 @@ internal class SimpleMagicBusTest {
             .noMessageDelivered()
             .noMessageReturned()
             .failedInOrder(
-                with(brokenMailboxA, message, failureA),
-                with(brokenMailboxB, message, failureB)
+                failed(brokenMailboxA, message, failureA),
+                failed(brokenMailboxB, message, failureB)
             )
     }
 
@@ -178,7 +178,7 @@ internal class SimpleMagicBusTest {
         val allMailbox = testMailbox<Any>().subscribeTo(bus)
 
         val message = RightType()
-        val failedMessage = with(badMailbox, message, failure)
+        val failedMessage = failed(badMailbox, message, failure)
 
         bus.post(message)
 
@@ -386,7 +386,7 @@ internal class SimpleMagicBusTest {
     private fun <T> assertOn(delivered: List<TestMailbox<T>>) =
         AssertDelivery(delivered.flatMap { it.messages }, returned, failed)
 
-    private fun <T : Any> with(
+    private fun <T : Any> failed(
         mailbox: Mailbox<T>,
         message: T,
         failure: Exception,
