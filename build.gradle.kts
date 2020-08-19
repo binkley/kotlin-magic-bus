@@ -34,7 +34,7 @@ dependencies {
 
 detekt {
     failFast = true
-    // No support yet for configuring direcly in Gradle
+    // No support yet for configuring directly in Gradle
     config = files("config/detekt.yml")
 }
 
