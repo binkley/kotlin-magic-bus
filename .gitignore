@@ -1,3 +1,4 @@
-/.gradle/
-/.idea/
 /build/
+/.gradle/
+/.gradle-cache
+/.idea/
