@@ -47,7 +47,7 @@ ktlint {
 tasks {
     withType<DependencyUpdatesTask> {
         rejectVersionIf {
-            isNonStable(candidate.version) && !isNonStable(currentVersion)
+            !isStable(candidate.version) && isStable(currentVersion)
         }
     }
 
@@ -92,11 +92,10 @@ tasks {
     }
 }
 
-fun isNonStable(version: String): Boolean {
+fun isStable(version: String): Boolean {
     val stableKeyword = listOf("RELEASE", "FINAL", "GA").any {
         version.toUpperCase().contains(it)
     }
     val regex = "^[0-9,.v-]+(-r)?$".toRegex()
-    val isStable = stableKeyword || regex.matches(version)
-    return isStable.not()
+    return stableKeyword || regex.matches(version)
 }
