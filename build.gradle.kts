@@ -4,6 +4,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 val assertJVersion: String by project
 val gradleWrapperVersion: String by project
+val javaVersion: String by project
 val junitVersion: String by project
 val kotlinVersion: String by project
 val ktlintVersion: String by project
@@ -54,7 +55,7 @@ tasks {
     withType<KotlinCompile> {
         kotlinOptions {
             allWarningsAsErrors = true
-            jvmTarget = "11"
+            jvmTarget = javaVersion
             javaParameters = true
             useIR = true
         }
