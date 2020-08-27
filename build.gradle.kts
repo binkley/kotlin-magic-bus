@@ -13,6 +13,7 @@ plugins {
     `build-dashboard`
     `project-report`
     kotlin("jvm")
+    id("org.jetbrains.dokka")
     id("io.gitlab.arturbosch.detekt")
     id("org.jlleitschuh.gradle.ktlint")
     id("com.github.ben-manes.versions")
