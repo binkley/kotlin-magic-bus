@@ -9,6 +9,7 @@ val junitVersion: String by project
 val kotlinVersion: String by project
 val ktlintVersion: String by project
 val lombokVersion: String by project
+val pitestJUnit5PluginVersion: String by project
 
 plugins {
     `build-dashboard`
@@ -17,6 +18,7 @@ plugins {
     id("org.jetbrains.dokka")
     id("io.gitlab.arturbosch.detekt")
     id("org.jlleitschuh.gradle.ktlint")
+    id("info.solidsoft.pitest")
     id("com.github.ben-manes.versions")
     jacoco
 }
@@ -43,6 +45,13 @@ detekt {
 ktlint {
     outputColorName.set("RED")
     version.set(ktlintVersion)
+}
+
+pitest {
+    coverageThreshold.set(82)
+    junit5PluginVersion.set(pitestJUnit5PluginVersion)
+    mutationThreshold.set(100)
+    timestampedReports.set(false)
 }
 
 tasks {
@@ -85,6 +94,7 @@ tasks {
     check {
         dependsOn += jacocoTestCoverageVerification
         dependsOn += ktlintCheck
+        dependsOn += pitest
     }
 
     withType<Wrapper> {
