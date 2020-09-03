@@ -29,4 +29,4 @@ jobs:
           java-version: 11
 
       - name: Build and test
-        run: ./gradlew --console=rich --no-daemon build
+        run: ./gradlew --no-daemon build
