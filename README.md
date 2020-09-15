@@ -27,15 +27,6 @@ Use `./gradlew build` (Gradle) or `./batect build` (Batect) to build, run tests.
 optimization is to avoid redownloading plugins and dependencies from within
 a Docker container.
 
-With Batect, link to your user Gradle cache directory:
-
-```
-$ ln -s ~/.gradle .gradle-cache
-```
-
-This shares Gradle plugin and dependency downloads with the Docker container
-run by Batect.
-
 ## Examples
 
 ### Post a message
