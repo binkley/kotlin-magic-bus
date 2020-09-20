@@ -4,6 +4,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 val assertJVersion: String by project
 val gradleWrapperVersion: String by project
+val jacocoVersion: String by project
 val javaVersion: String by project
 val junitVersion: String by project
 val kotlinVersion: String by project
@@ -40,6 +41,10 @@ detekt {
     failFast = true
     // No support yet for configuring directly in Gradle
     config = files("config/detekt.yml")
+}
+
+jacoco {
+    toolVersion = jacocoVersion
 }
 
 ktlint {
@@ -80,8 +85,7 @@ tasks {
         violationRules {
             rule {
                 limit {
-                    // TODO: JaCoCo lies
-                    minimum = "0.96".toBigDecimal()
+                    minimum = "1.00".toBigDecimal()
                 }
             }
         }
