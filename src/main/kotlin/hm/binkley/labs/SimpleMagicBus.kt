@@ -61,13 +61,7 @@ class SimpleMagicBus : MagicBus {
         val mailboxes = subscriptions.getOrElse(messageType) {
             throw NoSuchElementException()
         }
-        // TODO: Kotlin's "remove" is inlined and includes a type cast which
-        //       cannot fail, hence JaCoCo's complaint of a missed branch
-        //       It boils down to JDK's `Collection.remove` accepts `Object`
-        //       rather than just "T".  Kotlin addresses this syntactically,
-        //       but there is still a type check in the byte code, and JaCoCo
-        //       is not clever enough to ignore that this check cannot fail
-        @Suppress("TYPE_INFERENCE_ONLY_INPUT_TYPES_WARNING")
+
         if (!mailboxes.remove(mailbox)) throw NoSuchElementException()
     }
 
