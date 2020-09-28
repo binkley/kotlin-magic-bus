@@ -2,6 +2,7 @@ package hm.binkley.labs
 
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.nio.charset.CoderMalfunctionError
@@ -64,13 +65,16 @@ internal class SimpleMagicBusTest {
     fun `should deliver correctly to disparate subscribers`() {
         val mailboxForDelivery = testMailbox<RightType>().subscribeTo(bus)
         val mailboxForNoDelivery = testMailbox<LeftType>().subscribeTo(bus)
+        val mailboxForAliens = testMailbox<AlienType>().subscribeTo(bus)
 
         assertThat(bus.subscribers<RightType>())
             .containsOnly(mailboxForDelivery)
 
         val message = RightType()
+        val alienMessage = AlienType()
 
         bus.post(message)
+        bus.post(alienMessage)
 
         assertOn(mailboxForDelivery)
             .deliveredInOrder(message)
@@ -78,6 +82,10 @@ internal class SimpleMagicBusTest {
             .noFailingMailbox()
         assertOn(mailboxForNoDelivery)
             .noMessageDelivered()
+            .noMessageReturned()
+            .noFailingMailbox()
+        assertOn(mailboxForAliens)
+            .deliveredInOrder(alienMessage)
             .noMessageReturned()
             .noFailingMailbox()
     }
@@ -315,6 +323,17 @@ internal class SimpleMagicBusTest {
         assertThat(bus.subscribers<RightType>()).isEqualTo(mailboxes)
     }
 
+    @Disabled("TODO: How to query _all_ mailboxen?")
+    @Test
+    fun `should provide subscribers for unrelated types in some order`() {
+        val firstMailbox = testMailbox<RightType>().subscribeTo(bus)
+        val alienMailbox = testMailbox<AlienType>().subscribeTo(bus)
+
+        assertThat(bus.subscribers<Any>()).isEqualTo(
+            listOf(firstMailbox, alienMailbox)
+        )
+    }
+
     @Test
     fun `should provide accurate details on dead letters`() {
         val message = RightType()
@@ -439,7 +458,9 @@ internal class SimpleMagicBusTest {
             assertThat(failed).isEmpty()
         }
 
-        fun <U : T> failedInOrder(vararg failed: Pair<Pair<Mailbox<U>, U>, Exception>) =
+        fun <U : T> failedInOrder(
+            vararg failed: Pair<Pair<Mailbox<U>, U>, Exception>,
+        ) =
             apply {
                 assertThat(this.failed).isEqualTo(
                     failed.map {
@@ -486,3 +507,4 @@ private abstract class BaseType
 private class LeftType : BaseType()
 private open class RightType : BaseType()
 private class FarRightType : RightType()
+private class AlienType

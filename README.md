@@ -117,6 +117,7 @@ class BeGlobal {
 
 ## TODO
 
+* Finding all subscribers (`Any`).  See disabled test in `SimpleMagicBusTest`
 * Deep messaging paths (1K+): First try at `DeepRecursive` did not go well
 * Greater null-safety in declarations (`*` vs `T : Any`).
   See https://stackoverflow.com/a/40139892
