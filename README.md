@@ -16,16 +16,17 @@ Kotlin version of self-messaging
 ## What is this?
 
 _Magic Bus_ is an _internal_ message bus for JVM programs to talk with
-themselves.  It uses type-inheritance of messages, not string topics, for
-subscribers indicate interest in posted messages.  Methods are type-safe.
+themselves. It uses type-inheritance of messages, not string topics, for
+subscribers indicate interest in posted messages. Methods are type-safe.
 
 ## Build
 
-Use `./gradlew build` (Gradle) or `./batect build` (Batect) to build, run tests.
+Use `./gradlew build` (Gradle) or `./batect build` (Batect) to build, run
+tests.
 
 [Batect](https://batect.dev/) works "out of the box", however, an important
-optimization is to avoid redownloading plugins and dependencies from within
-a Docker container.
+optimization is to avoid redownloading plugins and dependencies from within a
+Docker container.
 
 ## Examples
 
@@ -96,6 +97,7 @@ val bus = SimpleMagicBus().apply {
 
 Or, if you're _lazy_ like me (pun intended; see
 [implementation](src/main/kotlin/hm/binkley/labs/MagicBus.kt)):
+
 ```kotlin
 class BeGlobal {
     fun main() {
@@ -115,8 +117,8 @@ class BeGlobal {
 
 ## TODO
 
-* JaCoCo does not recognize branch coverage for "impossible" branches within
-  the Kotlin stdlib (`MutableCollection.remove`)
-* Pick one: Detekt or Ktlint
 * Deep messaging paths (1K+): First try at `DeepRecursive` did not go well
-* Greater null-safety in declarations (`*` vs `T : Any`)
+* Greater null-safety in declarations (`*` vs `T : Any`).
+  See https://stackoverflow.com/a/40139892
+* Avoid use of JDK class reflection, ie, `SimpleMagicBus.subscribers`. This
+  method needs cleanup in any case
