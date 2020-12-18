@@ -18,4 +18,4 @@ tasks:
     description: Build (and test) the program
     run:
       container: build-env
-      command: ./gradlew --no-daemon build
+      command: ./gradlew --no-daemon clean build
