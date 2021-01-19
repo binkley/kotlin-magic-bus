@@ -43,6 +43,4 @@ jobs:
             ${{ runner.os }}-
 
       - name: Build and test with Gradle under Batect
-        run: ./batect build
-        env:
-          BATECT_ENABLE_TELEMETRY: true
+        run: ./batect --permanently-enable-telemetry build
