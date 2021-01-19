@@ -65,5 +65,5 @@ inline fun <reified T : Any> discard(): Mailbox<T> =
  *
  * @see SimpleMagicBus.subscribers
  */
-inline fun <reified T> SimpleMagicBus.subscribers() =
+inline fun <reified T : Any> SimpleMagicBus.subscribers() =
     subscribers(T::class.java)

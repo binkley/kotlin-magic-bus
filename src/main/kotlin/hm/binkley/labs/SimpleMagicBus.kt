@@ -86,7 +86,7 @@ class SimpleMagicBus : MagicBus {
 
     /** Return the mailboxes which would receive message of [messageType]. */
     @Suppress("UNCHECKED_CAST")
-    fun <T> subscribers(messageType: Class<in T>) = subscriptions.entries
+    fun <T : Any> subscribers(messageType: Class<in T>) = subscriptions.entries
         .filter { it.key.isAssignableFrom(messageType) }
         // TODO: Moving the sort into the map leads to ClassCastException; the
         //       filter is needed to prevent this.  There is no defined
