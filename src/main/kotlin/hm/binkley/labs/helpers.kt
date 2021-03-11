@@ -61,7 +61,7 @@ inline fun <reified T : Any> discard(): Mailbox<T> =
     namedMailbox("DISCARD-MAILBOX<${T::class.java.simpleName}>") { }
 
 /**
- * Helper to avoid caller providing a class token.
+ * Lists [mailbox]en for [this] bus without caller providing a type object.
  *
  * @see SimpleMagicBus.subscribers
  */

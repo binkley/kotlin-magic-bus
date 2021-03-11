@@ -3,14 +3,17 @@ package hm.binkley.labs
 typealias Mailbox<T> = (T) -> Unit
 
 /**
- * A default, singleton bus.  The instance is a [SimpleMagicBus] with its
- * additional methods and restrictions.
+ * A default, singleton bus, non-threadsafe.  The instance is a
+ * [SimpleMagicBus] with its additional methods and restrictions.
  */
 val DEFAULT_BUS: SimpleMagicBus by lazy { SimpleMagicBus() }
 
 /**
- * Represents a _minimal_ bus for an applications to self-communicate via
- * _messaging_ by types.
+ * Represents a _minimal_, non-threadsafe bus for an applications to
+ * self-communicate via messaging_ by types.
+ *
+ * Note that messages are delivered in _causal_ order, supertype receivers
+ * before subtypes mailboxes, and in subscription order thereafter.
  */
 interface MagicBus {
     /** Delivers messages of [messageType] to [mailbox]. */
