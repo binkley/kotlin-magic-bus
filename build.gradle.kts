@@ -55,7 +55,7 @@ ktlint {
 }
 
 pitest {
-    coverageThreshold.set(82)
+    coverageThreshold.set(81)
     junit5PluginVersion.set(pitestJUnit5PluginVersion)
     mutationThreshold.set(100)
     timestampedReports.set(false)

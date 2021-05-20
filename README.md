@@ -25,10 +25,6 @@ subscribers indicate interest in posted messages. Methods are type-safe.
 Use `./gradlew build` (Gradle) or `./batect build` (Batect) to build, run
 tests.
 
-[Batect](https://batect.dev/) works "out of the box", however, an important
-optimization is to avoid redownloading plugins and dependencies from within a
-Docker container.
-
 ## Examples
 
 ### Post a message
