@@ -29,7 +29,6 @@ group = "hm.binkley.labs"
 
 repositories {
     mavenCentral()
-    jcenter()
 }
 
 dependencies {

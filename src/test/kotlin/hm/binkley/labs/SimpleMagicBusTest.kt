@@ -421,7 +421,7 @@ internal class SimpleMagicBusTest {
             messages.add(message)
             delivered.getOrPut(this) {
                 mutableListOf()
-            } += (message as Any)
+            } += message as Any
         }
 
         override fun toString() = "TEST-MAILBOX<${messageType.simpleName}>"
