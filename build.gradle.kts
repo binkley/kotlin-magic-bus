@@ -71,7 +71,6 @@ tasks {
             allWarningsAsErrors = true
             jvmTarget = javaVersion
             javaParameters = true
-            useIR = true
         }
     }
 
@@ -85,7 +84,8 @@ tasks {
         violationRules {
             rule {
                 limit {
-                    minimum = "1.00".toBigDecimal()
+                    // TODO: JaCoCo vs Kotlin 1.6: this had been 100%
+                    minimum = "0.98".toBigDecimal()
                 }
             }
         }
