@@ -114,8 +114,9 @@ class BeGlobal {
 
 * Pure JDK, no 3<sup>rd</sup> parties
 * _Almost_ 100% test coverage
-* [Detekt](https://detekt.github.io/detekt/) and
-  [Ktlint](https://ktlint.github.io/) are happy
+* Static code analysis is happy: [Detekt](https://detekt.github.io/detekt/)
+  [Ktlint](https://ktlint.github.io/), 
+  and [DependencyCheck](https://owasp.org/www-project-dependency-check/)
 * Focus is on functions, not types, for subscriptions and bus behavior
 
 ## TODO
