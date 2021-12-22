@@ -11,7 +11,7 @@
 
 Kotlin version of self-messaging
 
-(For original context, see
+(For an earlier source using Java as the source language, see
 [the original Java version](https://github.com/binkley/magic-bus).)
 
 ## What is this?
@@ -32,7 +32,7 @@ tests.
 ```kotlin
 val bus: MagicBus // assigned elsewhere
 
-bus.post(UUID.randomUUID()) // Only received by subscribers of `UUID`
+bus.post(UUID.randomUUID()) // Only received by subscribers of `UUID` JVM type
 ```
 
 ### Receive messages
@@ -75,7 +75,13 @@ bus.unsubscribe(mailbox) // Stop receiving messages
 bus.post(SomeType()) // Not printed
 ```
 
+### Observe dead letters
+
+See `hm.binkley.labs.SimpleMagicBusTest.should save dead letters()`
+
 ### Make me a bus
+
+See `hm.binkley.labs.MagicBusKt.DEFAULT_BUS`, a single-threaded bus.
 
 ```kotlin
 // Track returned (no mailbox) messages, and failed (mailbox throws exception)
