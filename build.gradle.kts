@@ -16,11 +16,12 @@ plugins {
     `build-dashboard`
     `project-report`
     kotlin("jvm")
-    id("org.jetbrains.dokka")
-    id("io.gitlab.arturbosch.detekt")
-    id("org.jlleitschuh.gradle.ktlint")
-    id("info.solidsoft.pitest")
     id("com.github.ben-manes.versions")
+    id("info.solidsoft.pitest")
+    id("io.gitlab.arturbosch.detekt")
+    id("org.jetbrains.dokka")
+    id("org.jlleitschuh.gradle.ktlint")
+    id("org.owasp.dependencycheck")
     jacoco
 }
 
@@ -57,6 +58,11 @@ pitest {
     junit5PluginVersion.set(pitestJUnit5PluginVersion)
     mutationThreshold.set(100)
     timestampedReports.set(false)
+}
+
+dependencyCheck {
+    failBuildOnCVSS = 0f
+    // TODO: provide "skip" from -D command line
 }
 
 tasks {
