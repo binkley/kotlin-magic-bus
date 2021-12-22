@@ -19,7 +19,6 @@ plugins {
     id("com.github.ben-manes.versions")
     id("info.solidsoft.pitest")
     id("io.gitlab.arturbosch.detekt")
-    id("org.jetbrains.dokka")
     id("org.jlleitschuh.gradle.ktlint")
     id("org.owasp.dependencycheck")
     jacoco
@@ -102,8 +101,9 @@ tasks {
     }
 
     check {
-        dependsOn += jacocoTestCoverageVerification
         dependsOn += ktlintCheck
+        dependsOn += jacocoTestCoverageVerification
+        dependsOn += dependencyCheckAnalyze
         dependsOn += pitest
     }
 
