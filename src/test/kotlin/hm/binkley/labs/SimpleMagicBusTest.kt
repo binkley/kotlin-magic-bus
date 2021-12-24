@@ -67,7 +67,7 @@ internal class SimpleMagicBusTest {
         val mailboxForNoDelivery = testMailbox<LeftType>().subscribeTo(bus)
         val mailboxForAliens = testMailbox<AlienType>().subscribeTo(bus)
 
-        assertThat(bus.subscribers<RightType>())
+        assertThat(bus.subscribersTo<RightType>())
             .containsOnly(mailboxForDelivery)
 
         val message = RightType()
@@ -259,7 +259,7 @@ internal class SimpleMagicBusTest {
 
         mailbox.unsubscribeFrom(bus)
 
-        assertThat(bus.subscribers<LeftType>()).isEmpty()
+        assertThat(bus.subscribersTo<LeftType>()).isEmpty()
     }
 
     @Test
@@ -269,10 +269,10 @@ internal class SimpleMagicBusTest {
 
         bus -= mailboxForNoDelivery
 
-        assertThat(bus.subscribers<RightType>())
+        assertThat(bus.subscribersTo<RightType>())
             .containsOnly(mailboxForDelivery)
 
-        println(bus.subscribers<RightType>())
+        println(bus.subscribersTo<RightType>())
     }
 
     @Test
@@ -301,7 +301,7 @@ internal class SimpleMagicBusTest {
         val mailboxRight = testMailbox<RightType>().subscribeTo(bus)
         val mailboxBase = testMailbox<BaseType>().subscribeTo(bus)
 
-        assertThat(bus.subscribers<RightType>())
+        assertThat(bus.subscribersTo<RightType>())
             .containsOnly(mailboxBase, mailboxRight)
     }
 
@@ -320,7 +320,7 @@ internal class SimpleMagicBusTest {
         // critically on test mailbox instances being non-equal
         assertThat(testMailbox<RightType>())
             .isNotEqualTo(testMailbox<RightType>())
-        assertThat(bus.subscribers<RightType>()).isEqualTo(mailboxes)
+        assertThat(bus.subscribersTo<RightType>()).isEqualTo(mailboxes)
     }
 
     @Disabled("TODO: How to query _all_ mailboxen?")
@@ -329,7 +329,7 @@ internal class SimpleMagicBusTest {
         val firstMailbox = testMailbox<RightType>().subscribeTo(bus)
         val alienMailbox = testMailbox<AlienType>().subscribeTo(bus)
 
-        assertThat(bus.subscribers<Any>()).isEqualTo(
+        assertThat(bus.subscribersTo<Any>()).isEqualTo(
             listOf(firstMailbox, alienMailbox)
         )
     }
@@ -347,13 +347,13 @@ internal class SimpleMagicBusTest {
     fun `should have default rejected letter box`() {
         val defaultMailboxCountForReturnedAndFailedMessages = 2
 
-        assertThat(bus.subscribers<FailedMessage<Any>>())
+        assertThat(bus.subscribersTo<FailedMessage<Any>>())
             .hasSize(defaultMailboxCountForReturnedAndFailedMessages)
     }
 
     @Test
     fun `should deliver to first subscriber for returned messages before default`() {
-        val subscribers = bus.subscribers<ReturnedMessage<Any>>()
+        val subscribers = bus.subscribersTo<ReturnedMessage<Any>>()
 
         assertThat(subscribers.first().toString())
             .isEqualTo("DISCARD-MAILBOX<ReturnedMessage>")
@@ -361,7 +361,7 @@ internal class SimpleMagicBusTest {
 
     @Test
     fun `should deliver to first subscriber for failed messages before default`() {
-        val subscribers = bus.subscribers<FailedMessage<Any>>()
+        val subscribers = bus.subscribersTo<FailedMessage<Any>>()
 
         assertThat(subscribers.first().toString())
             .isEqualTo("DISCARD-MAILBOX<FailedMessage>")

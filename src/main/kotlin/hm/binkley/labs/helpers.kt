@@ -63,7 +63,7 @@ inline fun <reified T : Any> discard(): Mailbox<T> =
 /**
  * Lists [mailbox]en for [this] bus without caller providing a type object.
  *
- * @see SimpleMagicBus.subscribers
+ * @see SimpleMagicBus.subscribersTo
  */
-inline fun <reified T : Any> SimpleMagicBus.subscribers() =
-    subscribers(T::class.java)
+inline fun <reified T : Any> SimpleMagicBus.subscribersTo() =
+    subscribersTo(T::class.java)

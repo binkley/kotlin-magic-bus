@@ -16,7 +16,7 @@ package hm.binkley.labs
  *   interleaved with later subscribers to the original message
  *
  * Additional features include:
- * * [subscribers] provides a correct list of mailboxes for a given message
+ * * [subscribersTo] provides a correct list of mailboxes for a given message
  *   type in the same order as message delivery
  * * By default, if there are no mailboxes for either [ReturnedMessage] or
  *   [FailedMessage]; the result is a `StackOverflowError` in these cases.
@@ -66,7 +66,7 @@ class SimpleMagicBus : MagicBus {
     }
 
     override fun post(message: Any) {
-        val mailboxes = subscribers(message.javaClass)
+        val mailboxes = subscribersTo(message.javaClass)
         if (mailboxes.isEmpty()) return post(ReturnedMessage(this, message))
 
         mailboxes.forEach { it.post(message) }
@@ -86,13 +86,13 @@ class SimpleMagicBus : MagicBus {
 
     /** Return the mailboxes which would receive message of [messageType]. */
     @Suppress("UNCHECKED_CAST")
-    fun <T : Any> subscribers(messageType: Class<in T>) = subscriptions.entries
-        .filter { it.key.isAssignableFrom(messageType) }
-        // TODO: Moving the sort into the map leads to ClassCastException; the
-        //       filter is needed to prevent this.  There is no defined
-        //       ordering between unrelated classes
-        .sortedWith { a, b -> parentFirstAndFifoOrdering(a.key, b.key) }
-        .flatMap { it.value } as List<Mailbox<T>>
+    fun <T : Any> subscribersTo(messageType: Class<in T>) =
+        subscriptions.entries.filter { it.key.isAssignableFrom(messageType) }
+            // TODO: Moving the sort into the map leads to ClassCastException;
+            //  the filter is needed to prevent this.  There is no defined
+            //  ordering between unrelated classes
+            .sortedWith { a, b -> parentFirstAndFifoOrdering(a.key, b.key) }
+            .flatMap { it.value } as List<Mailbox<T>>
 
     private fun installFallbackMailboxes() {
         // Default do nothings: avoid stack overflow from reposting
