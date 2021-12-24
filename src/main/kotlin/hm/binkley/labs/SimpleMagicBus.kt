@@ -38,18 +38,21 @@ package hm.binkley.labs
  * ```
  */
 class SimpleMagicBus : MagicBus {
-    private val subscriptions =
+    private val _subscriptions =
         mutableMapOf<Class<*>, MutableSet<Mailbox<*>>>()
 
     init {
         installFallbackMailboxes()
     }
 
+    override val subscriptions: Map<Class<*>, Set<Mailbox<*>>>
+        get() = _subscriptions
+
     override fun <T : Any> subscribe(
         messageType: Class<in T>,
         mailbox: Mailbox<in T>,
     ) {
-        subscriptions.getOrPut(messageType) {
+        _subscriptions.getOrPut(messageType) {
             mutableSetOf()
         } += mailbox
     }
@@ -58,11 +61,12 @@ class SimpleMagicBus : MagicBus {
         messageType: Class<in T>,
         mailbox: Mailbox<in T>,
     ) {
-        val mailboxes = subscriptions.getOrElse(messageType) {
+        val mailboxes = _subscriptions.getOrElse(messageType) {
             throw NoSuchElementException()
         }
 
         if (!mailboxes.remove(mailbox)) throw NoSuchElementException()
+        if (mailboxes.isEmpty()) _subscriptions.remove(messageType)
     }
 
     override fun post(message: Any) {
@@ -73,21 +77,20 @@ class SimpleMagicBus : MagicBus {
     }
 
     @Suppress("TooGenericExceptionCaught", "RethrowCaughtException")
-    private fun <T : Any> Mailbox<in T>.post(message: T) =
-        try {
-            this(message)
-        } catch (e: RuntimeException) {
-            // NB -- `RuntimeException` is a subtype of `Exception`
-            // No need to handle `Error`: it is not a subtype
-            throw e
-        } catch (e: Exception) {
-            post(FailedMessage(this@SimpleMagicBus, this, message, e))
-        }
+    private fun <T : Any> Mailbox<in T>.post(message: T) = try {
+        this(message)
+    } catch (e: RuntimeException) {
+        // NB -- `RuntimeException` is a subtype of `Exception` No need to
+        // handle `Error`: it is not a subtype
+        throw e
+    } catch (e: Exception) {
+        post(FailedMessage(this@SimpleMagicBus, this, message, e))
+    }
 
     /** Return the mailboxes which would receive message of [messageType]. */
     @Suppress("UNCHECKED_CAST")
     fun <T : Any> subscribersTo(messageType: Class<in T>) =
-        subscriptions.entries.filter { it.key.isAssignableFrom(messageType) }
+        _subscriptions.entries.filter { it.key.isAssignableFrom(messageType) }
             // TODO: Moving the sort into the map leads to ClassCastException;
             //  the filter is needed to prevent this.  There is no defined
             //  ordering between unrelated classes
@@ -102,7 +105,7 @@ class SimpleMagicBus : MagicBus {
 }
 
 // Notes:
-// * Inverted order so that parents come first
+// * Invert natural order so that parents come first
 // * Ordering is stable so that FIFO on ties
 // * Boolean sorts with `false` coming before `true`
 private fun parentFirstAndFifoOrdering(a: Class<*>, b: Class<*>) =

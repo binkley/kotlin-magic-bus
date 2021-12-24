@@ -49,6 +49,16 @@ internal class SimpleMagicBusTest {
     }
 
     @Test
+    fun `should stop tracking message types with no subscribers`() {
+        testMailbox<RightType>()
+            .subscribeTo(bus)
+            .unsubscribeFrom(bus)
+
+        assertThat(bus.subscriptions.containsKey(RightType::class.java))
+            .isFalse
+    }
+
+    @Test
     fun `should receive correct type`() {
         val mailbox = testMailbox<RightType>().subscribeTo(bus)
         val message = RightType()
@@ -403,7 +413,7 @@ internal class SimpleMagicBusTest {
         assertOn(delivered.asList())
 
     private fun <T> assertOn(delivered: List<TestMailbox<T>>) =
-        AssertDelivery(delivered.flatMap { it.messages }, returned, failed)
+        AssertDelivered(delivered.flatMap { it.messages }, returned, failed)
 
     private infix fun <T> Mailbox<T>.with(message: T) = this to message
     private infix fun <T> Pair<Mailbox<T>, T>.and(failure: Exception) =
@@ -429,7 +439,7 @@ internal class SimpleMagicBusTest {
 
     private fun allMailboxes() = listOf<TestMailbox<Any>>()
 
-    private inner class AssertDelivery<T>(
+    private inner class AssertDelivered<T>(
         private val delivered: List<T>,
         private val returned: List<ReturnedMessage<*>>,
         private val failed: List<FailedMessage<*>>,
@@ -460,16 +470,15 @@ internal class SimpleMagicBusTest {
 
         fun <U : T> failedInOrder(
             vararg failed: Pair<Pair<Mailbox<U>, U>, Exception>,
-        ) =
-            apply {
-                assertThat(this.failed).isEqualTo(
-                    failed.map {
-                        val (first, failure) = it
-                        val (mailbox, message) = first
-                        FailedMessage(bus, mailbox, message, failure)
-                    }
-                )
-            }
+        ) = apply {
+            assertThat(this.failed).isEqualTo(
+                failed.map {
+                    val (first, failure) = it
+                    val (mailbox, message) = first
+                    FailedMessage(bus, mailbox, message, failure)
+                }
+            )
+        }
     }
 }
 
