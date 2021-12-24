@@ -110,9 +110,16 @@ class BeGlobal {
 }
 ```
 
-## Tech features
+### Introspection
 
-* Pure JDK, no 3<sup>rd</sup> parties
+You may examine mapping of message types to subscribers using
+`MagicBus.subscribers`.  This may be useful in testing or debugging.  This 
+mapping represents _internal state_ of your message bus, so be cautious in 
+using this mapping.
+
+## Implementation
+
+* Pure JDK, no 3<sup>rd</sup>-party dependencies
 * _Almost_ 100% test coverage
 * Static code analysis is happy: [Detekt](https://detekt.github.io/detekt/)
   [Ktlint](https://ktlint.github.io/), 
