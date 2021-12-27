@@ -76,17 +76,6 @@ class SimpleMagicBus : MagicBus {
         mailboxes.forEach { it.post(message) }
     }
 
-    @Suppress("TooGenericExceptionCaught", "RethrowCaughtException")
-    private fun <T : Any> Mailbox<in T>.post(message: T) = try {
-        this(message)
-    } catch (e: RuntimeException) {
-        // NB -- `RuntimeException` is a subtype of `Exception` No need to
-        // handle `Error`: it is not a subtype
-        throw e
-    } catch (e: Exception) {
-        post(FailedMessage(this@SimpleMagicBus, this, message, e))
-    }
-
     /** Return the mailboxes which would receive message of [messageType]. */
     @Suppress("UNCHECKED_CAST")
     fun <T : Any> subscribersTo(messageType: Class<in T>) =
@@ -96,6 +85,19 @@ class SimpleMagicBus : MagicBus {
             //  ordering between unrelated classes
             .sortedWith { a, b -> parentFirstAndFifoOrdering(a.key, b.key) }
             .flatMap { it.value } as List<Mailbox<T>>
+
+    @Suppress("TooGenericExceptionCaught", "RethrowCaughtException")
+    private fun <T : Any> Mailbox<in T>.post(message: T) = try {
+        this(message)
+    } catch (e: RuntimeException) {
+        // NB -- `RuntimeException` is a subtype of `Exception` No need to
+        // handle `Error`: it is not a subtype, and catching `Error` leads to
+        // bad mojo; see
+        // https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Error.html
+        throw e
+    } catch (e: Exception) {
+        post(FailedMessage(this@SimpleMagicBus, this, message, e))
+    }
 
     private fun installFallbackMailboxes() {
         // Default do nothings: avoid stack overflow from reposting

@@ -171,20 +171,21 @@ internal class SimpleMagicBusTest {
     @Test
     fun `should bubble out runtime exceptions`() {
         val failure = RuntimeException()
+        bus += failWith<LeftType> { failure }
 
         assertThatThrownBy {
-            bus += failWith<LeftType> { failure }
-
             bus.post(LeftType())
         }.isSameAs(failure)
     }
 
     @Test
-    fun `should bubble out JVM errors (Error vs Exception)`() {
-        val failure = CoderMalfunctionError(Exception())
-        assertThatThrownBy {
-            bus += failWith<LeftType> { failure }
+    fun `should let JVM errors (Error vs Exception) bubble out`() {
+        val failure = CoderMalfunctionError(
+            Exception("SOMETHING WICKED THIS WAY COMES")
+        )
+        bus += failWith<LeftType> { failure }
 
+        assertThatThrownBy {
             bus.post(LeftType())
         }.isSameAs(failure)
     }

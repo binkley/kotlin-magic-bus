@@ -128,6 +128,7 @@ using this mapping.
 
 ## TODO
 
+* Should `DEFAULT_BUS` be a pre-defined global?
 * Finding all subscribers (`Any`). See disabled test in `SimpleMagicBusTest`
 * Deep messaging paths (1K+): First try at `DeepRecursive` did not go well
 * Greater null-safety in declarations (`*` vs `T : Any`).
