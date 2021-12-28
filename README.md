@@ -27,12 +27,12 @@ tests.
 
 ## Examples
 
-### Post a message
+### Post messages
 
 ```kotlin
 val bus: MagicBus // assigned elsewhere
 
-bus.post(UUID.randomUUID()) // Only received by subscribers of `UUID` JVM type
+bus.post(UUID.randomUUID()) // Only received by subscribers of `UUID` JDK type
 ```
 
 ### Receive messages
