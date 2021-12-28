@@ -282,8 +282,6 @@ internal class SimpleMagicBusTest {
 
         assertThat(bus.subscribersTo<RightType>())
             .containsOnly(mailboxForDelivery)
-
-        println(bus.subscribersTo<RightType>())
     }
 
     @Test
