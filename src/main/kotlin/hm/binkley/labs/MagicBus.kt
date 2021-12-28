@@ -26,8 +26,8 @@ val DEFAULT_BUS: SimpleMagicBus by lazy { SimpleMagicBus() }
  * before subtypes mailboxes, and in subscription order thereafter.
  */
 interface MagicBus {
-    /** Inspects current subscriptions. */
-    val subscriptions: Map<Class<*>, Set<Mailbox<*>>>
+    /** Current subscriptions listed in FIFO order of receiving messages. */
+    val subscriptions: Map<Class<*>, List<Mailbox<*>>>
 
     /** Delivers messages of [messageType] to [mailbox]. */
     fun <T : Any> subscribe(

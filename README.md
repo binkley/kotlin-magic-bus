@@ -50,7 +50,7 @@ bus.post(BigDecimal("1000000")) // A BigDecimal is a Number
 bus.post("Frodo lives!") // Nothing happens: not a Number
 ```
 
-### See all messages, regardless of type or sender
+### Process all messages, regardless of type or sender
 
 ```kotlin
 val bus: MagicBus // assigned elsewhere
@@ -75,13 +75,16 @@ bus.unsubscribe(mailbox) // Stop receiving messages
 bus.post(SomeType()) // Not printed
 ```
 
-### Observe dead letters
+### Process dead letters or failed posts
 
-See `hm.binkley.labs.SimpleMagicBusTest.should save dead letters()`
+See [_Make me a bus_](#make-me-a-bus) (next section) for an example that 
+saves dead letters or failed posts.
 
 ### Make me a bus
 
-See `hm.binkley.labs.MagicBusKt.DEFAULT_BUS`, a single-threaded bus.
+Use `hm.binkley.labs.MagicBusKt.DEFAULT_BUS` for a single-threaded bus that 
+by default discards `ReturnedMessage` and `FailedMessage` posts.  
+`SimpleMessageBusTest` uses a bus that tracks these posts.
 
 ```kotlin
 // Track returned (no mailbox) messages, and failed (mailbox throws exception)
@@ -125,13 +128,13 @@ using this mapping.
   [Ktlint](https://ktlint.github.io/), 
   and [DependencyCheck](https://owasp.org/www-project-dependency-check/)
 * Focus is on functions, not types, for subscriptions and bus behavior
+* Deep recursion among mailboxen results in stack overflow; however, 
+  triggering this takes a message post storm of typically 1000+, and this 
+  should indicate the messaging patterns are very smelly
 
 ## TODO
 
 * Should `DEFAULT_BUS` be a pre-defined global?
-* Finding all subscribers (`Any`). See disabled test in `SimpleMagicBusTest`
-* Deep messaging paths (1K+): First try at `DeepRecursive` did not go well
-* Greater null-safety in declarations (`*` vs `T : Any`).
-  See https://stackoverflow.com/a/40139892
-* Avoid use of JDK class reflection, ie, `SimpleMagicBus.subscribers`. This
-  method needs cleanup in any case
+* Greater null-safety in declarations (`*` vs `T : Any`). See
+  [_Difference between "*" and "Any" in Kotlin
+  generics_](https://stackoverflow.com/a/40139892)

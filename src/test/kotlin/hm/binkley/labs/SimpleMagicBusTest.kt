@@ -2,7 +2,6 @@ package hm.binkley.labs
 
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.nio.charset.CoderMalfunctionError
@@ -330,17 +329,6 @@ internal class SimpleMagicBusTest {
         assertThat(testMailbox<RightType>())
             .isNotEqualTo(testMailbox<RightType>())
         assertThat(bus.subscribersTo<RightType>()).isEqualTo(mailboxes)
-    }
-
-    @Disabled("TODO: How to query _all_ mailboxen?")
-    @Test
-    fun `should provide subscribers for unrelated types in some order`() {
-        val firstMailbox = testMailbox<RightType>().subscribeTo(bus)
-        val alienMailbox = testMailbox<AlienType>().subscribeTo(bus)
-
-        assertThat(bus.subscribersTo<Any>()).isEqualTo(
-            listOf(firstMailbox, alienMailbox)
-        )
     }
 
     @Test

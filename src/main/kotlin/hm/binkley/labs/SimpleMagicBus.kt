@@ -39,13 +39,13 @@ package hm.binkley.labs
  */
 class SimpleMagicBus : MagicBus {
     private val _subscriptions =
-        mutableMapOf<Class<*>, MutableSet<Mailbox<*>>>()
+        mutableMapOf<Class<*>, MutableList<Mailbox<*>>>()
 
     init {
         installFallbackMailboxes()
     }
 
-    override val subscriptions: Map<Class<*>, Set<Mailbox<*>>>
+    override val subscriptions: Map<Class<*>, List<Mailbox<*>>>
         get() = _subscriptions
 
     override fun <T : Any> subscribe(
@@ -53,7 +53,7 @@ class SimpleMagicBus : MagicBus {
         mailbox: Mailbox<in T>,
     ) {
         _subscriptions.getOrPut(messageType) {
-            mutableSetOf()
+            mutableListOf()
         } += mailbox
     }
 
@@ -99,8 +99,13 @@ class SimpleMagicBus : MagicBus {
         post(FailedMessage(this@SimpleMagicBus, this, message, e))
     }
 
+    /**
+     * Add fallback do-nothing mailboxes for [ReturnedMessage] and
+     * [FailedMessage].  This avoids stack overflow from reposting if user
+     * does not install mailboxen for them, or if user mailboxen are
+     * themselves faulty.
+     */
     private fun installFallbackMailboxes() {
-        // Default do nothings: avoid stack overflow from reposting
         subscribe(discard<ReturnedMessage<*>>())
         subscribe(discard<FailedMessage<*>>())
     }
