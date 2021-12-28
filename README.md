@@ -40,6 +40,7 @@ bus.post(UUID.randomUUID()) // Only received by subscribers of `UUID` JDK type
 ```kotlin
 val bus: MagicBus // assigned elsewhere
 
+// A mailbox (subscriber) is just a function; could be an object for example
 bus.subscribe<Number> { message ->
     println("$message")
 }
@@ -50,13 +51,26 @@ bus.post(BigDecimal("1000000")) // A BigDecimal is a Number
 bus.post("Frodo lives!") // Nothing happens: not a Number
 ```
 
+The same example using objects or class instances:
+```kotlin
+val bus: MagicBus // assigned elsewhere
+
+// A mailbox (subscriber) is just a function; could be an object for example
+bus.subscribe(object : Mailbox<Number> {
+  override fun invoke(message: Number) { } // Do nothing for now
+})
+
+// Rest of example elided
+```
+
 ### Process all messages, regardless of type or sender
 
 ```kotlin
 val bus: MagicBus // assigned elsewhere
 
+// Example for debugging
 bus.subscribe<Any> { message ->
-    println(message) // Messages are never null; any type of message
+    println(message) // Messages are never null; could be any message type
 }
 ```
 
@@ -102,14 +116,14 @@ val bus = SimpleMagicBus().apply {
 ```
 
 Or, if you're _lazy_ like me (pun intended; see
-[implementation](src/main/kotlin/hm/binkley/labs/MagicBus.kt)):
+[implementation](src/main/kotlin/hm/binkley/labs/MagicBus.kt)).  
+`DEFAULT_BUS` discards `ReturnedMessage` and `FailedMessage` posts as the 
+base case.  Add mailboxen to act on these posted message types.
 
 ```kotlin
-class BeGlobal {
-    fun main() {
-        val bus = DEFAULT_GLOBAL_BUS
-        // Do bus stuff
-    }
+fun main() {
+    val globalBus = DEFAULT_GLOBAL_BUS
+    // Provide `globalBus`, for example, to Spring Framework for injection
 }
 ```
 
