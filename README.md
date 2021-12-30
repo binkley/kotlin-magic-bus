@@ -9,25 +9,33 @@
 [![vulnerabilities](https://snyk.io/test/github/binkley/kotlin-magic-bus/badge.svg)](https://snyk.io/test/github/binkley/kotlin-magic-bus)
 [![license](https://img.shields.io/badge/license-Public%20Domain-blue.svg)](http://unlicense.org/)
 
-Kotlin version of self-messaging
+**Kotlin version of self-messaging**
 
-(For an earlier source using Java as the source language, see
+(For an earlier version using Java as the source language, see
 [the original Java version](https://github.com/binkley/magic-bus).)
 
 ## What is this?
 
 _Magic Bus_ is an _internal_ message bus for JVM programs to talk with
-themselves. It uses type-inheritance of messages, not string topics, for
-subscribers indicate interest in posted messages. Methods are type-safe.
+themselves. The bus uses type-inheritance of messages, not string topics, and
+subscribers indicate interest in posted messages by type. Methods are
+type-safe.
+
+The goal is to support
+[messaging patterns](https://www.enterpriseintegrationpatterns.com/patterns/messaging/)
+within a single JVM process (program).
 
 ## Build
 
 Use `./gradlew build` (Gradle) or `./batect build` (Batect) to build, run
-tests.
+tests.  CI for the repo uses Batect to validate pushes.
 
 ## Examples
 
 ### Post messages
+
+Any JVM type can be published as a message.  Recievers ("mailboxen") 
+accept new posts based on typing.
 
 ```kotlin
 val bus: MagicBus // assigned elsewhere
@@ -37,30 +45,35 @@ bus.post(UUID.randomUUID()) // Only received by subscribers of `UUID` JDK type
 
 ### Receive messages
 
+By choice, this library does not use annotations to note subscribers or 
+publishers.
+
 ```kotlin
 val bus: MagicBus // assigned elsewhere
 
-// A mailbox (subscriber) is just a function; could be an object for example
+// A mailbox (subscriber) is just a function; could be a class or Kotlin 
+// object which implements the function type (shape).  This example just 
+// prints the message to STDOUT
 bus.subscribe<Number> { message ->
     println("$message")
 }
 
-bus.post(1) // An Int is a Number
-bus.post(3.14f) // An Float is a Number
-bus.post(BigDecimal("1000000")) // A BigDecimal is a Number
-bus.post("Frodo lives!") // Nothing happens: not a Number
+bus.post(1) // An Int is a Number -- PRINTED
+bus.post(3.14f) // An Float is a Number -- PRINTED
+bus.post(BigDecimal("1000000")) // A BigDecimal is a Number -- PRINTED
+bus.post("Frodo lives!") // Nothing happens: not a Number -- NOT PRINTED
 ```
 
-The same example using objects or class instances:
+Similar example using Kotlin objects (could be a class instance):
 ```kotlin
 val bus: MagicBus // assigned elsewhere
 
-// A mailbox (subscriber) is just a function; could be an object for example
 bus.subscribe(object : Mailbox<Number> {
-  override fun invoke(message: Number) { } // Do nothing for now
+    // `invoke` is Kotlin-specific; the technique varies by source language
+    override fun invoke(message: Number) {
+        println("I AM A NUMBER! HEAR MY VALUE: $message")
+    }
 })
-
-// Rest of example elided
 ```
 
 ### Process all messages, regardless of type or sender
@@ -70,7 +83,7 @@ val bus: MagicBus // assigned elsewhere
 
 // Example for debugging
 bus.subscribe<Any> { message ->
-    println(message) // Messages are never null; could be any message type
+    myDebugLog.log(message) // Messages are never null 
 }
 ```
 
@@ -82,11 +95,11 @@ val bus: MagicBus // assigned elsewhere
 val mailbox: Mailbox<SomeType> = { println(it) }
 bus.subscribe(mailbox)
 
-bus.post(SomeType()) // printed
+bus.post(SomeType()) // PRINTED
 
 bus.unsubscribe(mailbox) // Stop receiving messages
 
-bus.post(SomeType()) // Not printed
+bus.post(SomeType()) // NOT PRINTED
 ```
 
 ### Process dead letters or failed posts
@@ -96,9 +109,14 @@ saves dead letters or failed posts.
 
 ### Make me a bus
 
-Use `hm.binkley.labs.MagicBusKt.DEFAULT_BUS` for a single-threaded bus that 
-by default discards `ReturnedMessage` and `FailedMessage` posts.  
-`SimpleMessageBusTest` uses a bus that tracks these posts.
+Use `MagicBusKt.DEFAULT_BUS` for a global single-threaded bus that by default
+discards `ReturnedMessage` and `FailedMessage` posts.  
+`TestMagicBus` in `SimpleMagicBusTest` extends to track all posts for testing.
+
+**Typical programs would add handling for `ReturnedMessage` (no subscriber)
+and `FailedMessage` (a subscriber "blew up").**  This library does not include
+helpful default handlers for these cases: typical strategies include logging
+or business logic, both which are beyond scope of this library.
 
 ```kotlin
 // Track returned (no mailbox) messages, and failed (mailbox throws exception)
@@ -114,11 +132,33 @@ val bus = SimpleMagicBus().apply {
     }
 }
 ```
+An alternative using class extension:
+```kotlin
+// Track returned (no mailbox) messages, and failed (mailbox throws exception)
+// messages, say for testing
+class ExampleRecordingMagicBus: SimpleMagicBus() {
+    private val _returned = mutableListOf<ReturnedMessage>()
+    private val _failed = mutableListOf<FailedMessage>()
+
+    // Typical pattern for visible but not modifiable  
+    val returned: List<ReturnedMessage> get() = _returned
+    val failed: List<ReturnedMessage> get() = _failed
+
+    init {
+        subscribe<ReturnedMessage> {
+            _returned += it
+        }
+        subscribe<FailedMessage> {
+            _failed += it
+        }
+    }
+}
+```
 
 Or, if you're _lazy_ like me (pun intended; see
 [implementation](src/main/kotlin/hm/binkley/labs/MagicBus.kt)).  
-`DEFAULT_BUS` discards `ReturnedMessage` and `FailedMessage` posts as the 
-base case.  Add mailboxen to act on these posted message types.
+`DEFAULT_BUS` discards `ReturnedMessage` and `FailedMessage` posts by default.
+Add mailboxen to act on these posted message types.
 
 ```kotlin
 fun main() {
