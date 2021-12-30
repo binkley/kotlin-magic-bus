@@ -8,23 +8,7 @@ import java.nio.charset.CoderMalfunctionError
 import java.util.concurrent.atomic.AtomicInteger
 
 internal class SimpleMagicBusTest {
-    // TODO: Why is the key `<*>` but the value is `<Any>`?
-    private val delivered = mutableMapOf<Mailbox<*>, MutableList<Any>>()
-
-    // TODO: Why returned `<Any>` but failed is `<*>`?
-    private val returned = mutableListOf<ReturnedMessage<Any>>()
-    private val failed = mutableListOf<FailedMessage<*>>()
-
-    // Do *not* use `DEFAULT_BUS`.  The test needs a new instance each run,
-    // and `DEFAULT_BUS` is a global static
-    private val bus = SimpleMagicBus().also { bus ->
-        bus += namedMailbox<ReturnedMessage<Any>>("TEST-DEAD-LETTERBOX") {
-            returned += it
-        }
-        bus += namedMailbox<FailedMessage<Any>>("TEST-FAILED-LETTERBOX") {
-            failed += it
-        }
-    }
+    private val bus = TestMagicBus()
 
     @Test
     fun `should have distinct named mailboxes even with the same name`() {
@@ -337,7 +321,7 @@ internal class SimpleMagicBusTest {
 
         bus.post(message)
 
-        assertThat(returned).containsOnly(ReturnedMessage(bus, message))
+        assertThat(bus.returned).containsOnly(ReturnedMessage(bus, message))
     }
 
     @Test
@@ -384,7 +368,7 @@ internal class SimpleMagicBusTest {
 
         bus.post(message)
 
-        assertThat(failed)
+        assertThat(bus.failed)
             .containsOnly(FailedMessage(bus, mailbox, message, failure))
     }
 
@@ -400,7 +384,11 @@ internal class SimpleMagicBusTest {
         assertOn(delivered.asList())
 
     private fun <T> assertOn(delivered: List<TestMailbox<T>>) =
-        AssertDelivered(delivered.flatMap { it.messages }, returned, failed)
+        AssertDelivered(
+            delivered.flatMap { it.messages },
+            bus.returned,
+            bus.failed
+        )
 
     private infix fun <T> Mailbox<T>.with(message: T) = this to message
     private infix fun <T> Pair<Mailbox<T>, T>.and(failure: Exception) =
@@ -408,21 +396,7 @@ internal class SimpleMagicBusTest {
 
     private inline fun <reified T> testMailbox(
         messages: MutableList<T> = mutableListOf(),
-    ) = TestMailbox(T::class.java, messages)
-
-    private inner class TestMailbox<T>(
-        private val messageType: Class<T>,
-        val messages: MutableList<T>,
-    ) : Mailbox<T> {
-        override operator fun invoke(message: T) {
-            messages.add(message)
-            delivered.getOrPut(this) {
-                mutableListOf()
-            } += message as Any
-        }
-
-        override fun toString() = "TEST-MAILBOX<${messageType.simpleName}>"
-    }
+    ) = TestMailbox(bus, T::class.java, messages)
 
     private fun allMailboxes() = listOf<TestMailbox<Any>>()
 
@@ -504,3 +478,40 @@ private class LeftType : BaseType()
 private open class RightType : BaseType()
 private class FarRightType : RightType()
 private class AlienType
+
+/**
+ * @todo Why is delivered key `<*>` but the value is `<Any>`?
+ * @todo Why is returned `<Any>` but failed is `<*>`?
+ */
+private class TestMagicBus : SimpleMagicBus() {
+    val delivered = mutableMapOf<Mailbox<*>, MutableList<Any>>()
+    private val _returned = mutableListOf<ReturnedMessage<Any>>()
+    private val _failed = mutableListOf<FailedMessage<*>>()
+
+    val returned: List<ReturnedMessage<Any>> get() = _returned
+    val failed: List<FailedMessage<*>> get() = _failed
+
+    init {
+        this += namedMailbox<ReturnedMessage<Any>>("TEST-DEAD-LETTERBOX") {
+            _returned += it
+        }
+        this += namedMailbox<FailedMessage<Any>>("TEST-FAILED-LETTERBOX") {
+            _failed += it
+        }
+    }
+}
+
+private class TestMailbox<T>(
+    private val bus: TestMagicBus,
+    private val messageType: Class<T>,
+    val messages: MutableList<T>,
+) : Mailbox<T> {
+    override operator fun invoke(message: T) {
+        messages.add(message)
+        bus.delivered.getOrPut(this) {
+            mutableListOf()
+        } += message as Any
+    }
+
+    override fun toString() = "TEST-MAILBOX<${messageType.simpleName}>"
+}

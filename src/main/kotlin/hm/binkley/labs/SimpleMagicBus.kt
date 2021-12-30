@@ -23,7 +23,8 @@ package hm.binkley.labs
  *   Code creating a new `SimpleMessageBus` is responsible for subscribing
  *   to these message types
  *
- * Example bus creation with handling of returned and failed messages:
+ * Example bus creation with handling of returned and failed messages
+ * (alternatively, extend the class and encapsulate subscriptions in `init`):
  * ```
  * val failed = mutableListOf<FailedMessage<*>>()
  * val delivered = mutableMapOf<Mailbox<*>, MutableList<Any>>()
@@ -37,7 +38,7 @@ package hm.binkley.labs
  * }
  * ```
  */
-class SimpleMagicBus : MagicBus {
+open class SimpleMagicBus : MagicBus {
     private val _subscriptions =
         mutableMapOf<Class<*>, MutableList<Mailbox<*>>>()
 
