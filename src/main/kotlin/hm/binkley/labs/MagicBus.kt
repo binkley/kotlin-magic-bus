@@ -41,6 +41,12 @@ interface MagicBus {
         mailbox: Mailbox<in T>,
     )
 
-    /** Posts [message] to any subscribed mailboxen based on message type. */
+    /**
+     * Posts [message] to any subscribed mailboxen based on message type.
+     *
+     * Note that:
+     * - Subscribed mailboxes that fail produce [FailedMessage] posts
+     * - Posts with no subscribers produce [ReturnedMessage] posts
+     */
     fun post(message: Any)
 }

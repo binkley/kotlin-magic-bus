@@ -50,11 +50,11 @@ And:
 - _Failed_ (adj) &mdash; a mailbox raises an exception while processing a
   letter. This always indicates an error in design or mailbox logic.  
   **Note**: For JVM, distinguish between `Exception` (a program concern)
-  and `Error` (a JVM concern).  This framework publishes `Exception`s, and 
-  does not publish `Error`s
+  and `Error` (a JVM concern). `SimpleMagicBus` posts mailbox `Exception`s as
+  `FailedMessage`s, and `Error`s bubble out
 - _Returned_ (adj) &mdash; a posted letter with no subscribed mailbox to
   receive. Typically, this indicates a potential error in program design or
-  logic
+  logic. `SimpleMagicBus` by default discards returned messages
 
 ## Examples
 
