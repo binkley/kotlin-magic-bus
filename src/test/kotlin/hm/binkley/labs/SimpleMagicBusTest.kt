@@ -195,6 +195,8 @@ internal class SimpleMagicBusTest {
         bus += failWith<RightType> { Exception() }
         bus += failWith<FailedMessage<Any>> { Exception() }
 
+        // TODO: Rather than overflowing the stack, how to alert caller?
+        //       Not appropriate to add a logging framework, so what else?
         assertThrows<StackOverflowError> {
             bus.post(RightType())
         }
