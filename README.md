@@ -30,12 +30,39 @@ within a single JVM process (program).
 Use `./gradlew build` (Gradle) or `./batect build` (Batect) to build, run
 tests.  CI for the repo uses Batect to validate pushes.
 
+## Terminology
+
+- _Letter_ (noun) &mdash; synonym for "message": this is a JVM object of some
+  instance type to be processed by other objects or functions. The nouns,
+  "letter" and "message" may be used interchangeably depending on context 
+  or on common industry usage.  Typically, this is a business or logical 
+  type to process by your system
+- _Mailbox_ (noun) \[pl: Mailboxen] &mdash; a function or method that 
+  receives letters, and processes them in some fashion (possibly 
+  discarding them).  Typically these manifest your business or processing 
+  logic
+- _Post_ (verb) &mdash; to send a letter. The poster does not know which 
+  mailboxen may process the letter.  Typically, your domain boundaries post 
+  letters for other internal domains to process
+
+And:
+
+- _Failed_ (adj) &mdash; a mailbox raises an exception while processing a
+  letter. This always indicates an error in design or mailbox logic.  
+  **Note**: For JVM, distinguish between `Exception` (a program concern)
+  and `Error` (a JVM concern).  This framework publishes `Exception`s, and 
+  does not publish `Error`s
+- _Returned_ (adj) &mdash; a posted letter with no subscribed mailbox to
+  receive. Typically, this indicates a potential error in program design or
+  logic
+
 ## Examples
 
 ### Post messages
 
-Any JVM type can be published as a message.  Recievers ("mailboxen") 
-accept new posts based on typing.
+Any JVM type can be published as a message. A receiver (a
+receiver/subscriber is termed a `Mailbox` in code) receives new posts 
+based on typing.
 
 ```kotlin
 val bus: MagicBus // assigned elsewhere
