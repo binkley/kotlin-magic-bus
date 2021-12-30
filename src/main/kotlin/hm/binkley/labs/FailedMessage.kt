@@ -3,7 +3,7 @@ package hm.binkley.labs
 import lombok.Generated
 
 /**
- * Subscribe to [FailedMessage] to find out about broken mailboxes.  The bus
+ * Subscribe to [FailedMessage] to find out about broken mailboxen.  The bus
  * posts a separate message for each broken mailbox.
  *
  * *NB* &mdash; This does not capture `RuntimeException` or `Error` failures;

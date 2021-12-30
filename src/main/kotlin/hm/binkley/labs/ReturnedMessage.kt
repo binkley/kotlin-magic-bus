@@ -4,7 +4,7 @@ import lombok.Generated
 
 /**
  * Subscribe to [ReturnedMessage] to find out about posts with no subscribed
- * mailboxes.
+ * mailboxen.
  */
 @Generated // Lie to JaCoCo
 data class ReturnedMessage<T : Any>(

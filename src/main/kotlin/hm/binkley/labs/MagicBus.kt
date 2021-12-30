@@ -23,7 +23,7 @@ val DEFAULT_BUS: SimpleMagicBus by lazy { SimpleMagicBus() }
  * self-communicate via messaging_ by types.
  *
  * Note that messages are delivered in _causal_ order, supertype receivers
- * before subtypes mailboxes, and in subscription order thereafter.
+ * before subtypes mailboxen, and in subscription order thereafter.
  */
 interface MagicBus {
     /** Current subscriptions listed in FIFO order of receiving messages. */
@@ -41,6 +41,6 @@ interface MagicBus {
         mailbox: Mailbox<in T>,
     )
 
-    /** Posts [message] to any subscribed mailboxes based on message type. */
+    /** Posts [message] to any subscribed mailboxen based on message type. */
     fun post(message: Any)
 }

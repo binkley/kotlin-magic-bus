@@ -3,22 +3,22 @@ package hm.binkley.labs
 /**
  * A _simple_ implementation of [MagicBus].  Limitations include:
  * * No thread safety
- * * Single-threaded [post] &mdash; callers _block_ until all mailboxes
+ * * Single-threaded [post] &mdash; callers _block_ until all mailboxen
  *   process the message
  * * No loop detection &mdash; no attempt is made to prevent "storms" whereby
- *   a single post results in mailboxes posting additional messages, possibly
+ *   a single post results in mailboxen posting additional messages, possibly
  *   without limits
  *
  * Upsides include:
  * * Guaranteed ordering: Subscribers to parent classes always receive
  *   a message before child class subscribers; the bus always sends
- *   [FailedMessage] notifications in the order in which mailboxes failed,
+ *   [FailedMessage] notifications in the order in which mailboxen failed,
  *   interleaved with later subscribers to the original message
  *
  * Additional features include:
- * * [subscribersTo] provides a correct list of mailboxes for a given message
+ * * [subscribersTo] provides a correct list of mailboxen for a given message
  *   type in the same order as message delivery
- * * By default, if there are no mailboxes for either [ReturnedMessage] or
+ * * By default, if there are no mailboxen for either [ReturnedMessage] or
  *   [FailedMessage]; the result is a `StackOverflowError` in these cases.
  *   Code creating a new `SimpleMessageBus` is responsible for subscribing
  *   to these message types
@@ -43,7 +43,7 @@ open class SimpleMagicBus : MagicBus {
         mutableMapOf<Class<*>, MutableList<Mailbox<*>>>()
 
     init {
-        installFallbackMailboxes()
+        installFallbackmailboxen()
     }
 
     override val subscriptions: Map<Class<*>, List<Mailbox<*>>>
@@ -62,22 +62,22 @@ open class SimpleMagicBus : MagicBus {
         messageType: Class<in T>,
         mailbox: Mailbox<in T>,
     ) {
-        val mailboxes = _subscriptions.getOrElse(messageType) {
+        val mailboxen = _subscriptions.getOrElse(messageType) {
             throw NoSuchElementException()
         }
 
-        if (!mailboxes.remove(mailbox)) throw NoSuchElementException()
-        if (mailboxes.isEmpty()) _subscriptions.remove(messageType)
+        if (!mailboxen.remove(mailbox)) throw NoSuchElementException()
+        if (mailboxen.isEmpty()) _subscriptions.remove(messageType)
     }
 
     override fun post(message: Any) {
-        val mailboxes = subscribersTo(message.javaClass)
-        if (mailboxes.isEmpty()) return post(ReturnedMessage(this, message))
+        val mailboxen = subscribersTo(message.javaClass)
+        if (mailboxen.isEmpty()) return post(ReturnedMessage(this, message))
 
-        mailboxes.forEach { it.post(message) }
+        mailboxen.forEach { it.post(message) }
     }
 
-    /** Return the mailboxes which would receive message of [messageType]. */
+    /** Return the mailboxen which would receive message of [messageType]. */
     @Suppress("UNCHECKED_CAST")
     fun <T : Any> subscribersTo(messageType: Class<in T>) =
         _subscriptions.entries.filter { it.key.isAssignableFrom(messageType) }
@@ -101,12 +101,12 @@ open class SimpleMagicBus : MagicBus {
     }
 
     /**
-     * Add fallback do-nothing mailboxes for [ReturnedMessage] and
+     * Add fallback do-nothing mailboxen for [ReturnedMessage] and
      * [FailedMessage].  This avoids stack overflow from reposting if user
      * does not install mailboxen for them, or if user mailboxen are
      * themselves faulty.
      */
-    private fun installFallbackMailboxes() {
+    private fun installFallbackmailboxen() {
         subscribe(discard<ReturnedMessage<*>>())
         subscribe(discard<FailedMessage<*>>())
     }
