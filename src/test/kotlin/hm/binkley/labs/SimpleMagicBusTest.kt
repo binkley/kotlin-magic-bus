@@ -115,7 +115,7 @@ internal class SimpleMagicBusTest {
 
         bus.post(message)
 
-        assertOn(allmailboxen())
+        assertOn(allMailboxen())
             .noMessageDelivered()
             .returnedInOrder(message)
             .noFailingMailbox()
@@ -142,7 +142,7 @@ internal class SimpleMagicBusTest {
 
         bus.post(message)
 
-        assertOn(allmailboxen())
+        assertOn(allMailboxen())
             .noMessageDelivered()
             .noMessageReturned()
             .failedInOrder(
@@ -204,7 +204,7 @@ internal class SimpleMagicBusTest {
 
     @Test
     fun `should receive mailboxen for same type in subscription order`() {
-        val mailboxen = Orderedmailboxen()
+        val mailboxen = OrderedMailboxen()
         val mailboxA = mailboxen.orderedMailbox<RightType>().subscribeTo(bus)
         val mailboxB = mailboxen.orderedMailbox<RightType>().subscribeTo(bus)
 
@@ -223,7 +223,7 @@ internal class SimpleMagicBusTest {
         // FYI -- it is important that mailboxen subscribe *not* in class
         // hierarchy order, so that the test can verify messages are received
         // in the correct order nonetheless
-        val mailboxen = Orderedmailboxen()
+        val mailboxen = OrderedMailboxen()
         val rightMailbox =
             mailboxen.orderedMailbox<RightType>().subscribeTo(bus)
         //  And an unrelated type which should *not* show up
@@ -356,7 +356,7 @@ internal class SimpleMagicBusTest {
 
         bus.post(RightType())
 
-        assertOn(allmailboxen())
+        assertOn(allMailboxen())
             .noMessageDelivered()
             .noMessageReturned()
             .noFailingMailbox()
@@ -400,7 +400,7 @@ internal class SimpleMagicBusTest {
         messages: MutableList<T> = mutableListOf(),
     ) = TestMailbox(bus, T::class.java, messages)
 
-    private fun allmailboxen() = listOf<TestMailbox<Any>>()
+    private fun allMailboxen() = listOf<TestMailbox<Any>>()
 
     private inner class AssertDelivered<T>(
         private val delivered: List<T>,
@@ -445,7 +445,7 @@ internal class SimpleMagicBusTest {
     }
 }
 
-private class Orderedmailboxen {
+private class OrderedMailboxen {
     private val sequence = AtomicInteger(-1)
     private val mailboxen = mutableListOf<OrderedMailbox<*>>()
 

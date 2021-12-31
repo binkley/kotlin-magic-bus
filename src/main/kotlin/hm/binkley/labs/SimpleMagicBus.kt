@@ -43,7 +43,7 @@ open class SimpleMagicBus : MagicBus {
         mutableMapOf<Class<*>, MutableList<Mailbox<*>>>()
 
     init {
-        installFallbackmailboxen()
+        installFallbackMailboxen()
     }
 
     override val subscriptions: Map<Class<*>, List<Mailbox<*>>>
@@ -106,7 +106,7 @@ open class SimpleMagicBus : MagicBus {
      * does not install mailboxen for them, or if user mailboxen are
      * themselves faulty.
      */
-    private fun installFallbackmailboxen() {
+    private fun installFallbackMailboxen() {
         subscribe(discard<ReturnedMessage<*>>())
         subscribe(discard<FailedMessage<*>>())
     }

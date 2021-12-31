@@ -11,7 +11,7 @@ internal class MagicBusTest {
      * init worked, essentially testing that the Kotlin library works.  :(
      */
     @Test
-    fun `should share global default bus with same instance`() {
+    fun `should have a global default bus`() {
         assertThat(bus).isSameAs(DEFAULT_BUS)
     }
 }

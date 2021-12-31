@@ -37,7 +37,7 @@ tests.  CI for the repo uses Batect to validate pushes.
   "letter" and "message" may be used interchangeably depending on context 
   or on common industry usage.  Typically, this is a business or logical 
   type to process by your system
-- _Mailbox_ (noun) \[pl: Mailboxen] &mdash; a function or method that 
+- _Mailbox_ (noun) \[pl: mailboxen] &mdash; a function or method that 
   receives letters, and processes them in some fashion (possibly 
   discarding them).  Typically these manifest your business or processing 
   logic
