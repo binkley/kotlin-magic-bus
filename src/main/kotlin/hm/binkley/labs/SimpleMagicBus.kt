@@ -49,6 +49,15 @@ open class SimpleMagicBus : MagicBus {
     override val subscriptions: Map<Class<*>, List<Mailbox<*>>>
         get() = _subscriptions
 
+    @Suppress("UNCHECKED_CAST")
+    override fun <T : Any> subscribersTo(messageType: Class<in T>): List<Mailbox<T>> =
+        // TODO: Moving the sort into the map leads to ClassCastException;
+        //  the filter is needed to prevent this.  There is no defined
+        //  ordering between unrelated classes
+        _subscriptions.entries.filter { it.key.isAssignableFrom(messageType) }
+            .sortedWith { a, b -> orderByParentElseFifo(a.key, b.key) }
+            .flatMap { it.value } as List<Mailbox<T>>
+
     override fun <T : Any> subscribe(
         messageType: Class<in T>,
         mailbox: Mailbox<in T>,
@@ -77,16 +86,6 @@ open class SimpleMagicBus : MagicBus {
         mailboxen.forEach { it.post(message) }
     }
 
-    /** Return the mailboxen which would receive message of [messageType]. */
-    @Suppress("UNCHECKED_CAST")
-    fun <T : Any> subscribersTo(messageType: Class<in T>) =
-        _subscriptions.entries.filter { it.key.isAssignableFrom(messageType) }
-            // TODO: Moving the sort into the map leads to ClassCastException;
-            //  the filter is needed to prevent this.  There is no defined
-            //  ordering between unrelated classes
-            .sortedWith { a, b -> parentFirstAndFifoOrdering(a.key, b.key) }
-            .flatMap { it.value } as List<Mailbox<T>>
-
     @Suppress("TooGenericExceptionCaught", "RethrowCaughtException")
     private fun <T : Any> Mailbox<in T>.post(message: T) = try {
         this(message)
@@ -112,9 +111,11 @@ open class SimpleMagicBus : MagicBus {
     }
 }
 
-// Notes:
-// * Invert natural order so that parents come first
-// * Ordering is stable so that FIFO on ties
-// * Boolean sorts with `false` coming before `true`
-private fun parentFirstAndFifoOrdering(a: Class<*>, b: Class<*>) =
+/**
+ * Notes:
+ * * Invert natural order so that parents come first -- [b] before [a]
+ * * Ordering is stable so that FIFO on ties
+ * * `Boolean` sorts with `false` coming before `true`
+*/
+private fun orderByParentElseFifo(a: Class<*>, b: Class<*>) =
     b.isAssignableFrom(a).compareTo(a.isAssignableFrom(b))

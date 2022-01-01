@@ -219,3 +219,7 @@ using this mapping.
 * Greater null-safety in declarations (`*` vs `T : Any`). See
   [_Difference between "*" and "Any" in Kotlin
   generics_](https://stackoverflow.com/a/40139892)
+* Consider breaking `MagicBus` into more fine-grained interfaces (_eg_, 
+  posting separate from subscribing separate from inspecting).  See 
+  [_Namespacing in Kotlin_](https://arturdryomov.dev/posts/namespacing-in-kotlin/)
+  for a discussion of implementation
