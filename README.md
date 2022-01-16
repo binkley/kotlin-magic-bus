@@ -33,7 +33,7 @@ tests. CI (GitHub Actions) runs Batect on each non-README push.
 ## Terminology
 
 - _Message_ (noun) &mdash; a JVM object of some instance type to be processed
-  by subscribed functions or methods. Your code logic processes messages 
+  by subscribed functions or methods. Your code logic processes messages
   objects
 - _Letter_ (noun) &mdash; synonym for "message". The nouns, "letter" and
   "message" mean the same, and are used depending on context. In code one
@@ -45,25 +45,31 @@ tests. CI (GitHub Actions) runs Batect on each non-README push.
   subtyping may be of benefit). These typically manifest your business or
   processing logic, or provide debugging, auditing, or operational features,
   _et al_. (The plural, "mailboxen" is fanciful, _cf_
-  [_boxen_](http://catb.org/~esr/jargon/html/B/boxen.html))
+  [_boxen_](http://catb.org/~esr/jargon/html/B/boxen.html)).  See
+  [`MagicBus.Mailbox`](./src/main/kotlin/hm/binkley/labs/MagicBus.kt)
 - _Post_ (verb) &mdash; to send a message. The poster does not know which
   mailboxen may process the message. Your domain boundaries post messages for
-  other internal domains to process, or communicate with external resources
-- _Failed_ (adj) &mdash; a mailbox raises an exception while processing a
-  message. This always indicates an error in design or mailbox logic &mdash;
-  when external input is bad, this should result in a message processed by
-  your program
+  other internal domains to process, or communicate with external resources.
+  See [`MessageBus.post`](./src/main/kotlin/hm/binkley/labs/MagicBus.kt)
 - _Returned_ (adj) &mdash; a posted message with no subscribed mailbox to
-  receive. This always indicates a potential error in program design or logic
-  &mdash; you are posting messages for which there is no mailbox to receive
+  receive. This always indicates an error in program design or logic &mdash;
+  you are posting messages for which there is no mailbox to receive. See the
+  [`ReturnedMessage`](./src/main/kotlin/hm/binkley/labs/ReturnedMessage.kt)
+  type in this library
+- _Failed_ (adj) &mdash; a "failed message" is when a mailbox raises a JVM
+  exception while processing the message. When the exception is not handled by
+  another mailbox, this indicates an error in design or mailbox logic &mdash;
+  when external input is bad, this should result in a message processed by
+  your program, not in crashing. See the
+  [`FailedMessage`](./src/main/kotlin/hm/binkley/labs/FailedMessage.kt) type
+  in this library
 
 ## Examples
 
 ### Post messages
 
-Any JVM type can be published as a message. A receiver (a
-receiver/subscriber is termed a `Mailbox` in code) receives new posts 
-based on typing.
+Any JVM type can be published as a message. A receiver (a receiver/subscriber
+is termed a `Mailbox` in code) receives new posts based on typing.
 
 ```kotlin
 val bus: MagicBus // assigned elsewhere
@@ -73,7 +79,7 @@ bus.post(UUID.randomUUID()) // Only received by subscribers of `UUID` JDK type
 
 ### Receive messages
 
-By choice, this library does not use annotations to note subscribers or 
+By choice, this library does not use annotations to note subscribers or
 publishers.
 
 ```kotlin
@@ -93,6 +99,7 @@ bus.post("Frodo lives!") // Nothing happens: not a Number -- NOT PRINTED
 ```
 
 Similar example using Kotlin objects (could be a class instance):
+
 ```kotlin
 val bus: MagicBus // assigned elsewhere
 
@@ -132,8 +139,8 @@ bus.post(SomeType()) // NOT PRINTED
 
 ### Process dead letters or failed posts
 
-See [_Make me a bus_](#make-me-a-bus) (next section) for an example that 
-saves dead letters or failed posts.
+See [_Make me a bus_](#make-me-a-bus) (next section) for an example that saves
+dead letters or failed posts.
 
 ### Make me a bus
 
@@ -142,7 +149,7 @@ discards `ReturnedMessage` and `FailedMessage` posts.
 `TestMagicBus` in `SimpleMagicBusTest` extends to track all posts for testing.
 
 Typical programs add handling for `ReturnedMessage` (no subscriber) and
-`FailedMessage` (a subscriber "blew up").  This library does not include
+`FailedMessage` (a subscriber "blew up"). This library does not include
 helpful default handlers for these cases: typical strategies include logging
 or business logic, both which are beyond scope of this library.
 
@@ -160,11 +167,13 @@ val bus = SimpleMagicBus().apply {
     }
 }
 ```
+
 An alternative using class extension:
+
 ```kotlin
 // Track returned (no mailbox) messages, and failed (mailbox throws exception)
 // messages, say for testing
-class ExampleRecordingMagicBus: SimpleMagicBus() {
+class ExampleRecordingMagicBus : SimpleMagicBus() {
     private val _returned = mutableListOf<ReturnedMessage>()
     private val _failed = mutableListOf<FailedMessage>()
 
@@ -198,8 +207,8 @@ fun main() {
 ### Introspection
 
 You may examine mapping of message types to subscribers using
-`MagicBus.subscribers`.  This may be useful in testing or debugging.  This 
-mapping represents _internal state_ of your message bus, so be cautious in 
+`MagicBus.subscribers`. This may be useful in testing or debugging. This
+mapping represents _internal state_ of your message bus, so be cautious in
 using this mapping.
 
 ## Implementation
@@ -207,12 +216,12 @@ using this mapping.
 * Pure JDK, no 3<sup>rd</sup>-party dependencies
 * _Almost_ 100% test coverage
 * Static code analysis is happy: [Detekt](https://detekt.github.io/detekt/)
-  [Ktlint](https://ktlint.github.io/), 
+  [Ktlint](https://ktlint.github.io/),
   and [DependencyCheck](https://owasp.org/www-project-dependency-check/)
 * Focus is on functions, not types, for subscriptions and bus behavior
-* Deep recursion among mailboxen results in stack overflow; however, 
-  triggering this takes a message post storm of typically 1000+, and this 
-  should indicate the messaging patterns are very smelly 
+* Deep recursion among mailboxen results in stack overflow; however,
+  triggering this takes a message post storm of typically 1000+, and this
+  should indicate the messaging patterns are very smelly
 
 No attempt is made to detect unbounded loops and cycles. So if you repost from
 within a mailbox, take care that the mailbox itself does not receive its
@@ -245,7 +254,8 @@ named
 * Greater null-safety in declarations (`*` vs `T : Any`). See
   [_Difference between "*" and "Any" in Kotlin
   generics_](https://stackoverflow.com/a/40139892)
-* Consider breaking `MagicBus` into more fine-grained interfaces (_eg_, 
-  posting separate from subscribing separate from inspecting).  See 
-  [_Namespacing in Kotlin_](https://arturdryomov.dev/posts/namespacing-in-kotlin/)
+* Consider breaking `MagicBus` into more fine-grained interfaces (_eg_,
+  posting separate from subscribing separate from inspecting). See
+  [_Namespacing in
+  Kotlin_](https://arturdryomov.dev/posts/namespacing-in-kotlin/)
   for a discussion of implementation
