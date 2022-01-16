@@ -212,6 +212,12 @@ using this mapping.
 * Deep recursion among mailboxen results in stack overflow; however, 
   triggering this takes a message post storm of typically 1000+, and this 
   should indicate the messaging patterns are very smelly
+* No attempt is made to detect unbounded loops and cycles.  So if you 
+  repost from within a mailbox, take care that the mailbox itself does not 
+  receive the reposting, or include properties in the messages to end the 
+  cycle, or otherwise you will get a `StackOverflowError` (detecting when 
+  reposting might terminate is an NP-hard problem akin to
+  [the halting problem](https://en.wikipedia.org/wiki/Halting_problem))
 
 ## TODO
 
