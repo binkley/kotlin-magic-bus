@@ -2,9 +2,11 @@ package hm.binkley.labs
 
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.nio.charset.CoderMalfunctionError
+import java.util.NoSuchElementException
 import java.util.concurrent.atomic.AtomicInteger
 
 internal class SimpleMagicBusTest {
@@ -194,6 +196,19 @@ internal class SimpleMagicBusTest {
     fun `should be fatal for a failure mailbox to itself fail`() {
         bus += failWith<RightType> { Exception() }
         bus += failWith<FailedMessage<Any>> { Exception() }
+
+        // TODO: Rather than overflowing the stack, how to alert caller?
+        //       Not appropriate to add a logging framework, so what else?
+        assertThrows<StackOverflowError> {
+            bus.post(RightType())
+        }
+    }
+
+    @Test
+    fun `should be fatal for a mailbox to repost in an infinite cycle`() {
+        bus += namedMailbox<RightType>("REPOSTING-RIGHT") {
+            bus.post(it)
+        }
 
         // TODO: Rather than overflowing the stack, how to alert caller?
         //       Not appropriate to add a logging framework, so what else?
