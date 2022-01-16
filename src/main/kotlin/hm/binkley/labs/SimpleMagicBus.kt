@@ -101,9 +101,10 @@ open class SimpleMagicBus : MagicBus {
 
     /**
      * Add fallback do-nothing mailboxen for [ReturnedMessage] and
-     * [FailedMessage].  This avoids stack overflow from reposting if user
-     * does not install mailboxen for them, or if user mailboxen are
-     * themselves faulty.
+     * [FailedMessage].  This avoids stack overflow from reposting if the user
+     * themselves does not install mailboxen for these message types, or if
+     * the user mailboxen are themselves faulty (raising exceptions, or
+     * reposting received message types without a way to eventually halt).
      */
     private fun installFallbackMailboxen() {
         subscribe(discard<ReturnedMessage<*>>())
