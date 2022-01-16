@@ -23,7 +23,9 @@ type-safe.
 
 The goal is to support
 [messaging patterns](https://www.enterpriseintegrationpatterns.com/patterns/messaging/)
-within a single JVM program (process).
+within a single JVM program (process).  Gregor's
+[EIP book](https://www.enterpriseintegrationpatterns.com/gregor.html) is 
+an excellent resource for understanding messaging.
 
 ## Build
 
@@ -144,8 +146,8 @@ dead letters or failed posts.
 
 ### Make me a bus
 
-Use `MagicBusKt.DEFAULT_BUS` for a global single-threaded bus that by default
-discards `ReturnedMessage` and `FailedMessage` posts.  
+Use `MagicBusKt.CURRENT_THREAD_BUS` for a global single-threaded bus that by
+default discards `ReturnedMessage` and `FailedMessage` posts.  
 `TestMagicBus` in `SimpleMagicBusTest` extends to track all posts for testing.
 
 Typical programs add handling for `ReturnedMessage` (no subscriber) and
@@ -192,10 +194,9 @@ class ExampleRecordingMagicBus : SimpleMagicBus() {
 }
 ```
 
-Or, if you're _lazy_ like me (pun intended; see
-[implementation](src/main/kotlin/hm/binkley/labs/MagicBus.kt)).  
-`DEFAULT_BUS` discards `ReturnedMessage` and `FailedMessage` posts by default.
-Add mailboxen to act on these posted message types.
+Or, if you're _lazy_ like me, use `CURRENT_THREAD_BUS` which discards
+`ReturnedMessage` and `FailedMessage`
+posts by default. **Add mailboxen** to processes these message types.
 
 ```kotlin
 fun main() {
@@ -250,7 +251,7 @@ named
 
 ## TODO
 
-* Should `DEFAULT_BUS` be a pre-defined global?
+* Should `CURRENT_THREAD_BUS` be a pre-defined global?
 * Greater null-safety in declarations (`*` vs `T : Any`). See
   [_Difference between "*" and "Any" in Kotlin
   generics_](https://stackoverflow.com/a/40139892)
