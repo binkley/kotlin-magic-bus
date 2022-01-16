@@ -23,12 +23,12 @@ type-safe.
 
 The goal is to support
 [messaging patterns](https://www.enterpriseintegrationpatterns.com/patterns/messaging/)
-within a single JVM process (program).
+within a single JVM program (process).
 
 ## Build
 
-Use `./gradlew build` (Gradle) or `./batect build` (Batect) to build, run
-tests.  CI for the repo uses Batect to validate pushes.
+Use `./gradlew build` (Gradle) or `./batect build` (Batect) to build and run
+tests. CI (GitHub Actions) runs Batect on each non-README push.
 
 ## Terminology
 
@@ -211,13 +211,32 @@ using this mapping.
 * Focus is on functions, not types, for subscriptions and bus behavior
 * Deep recursion among mailboxen results in stack overflow; however, 
   triggering this takes a message post storm of typically 1000+, and this 
-  should indicate the messaging patterns are very smelly
-* No attempt is made to detect unbounded loops and cycles.  So if you 
-  repost from within a mailbox, take care that the mailbox itself does not 
-  receive the reposting, or include properties in the messages to end the 
-  cycle, or otherwise you will get a `StackOverflowError` (detecting when 
-  reposting might terminate is an NP-hard problem akin to
-  [the halting problem](https://en.wikipedia.org/wiki/Halting_problem))
+  should indicate the messaging patterns are very smelly 
+
+No attempt is made to detect unbounded loops and cycles. So if you repost from
+within a mailbox, take care that the mailbox itself does not receive its
+reposting (including subtypes), or that if it self-receives, it includes
+properties in the message to terminate the cycle: otherwise you will
+eventually see a `StackOverflowError` thrown.
+
+Detecting when reposting might terminate is an NP-hard problem akin to
+[the halting problem](https://en.wikipedia.org/wiki/Halting_problem).  
+However, you might code a heuristic to check "stack depth" (how many
+repostings there are), and as an aid to debugging, post a failure message when
+things look bleak.
+
+## Deeper dive
+
+The self-messaging bus is an analog to normal function call and the call
+stack. Rather than callers directly invoking other functions, the bus is an
+intermediary, decoupling caller from receiver: this is a key technique in
+programming. This is not dissimilar from function pointers in other languages,
+or from
+["trampolines"](https://en.wikipedia.org/wiki/Trampoline_%28computing%29), or
+in JDK languages of passing "lambdas" as method parameters. Functional
+programming relies on this decoupling. One famous example is the mysteriously
+named
+["Y combinator"](https://en.wikipedia.org/wiki/Y_Combinator).
 
 ## TODO
 
