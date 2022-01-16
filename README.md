@@ -32,29 +32,30 @@ tests. CI (GitHub Actions) runs Batect on each non-README push.
 
 ## Terminology
 
-- _Letter_ (noun) &mdash; synonym for "message": this is a JVM object of some
-  instance type to be processed by other objects or functions. The nouns,
-  "letter" and "message" may be used interchangeably depending on context 
-  or on common industry usage.  Typically, this is a business or logical 
-  type to process by your system
-- _Mailbox_ (noun) \[pl: mailboxen] &mdash; a function or method that 
-  receives letters, and processes them in some fashion (possibly 
-  discarding them).  Typically these manifest your business or processing 
-  logic
-- _Post_ (verb) &mdash; to send a letter. The poster does not know which 
-  mailboxen may process the letter.  Typically, your domain boundaries post 
-  letters for other internal domains to process
-
-And:
-
+- _Message_ (noun) &mdash; a JVM object of some instance type to be processed
+  by subscribed functions or methods. Your code logic processes messages 
+  objects
+- _Letter_ (noun) &mdash; synonym for "message". The nouns, "letter" and
+  "message" mean the same, and are used depending on context. In code one
+  talks about "messages"; "dead letter box" is an example of using the synonym
+  "letter"
+- _Mailbox_ (noun) \[pl: mailboxen] &mdash; a function or method that receives
+  messages and processes them in some fashion (possibly discarding them
+  &mdash; though discarded messages might represent a _smell_ where futher
+  subtyping may be of benefit). These typically manifest your business or
+  processing logic, or provide debugging, auditing, or operational features,
+  _et al_. (The plural, "mailboxen" is fanciful, _cf_
+  [_boxen_](http://catb.org/~esr/jargon/html/B/boxen.html))
+- _Post_ (verb) &mdash; to send a message. The poster does not know which
+  mailboxen may process the message. Your domain boundaries post messages for
+  other internal domains to process, or communicate with external resources
 - _Failed_ (adj) &mdash; a mailbox raises an exception while processing a
-  letter. This always indicates an error in design or mailbox logic.  
-  **Note**: For JVM, distinguish between `Exception` (a program concern)
-  and `Error` (a JVM concern). `SimpleMagicBus` posts mailbox `Exception`s as
-  `FailedMessage`s, and `Error`s bubble out
-- _Returned_ (adj) &mdash; a posted letter with no subscribed mailbox to
-  receive. Typically, this indicates a potential error in program design or
-  logic. `SimpleMagicBus` by default discards returned messages
+  message. This always indicates an error in design or mailbox logic &mdash;
+  when external input is bad, this should result in a message processed by
+  your program
+- _Returned_ (adj) &mdash; a posted message with no subscribed mailbox to
+  receive. This always indicates a potential error in program design or logic
+  &mdash; you are posting messages for which there is no mailbox to receive
 
 ## Examples
 
@@ -140,8 +141,8 @@ Use `MagicBusKt.DEFAULT_BUS` for a global single-threaded bus that by default
 discards `ReturnedMessage` and `FailedMessage` posts.  
 `TestMagicBus` in `SimpleMagicBusTest` extends to track all posts for testing.
 
-**Typical programs would add handling for `ReturnedMessage` (no subscriber)
-and `FailedMessage` (a subscriber "blew up").**  This library does not include
+Typical programs add handling for `ReturnedMessage` (no subscriber) and
+`FailedMessage` (a subscriber "blew up").  This library does not include
 helpful default handlers for these cases: typical strategies include logging
 or business logic, both which are beyond scope of this library.
 
