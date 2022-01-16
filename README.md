@@ -81,8 +81,7 @@ bus.post(UUID.randomUUID()) // Only received by subscribers of `UUID` JDK type
 
 ### Receive messages
 
-By choice, this library does not use annotations to note subscribers or
-publishers.
+Subscribe to message types explicitly (no annotations).
 
 ```kotlin
 val bus: MagicBus // assigned elsewhere
@@ -113,12 +112,12 @@ bus.subscribe(object : Mailbox<Number> {
 })
 ```
 
-### Process all messages, regardless of type or sender
+### Process all messages regardless of type
 
 ```kotlin
 val bus: MagicBus // assigned elsewhere
 
-// Example for debugging
+// Example useful in debugging
 bus.subscribe<Any> { message ->
     myDebugLog.log(message) // Messages are never null 
 }
@@ -142,22 +141,32 @@ bus.post(SomeType()) // NOT PRINTED
 ### Process dead letters or failed posts
 
 See [_Make me a bus_](#make-me-a-bus) (next section) for an example that saves
-dead letters or failed posts.
+dead letters or failed posts.  The key point is:
+
+```kotlin
+val deadLetters = Mailbox<DeadLetter> = { /* do something with it */ }
+bus.subscribe(deadLetters)
+val failedMessages = Mailbox<FailedMessage> = { /* do something with it */ }
+bus.subscribe(failedMessages)
+```
 
 ### Make me a bus
 
 Use `MagicBusKt.CURRENT_THREAD_BUS` for a global single-threaded bus that by
 default discards `ReturnedMessage` and `FailedMessage` posts.  
-`TestMagicBus` in `SimpleMagicBusTest` extends to track all posts for testing.
+See `TestMagicBus` in
+[`SimpleMagicBusTest`](./src/test/kotlin/hm/binkley/labs/SimpleMagicBusTest.kt)
+as an example that tracks all posts for testing (the good, the bad, and the
+ugly).
 
-Typical programs add handling for `ReturnedMessage` (no subscriber) and
-`FailedMessage` (a subscriber "blew up"). This library does not include
-helpful default handlers for these cases: typical strategies include logging
-or business logic, both which are beyond scope of this library.
+Programs should add handling for `ReturnedMessage` (no subscriber) and
+`FailedMessage` (subscriber raised an unhandled exception). The
+`SimpleMessageBus` class by default discards these message types: sensible
+strategies include business logic and/or logging.
 
 ```kotlin
-// Track returned (no mailbox) messages, and failed (mailbox throws exception)
-// messages, say for testing
+// Tracks the returned and failed messages -- debugging or testing
+// Production code might fail and/or log: these are usually bugs
 val returned = mutableListOf<ReturnedMessage>()
 val failed = mutableListOf<FailedMessage>()
 val bus = SimpleMagicBus().apply {
@@ -173,13 +182,11 @@ val bus = SimpleMagicBus().apply {
 An alternative using class extension:
 
 ```kotlin
-// Track returned (no mailbox) messages, and failed (mailbox throws exception)
-// messages, say for testing
 class ExampleRecordingMagicBus : SimpleMagicBus() {
     private val _returned = mutableListOf<ReturnedMessage>()
     private val _failed = mutableListOf<FailedMessage>()
 
-    // Typical pattern for visible but not modifiable  
+    // Typical Kotlin pattern for visible but not modifiable  
     val returned: List<ReturnedMessage> get() = _returned
     val failed: List<ReturnedMessage> get() = _failed
 
@@ -191,17 +198,6 @@ class ExampleRecordingMagicBus : SimpleMagicBus() {
             _failed += it
         }
     }
-}
-```
-
-Or, if you're _lazy_ like me, use `CURRENT_THREAD_BUS` which discards
-`ReturnedMessage` and `FailedMessage`
-posts by default. **Add mailboxen** to processes these message types.
-
-```kotlin
-fun main() {
-    val globalBus = DEFAULT_GLOBAL_BUS
-    // Provide `globalBus`, for example, to Spring Framework for injection
 }
 ```
 
