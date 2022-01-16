@@ -4,7 +4,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 internal class MagicBusTest {
-    private val bus = DEFAULT_BUS
+    private val bus = CURRENT_THREAD_BUS
 
     /**
      * @todo This test looks pointless.  It makes JaCoCo hippier that lazy
@@ -12,6 +12,6 @@ internal class MagicBusTest {
      */
     @Test
     fun `should have a global default bus`() {
-        assertThat(bus).isSameAs(DEFAULT_BUS)
+        assertThat(bus).isSameAs(CURRENT_THREAD_BUS)
     }
 }

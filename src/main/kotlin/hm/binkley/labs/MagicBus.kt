@@ -3,20 +3,10 @@ package hm.binkley.labs
 typealias Mailbox<T> = (T) -> Unit
 
 /**
- * A default, singleton bus, non-threadsafe.  The instance is a
- * [SimpleMagicBus] with its additional methods and restrictions.
- *
- * Normal design would make `DEFAULT_BUS` a factory, however the point of
- * self-messaging within a single program implies a global object visible to
- * all classes.
- *
- * @todo Reconsider this being a global object, ie, API instead requires
- *       declaration of a global bus:
- * ```
- * val TheBus: MagicBus = SimpleMagicBus()
- * ```
+ * A default singleton bus on the current thread.  The instance is a
+ * [SimpleMagicBus].
  */
-val DEFAULT_BUS: SimpleMagicBus by lazy { SimpleMagicBus() }
+val CURRENT_THREAD_BUS: SimpleMagicBus by lazy { SimpleMagicBus() }
 
 /**
  * Represents a _minimal_, non-threadsafe bus for an applications to
