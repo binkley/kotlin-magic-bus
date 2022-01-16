@@ -7,8 +7,8 @@ internal class MagicBusTest {
     private val bus = CURRENT_THREAD_BUS
 
     /**
-     * @todo This test looks pointless.  It makes JaCoCo hippier that lazy
-     * init worked, essentially testing that the Kotlin library works.  :(
+     * @todo This test makes JaCoCo happier that lazy init worked,
+     *       essentially testing that Kotlin stdlib works :(
      */
     @Test
     fun `should have a global default bus`() {
