@@ -1,10 +1,13 @@
 package hm.binkley.labs
 
 /**
- * A _simple_ implementation of [MagicBus].  Limitations include:
- * * No thread safety
- * * Single-threaded [post] &mdash; callers _block_ until all mailboxen
- *   process the message
+ * A _simple_ implementation of [MagicBus] designed for extension.
+ *
+ * Limitations include:
+ * * No thread safety outside the current thread
+ * * Each receiver is called in sequence &mdash; there is no parallelism
+ * * Messages are delivered in _causal_ order, supertype receivers
+ *   before subtypes mailboxen, and in subscription order thereafter
  * * No loop detection &mdash; no attempt is made to prevent "storms" whereby
  *   a single post results in mailboxen posting additional messages, possibly
  *   without limits
@@ -15,13 +18,9 @@ package hm.binkley.labs
  *   [FailedMessage] notifications in the order in which mailboxen failed,
  *   interleaved with later subscribers to the original message
  *
- * Additional features include:
- * * [subscribersTo] provides a correct list of mailboxen for a given message
- *   type in the same order as message delivery
- * * By default, if there are no mailboxen for either [ReturnedMessage] or
- *   [FailedMessage]; the result is a `StackOverflowError` in these cases.
- *   Code creating a new `SimpleMessageBus` is responsible for subscribing
- *   to these message types
+ * Also consider:
+ * * Unhandled [ReturnedMessage] and [FailedMessage] are silently
+ *   discarded: you need to add subscribers for these
  *
  * Example bus creation with handling of returned and failed messages
  * (alternatively, extend the class and encapsulate subscriptions in `init`):
