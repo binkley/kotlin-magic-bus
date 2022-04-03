@@ -38,7 +38,7 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter:$junitVersion")
     testImplementation("org.assertj:assertj-core:$assertJVersion")
 
-    // TODO: Workaround CVE
+    // TODO: Workaround CVE(s)
     detekt("org.jetbrains.kotlin:kotlin-compiler-embeddable:$kotlinVersion") {
         because("https://nvd.nist.gov/vuln/detail/CVE-2022-24329")
     }
