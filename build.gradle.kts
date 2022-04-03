@@ -3,6 +3,7 @@ import org.gradle.api.tasks.wrapper.Wrapper.DistributionType.ALL
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 val assertJVersion: String by project
+val checkstyleVersion: String by project
 val gradleWrapperVersion: String by project
 val jacocoVersion: String by project
 val javaVersion: String by project
@@ -36,6 +37,11 @@ dependencies {
 
     testImplementation("org.junit.jupiter:junit-jupiter:$junitVersion")
     testImplementation("org.assertj:assertj-core:$assertJVersion")
+
+    // TODO: Workaround CVE
+    detekt("org.jetbrains.kotlin:kotlin-compiler-embeddable:$kotlinVersion") {
+        because("https://nvd.nist.gov/vuln/detail/CVE-2022-24329")
+    }
 }
 
 detekt {
