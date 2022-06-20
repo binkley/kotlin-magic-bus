@@ -86,7 +86,7 @@ open class SimpleMagicBus : MagicBus {
     }
 
     @Suppress("TooGenericExceptionCaught", "RethrowCaughtException")
-    private fun <T : Any> Mailbox<in T>.post(message: T) = try {
+    private fun <T> Mailbox<in T>.post(message: T & Any) = try {
         this(message)
     } catch (e: RuntimeException) {
         // NB -- `RuntimeException` is a subtype of `Exception` No need to

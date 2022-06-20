@@ -10,7 +10,7 @@ inline fun <reified T : Any> MagicBus.subscribe(
     noinline mailbox: Mailbox<in T>,
 ) = subscribe(T::class.java, mailbox)
 
-/** An fluent alternative syntax to [subscribe]. */
+/** Fluent alternative syntax to [subscribe]. */
 inline fun <reified T : Any, M : Mailbox<in T>> M.subscribeTo(
     bus: MagicBus,
 ): M {
