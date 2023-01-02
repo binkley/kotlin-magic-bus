@@ -40,6 +40,14 @@ dependencies {
     testImplementation("org.assertj:assertj-core:$assertJVersion")
 }
 
+configurations.all {
+    resolutionStrategy.eachDependency {
+        if ("org.jetbrains.kotlin" == requested.group) {
+            useVersion(kotlinVersion)
+        }
+    }
+}
+
 detekt {
     // No support yet for configuring directly in Gradle
     config = files("config/detekt.yml")
