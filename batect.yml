@@ -23,7 +23,7 @@ tasks:
     description: Build and test with Gradle
     run:
       container: build-env
-      command: ./gradlew --no-daemon --warning-mode=all dependencyCheckPurge
+      command: ./gradlew --no-daemon --warning-mode=all clean build
   shell:
     description: Opens a shell in the container
     run:
