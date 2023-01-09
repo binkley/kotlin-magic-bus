@@ -1,12 +1,12 @@
-name: build
+name: Build with Gradle
 
 on:
   push:
     paths-ignore:
-      - README.md
+      - '*.md'
   pull_request:
     paths-ignore:
-      - README.md
+      - '*.md'
 
 jobs:
   build:
@@ -16,6 +16,9 @@ jobs:
     steps:
       - name: Clone repository
         uses: actions/checkout@master
+
+      - name: Validate Batect wrapper scripts
+        uses: batect/batect-wrapper-validation-action@v0.4.0
 
       - name: Restore Batect caches
         uses: actions/cache@master
@@ -28,6 +31,9 @@ jobs:
             ${{ runner.os }}-build-${{ env.cache-name }}-
             ${{ runner.os }}-build-
             ${{ runner.os }}-
+
+      - name: Manage Batect telemetry
+        run: ./batect --permanently-enable-telemetry
 
       - name: Restore Gradle caches
         uses: actions/cache@master
@@ -43,4 +49,4 @@ jobs:
             ${{ runner.os }}-
 
       - name: Build and test with Gradle under Batect
-        run: ./batect --permanently-enable-telemetry build
+        run: ./batect build
