@@ -73,6 +73,9 @@ pitest {
 dependencyCheck {
     failBuildOnCVSS = 0f
     // TODO: provide "skip" from -D command line
+    // TODO: Workaround https://github.com/snakeyaml/snakeyaml#cve and
+    //       recheck when SnakeYML updates
+    suppressionFile = "config/owasp-suppressions.xml"
 }
 
 tasks {
