@@ -3,7 +3,8 @@
         xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
     <suppress>
         <notes><![CDATA[
-        See https://github.com/snakeyaml/snakeyaml#cve.
+        See https://github.com/snakeyaml/snakeyaml#cve and
+        https://snyk.io/blog/unsafe-deserialization-snakeyaml-java-cve-2022-1471/
         ]]></notes>
         <packageUrl>pkg:maven/org.yaml/snakeyaml@1.33</packageUrl>
         <vulnerabilityName>CVE-2022-1471</vulnerabilityName>
