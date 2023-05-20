@@ -8,7 +8,7 @@ typealias Mailbox<T> = (T) -> Unit
  */
 val CURRENT_THREAD_BUS: SimpleMagicBus by lazy { SimpleMagicBus() }
 
-/** A internal message bus for self-communication by message type. */
+/** An internal message bus for self-communication by message type. */
 interface MagicBus {
     /** Current subscriptions listed by order of subscription. */
     val subscriptions: Map<Class<*>, List<Mailbox<*>>>
