@@ -9,6 +9,7 @@ val jacocoVersion: String by project
 val javaVersion: String by project
 val junitVersion: String by project
 val kotlinVersion: String by project
+val kotlinxCoroutinesVersion: String by project
 val ktlintVersion: String by project
 val lombokVersion: String by project
 val pitestJUnit5PluginVersion: String by project
@@ -35,6 +36,8 @@ repositories {
 
 dependencies {
     compileOnly("org.projectlombok:lombok:$lombokVersion")
+
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinxCoroutinesVersion")
 
     testImplementation("org.junit.jupiter:junit-jupiter:$junitVersion")
     testImplementation("org.assertj:assertj-core:$assertJVersion")
