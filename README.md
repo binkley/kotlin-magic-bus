@@ -268,3 +268,4 @@ One famous example is the mysteriously named
   [_Namespacing in
   Kotlin_](https://arturdryomov.dev/posts/namespacing-in-kotlin/)
   for a discussion of implementation
+* Consider `+=` on a bus to post a message rather than subscribe
