@@ -27,9 +27,9 @@ internal class SimpleMagicBusTest {
         message postTo bus
 
         assertOn(mailbox)
-            .noMessageDelivered()
+            .noDeliveredMessages()
             .undeliveredInOrder(message)
-            .noFailingMailbox()
+            .noFailedMessages()
     }
 
     @Test
@@ -51,8 +51,8 @@ internal class SimpleMagicBusTest {
 
         assertOn(mailbox)
             .deliveredInOrder(message)
-            .noMessageUndelivered()
-            .noFailingMailbox()
+            .noUndeliveredMessages()
+            .noFailedMessages()
     }
 
     @Test
@@ -72,16 +72,16 @@ internal class SimpleMagicBusTest {
 
         assertOn(mailboxForDelivery)
             .deliveredInOrder(message)
-            .noMessageUndelivered()
-            .noFailingMailbox()
+            .noUndeliveredMessages()
+            .noFailedMessages()
         assertOn(mailboxForUndelivered)
-            .noMessageDelivered()
-            .noMessageUndelivered()
-            .noFailingMailbox()
+            .noDeliveredMessages()
+            .noUndeliveredMessages()
+            .noFailedMessages()
         assertOn(mailboxForAliens)
             .deliveredInOrder(alienMessage)
-            .noMessageUndelivered()
-            .noFailingMailbox()
+            .noUndeliveredMessages()
+            .noFailedMessages()
     }
 
     @Test
@@ -92,9 +92,9 @@ internal class SimpleMagicBusTest {
         message postTo bus
 
         assertOn(mailbox)
-            .noMessageDelivered()
+            .noDeliveredMessages()
             .undeliveredInOrder(message)
-            .noFailingMailbox()
+            .noFailedMessages()
     }
 
     @Test
@@ -106,8 +106,8 @@ internal class SimpleMagicBusTest {
 
         assertOn(mailbox)
             .deliveredInOrder(message)
-            .noMessageUndelivered()
-            .noFailingMailbox()
+            .noUndeliveredMessages()
+            .noFailedMessages()
     }
 
     @Test
@@ -117,9 +117,9 @@ internal class SimpleMagicBusTest {
         message postTo bus
 
         assertOn(allMailboxen())
-            .noMessageDelivered()
+            .noDeliveredMessages()
             .undeliveredInOrder(message)
-            .noFailingMailbox()
+            .noFailedMessages()
     }
 
     @Test
@@ -144,8 +144,8 @@ internal class SimpleMagicBusTest {
         message postTo bus
 
         assertOn(allMailboxen())
-            .noMessageDelivered()
-            .noMessageUndelivered()
+            .noDeliveredMessages()
+            .noUndeliveredMessages()
             .failedInOrder(
                 brokenMailboxA with message and failureA,
                 brokenMailboxB with message and failureB,
@@ -186,7 +186,7 @@ internal class SimpleMagicBusTest {
         message postTo bus
 
         assertOn(allMailbox)
-            .noMessageUndelivered()
+            .noUndeliveredMessages()
             .deliveredInOrder(message, failedMessage)
             .failedInOrder(badMailbox with message and failure)
     }
@@ -371,9 +371,9 @@ internal class SimpleMagicBusTest {
         RightType() postTo bus
 
         assertOn(allMailboxen())
-            .noMessageDelivered()
-            .noMessageUndelivered()
-            .noFailingMailbox()
+            .noDeliveredMessages()
+            .noUndeliveredMessages()
+            .noFailedMessages()
     }
 
     @Test
@@ -421,7 +421,7 @@ internal class SimpleMagicBusTest {
         private val undelivered: List<UndeliveredMessage<*>>,
         private val failed: List<FailedMessage<*>>,
     ) {
-        fun noMessageDelivered() = apply {
+        fun noDeliveredMessages() = apply {
             assertThat(delivered).isEmpty()
         }
 
@@ -429,7 +429,7 @@ internal class SimpleMagicBusTest {
             assertThat(this.delivered).isEqualTo(delivered.toList())
         }
 
-        fun noMessageUndelivered() = apply {
+        fun noUndeliveredMessages() = apply {
             assertThat(undelivered).isEmpty()
         }
 
@@ -441,7 +441,7 @@ internal class SimpleMagicBusTest {
             )
         }
 
-        fun noFailingMailbox() = apply {
+        fun noFailedMessages() = apply {
             assertThat(failed).isEmpty()
         }
 
