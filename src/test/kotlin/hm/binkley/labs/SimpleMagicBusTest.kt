@@ -28,7 +28,7 @@ internal class SimpleMagicBusTest {
 
         assertOn(mailbox)
             .noMessageDelivered()
-            .returnedInOrder(message)
+            .undeliveredInOrder(message)
             .noFailingMailbox()
     }
 
@@ -51,14 +51,14 @@ internal class SimpleMagicBusTest {
 
         assertOn(mailbox)
             .deliveredInOrder(message)
-            .noMessageReturned()
+            .noMessageUndelivered()
             .noFailingMailbox()
     }
 
     @Test
     fun `should deliver correctly to disparate subscribers`() {
         val mailboxForDelivery = testMailbox<RightType>() subscribeTo bus
-        val mailboxForNoDelivery = testMailbox<LeftType>() subscribeTo bus
+        val mailboxForUndelivered = testMailbox<LeftType>() subscribeTo bus
         val mailboxForAliens = testMailbox<AlienType>() subscribeTo bus
 
         assertThat(bus.subscribersTo<RightType>())
@@ -72,15 +72,15 @@ internal class SimpleMagicBusTest {
 
         assertOn(mailboxForDelivery)
             .deliveredInOrder(message)
-            .noMessageReturned()
+            .noMessageUndelivered()
             .noFailingMailbox()
-        assertOn(mailboxForNoDelivery)
+        assertOn(mailboxForUndelivered)
             .noMessageDelivered()
-            .noMessageReturned()
+            .noMessageUndelivered()
             .noFailingMailbox()
         assertOn(mailboxForAliens)
             .deliveredInOrder(alienMessage)
-            .noMessageReturned()
+            .noMessageUndelivered()
             .noFailingMailbox()
     }
 
@@ -93,7 +93,7 @@ internal class SimpleMagicBusTest {
 
         assertOn(mailbox)
             .noMessageDelivered()
-            .returnedInOrder(message)
+            .undeliveredInOrder(message)
             .noFailingMailbox()
     }
 
@@ -106,7 +106,7 @@ internal class SimpleMagicBusTest {
 
         assertOn(mailbox)
             .deliveredInOrder(message)
-            .noMessageReturned()
+            .noMessageUndelivered()
             .noFailingMailbox()
     }
 
@@ -118,7 +118,7 @@ internal class SimpleMagicBusTest {
 
         assertOn(allMailboxen())
             .noMessageDelivered()
-            .returnedInOrder(message)
+            .undeliveredInOrder(message)
             .noFailingMailbox()
     }
 
@@ -145,7 +145,7 @@ internal class SimpleMagicBusTest {
 
         assertOn(allMailboxen())
             .noMessageDelivered()
-            .noMessageReturned()
+            .noMessageUndelivered()
             .failedInOrder(
                 brokenMailboxA with message and failureA,
                 brokenMailboxB with message and failureB,
@@ -186,7 +186,7 @@ internal class SimpleMagicBusTest {
         message postTo bus
 
         assertOn(allMailbox)
-            .noMessageReturned()
+            .noMessageUndelivered()
             .deliveredInOrder(message, failedMessage)
             .failedInOrder(badMailbox with message and failure)
     }
@@ -275,9 +275,9 @@ internal class SimpleMagicBusTest {
     @Test
     fun `should unsubscribe exact mailbox`() {
         val mailboxForDelivery = discard<RightType>() subscribeTo bus
-        val mailboxForNoDelivery = discard<RightType>() subscribeTo bus
+        val mailboxForUndelivered = discard<RightType>() subscribeTo bus
 
-        bus -= mailboxForNoDelivery
+        bus -= mailboxForUndelivered
 
         assertThat(bus.subscribersTo<RightType>())
             .containsOnly(mailboxForDelivery)
@@ -337,19 +337,19 @@ internal class SimpleMagicBusTest {
 
         message postTo bus
 
-        assertThat(bus.returned).containsOnly(UndeliveredMessage(bus, message))
+        assertThat(bus.undelivered).containsOnly(UndeliveredMessage(bus, message))
     }
 
     @Test
     fun `should have default rejected letter box`() {
-        val defaultMailboxCountForReturnedAndFailedMessages = 2
+        val defaultMailboxCountForUndeliveredAndFailedMessages = 2
 
         assertThat(bus.subscribersTo<FailedMessage<Any>>())
-            .hasSize(defaultMailboxCountForReturnedAndFailedMessages)
+            .hasSize(defaultMailboxCountForUndeliveredAndFailedMessages)
     }
 
     @Test
-    fun `should deliver to first subscriber for returned messages before default`() {
+    fun `should deliver to first subscriber for undelivered messages before default`() {
         val subscribers = bus.subscribersTo<UndeliveredMessage<Any>>()
 
         assertThat(subscribers.first().toString())
@@ -372,7 +372,7 @@ internal class SimpleMagicBusTest {
 
         assertOn(allMailboxen())
             .noMessageDelivered()
-            .noMessageReturned()
+            .noMessageUndelivered()
             .noFailingMailbox()
     }
 
@@ -402,7 +402,7 @@ internal class SimpleMagicBusTest {
     private fun <T> assertOn(delivered: List<TestMailbox<T>>) =
         AssertDelivered(
             delivered.flatMap { it.messages },
-            bus.returned,
+            bus.undelivered,
             bus.failed
         )
 
@@ -418,7 +418,7 @@ internal class SimpleMagicBusTest {
 
     private inner class AssertDelivered<T>(
         private val delivered: List<T>,
-        private val returned: List<UndeliveredMessage<*>>,
+        private val undelivered: List<UndeliveredMessage<*>>,
         private val failed: List<FailedMessage<*>>,
     ) {
         fun noMessageDelivered() = apply {
@@ -429,13 +429,13 @@ internal class SimpleMagicBusTest {
             assertThat(this.delivered).isEqualTo(delivered.toList())
         }
 
-        fun noMessageReturned() = apply {
-            assertThat(returned).isEmpty()
+        fun noMessageUndelivered() = apply {
+            assertThat(undelivered).isEmpty()
         }
 
-        fun returnedInOrder(vararg returned: Any) = apply {
-            assertThat(this.returned).isEqualTo(
-                returned.map {
+        fun undeliveredInOrder(vararg undelivered: Any) = apply {
+            assertThat(this.undelivered).isEqualTo(
+                undelivered.map {
                     UndeliveredMessage(bus, it)
                 }
             )
@@ -497,19 +497,19 @@ private class AlienType
 
 /**
  * @todo Why is delivered key `<*>` but the value is `<Any>`?
- * @todo Why is returned `<Any>` but failed is `<*>`?
+ * @todo Why is undelivered `<Any>` but failed is `<*>`?
  */
 private class TestMagicBus : SimpleMagicBus() {
     val delivered = mutableMapOf<Mailbox<*>, MutableList<Any>>()
-    private val _returned = mutableListOf<UndeliveredMessage<Any>>()
+    private val _undelivered = mutableListOf<UndeliveredMessage<Any>>()
     private val _failed = mutableListOf<FailedMessage<*>>()
 
-    val returned: List<UndeliveredMessage<Any>> get() = _returned
+    val undelivered: List<UndeliveredMessage<Any>> get() = _undelivered
     val failed: List<FailedMessage<*>> get() = _failed
 
     init {
         this += namedMailbox<UndeliveredMessage<Any>>("TEST-DEAD-LETTERBOX") {
-            _returned += it
+            _undelivered += it
         }
         this += namedMailbox<FailedMessage<Any>>("TEST-FAILED-LETTERBOX") {
             _failed += it
