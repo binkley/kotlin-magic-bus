@@ -19,7 +19,7 @@ package hm.binkley.labs
  *   interleaved with later subscribers to the original message
  *
  * Also consider:
- * * Unhandled [ReturnedMessage] and [FailedMessage] are silently
+ * * Unhandled [UndeliveredMessage] and [FailedMessage] are silently
  *   discarded: you need to add subscribers for these
  *
  * Example bus creation with handling of returned and failed messages
@@ -80,7 +80,7 @@ open class SimpleMagicBus : MagicBus {
 
     override fun post(message: Any) {
         val mailboxen = subscribersTo(message.javaClass)
-        if (mailboxen.isEmpty()) return post(ReturnedMessage(this, message))
+        if (mailboxen.isEmpty()) return post(UndeliveredMessage(this, message))
 
         mailboxen.forEach { it.post(message) }
     }
@@ -99,14 +99,14 @@ open class SimpleMagicBus : MagicBus {
     }
 
     /**
-     * Add fallback do-nothing mailboxen for [ReturnedMessage] and
+     * Add fallback do-nothing mailboxen for [UndeliveredMessage] and
      * [FailedMessage].  This avoids stack overflow from reposting if the user
      * themselves does not install mailboxen for these message types, or if
      * the user mailboxen are themselves faulty (raising exceptions, or
      * reposting received message types without a way to eventually halt).
      */
     private fun installFallbackMailboxen() {
-        subscribe(discard<ReturnedMessage<*>>())
+        subscribe(discard<UndeliveredMessage<*>>())
         subscribe(discard<FailedMessage<*>>())
     }
 }

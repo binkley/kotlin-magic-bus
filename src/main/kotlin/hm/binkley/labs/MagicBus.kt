@@ -36,7 +36,7 @@ interface MagicBus {
      *
      * Note that:
      * - Subscribed mailboxen that fail produce [FailedMessage] posts
-     * - Posts with no subscribers produce [ReturnedMessage] posts
+     * - Posts with no subscribers produce [UndeliveredMessage] posts
      */
     fun post(message: Any)
 }

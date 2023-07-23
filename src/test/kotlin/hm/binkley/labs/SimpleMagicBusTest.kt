@@ -337,7 +337,7 @@ internal class SimpleMagicBusTest {
 
         message postTo bus
 
-        assertThat(bus.returned).containsOnly(ReturnedMessage(bus, message))
+        assertThat(bus.returned).containsOnly(UndeliveredMessage(bus, message))
     }
 
     @Test
@@ -350,10 +350,10 @@ internal class SimpleMagicBusTest {
 
     @Test
     fun `should deliver to first subscriber for returned messages before default`() {
-        val subscribers = bus.subscribersTo<ReturnedMessage<Any>>()
+        val subscribers = bus.subscribersTo<UndeliveredMessage<Any>>()
 
         assertThat(subscribers.first().toString())
-            .isEqualTo("DISCARD-MAILBOX<ReturnedMessage>")
+            .isEqualTo("DISCARD-MAILBOX<UndeliveredMessage>")
     }
 
     @Test
@@ -418,7 +418,7 @@ internal class SimpleMagicBusTest {
 
     private inner class AssertDelivered<T>(
         private val delivered: List<T>,
-        private val returned: List<ReturnedMessage<*>>,
+        private val returned: List<UndeliveredMessage<*>>,
         private val failed: List<FailedMessage<*>>,
     ) {
         fun noMessageDelivered() = apply {
@@ -436,7 +436,7 @@ internal class SimpleMagicBusTest {
         fun returnedInOrder(vararg returned: Any) = apply {
             assertThat(this.returned).isEqualTo(
                 returned.map {
-                    ReturnedMessage(bus, it)
+                    UndeliveredMessage(bus, it)
                 }
             )
         }
@@ -501,14 +501,14 @@ private class AlienType
  */
 private class TestMagicBus : SimpleMagicBus() {
     val delivered = mutableMapOf<Mailbox<*>, MutableList<Any>>()
-    private val _returned = mutableListOf<ReturnedMessage<Any>>()
+    private val _returned = mutableListOf<UndeliveredMessage<Any>>()
     private val _failed = mutableListOf<FailedMessage<*>>()
 
-    val returned: List<ReturnedMessage<Any>> get() = _returned
+    val returned: List<UndeliveredMessage<Any>> get() = _returned
     val failed: List<FailedMessage<*>> get() = _failed
 
     init {
-        this += namedMailbox<ReturnedMessage<Any>>("TEST-DEAD-LETTERBOX") {
+        this += namedMailbox<UndeliveredMessage<Any>>("TEST-DEAD-LETTERBOX") {
             _returned += it
         }
         this += namedMailbox<FailedMessage<Any>>("TEST-FAILED-LETTERBOX") {
