@@ -11,7 +11,7 @@ inline fun <reified T : Any> MagicBus.subscribe(
 ) = subscribe(T::class.java, mailbox)
 
 /** Fluent alternative syntax to [subscribe]. */
-inline fun <reified T : Any, M : Mailbox<in T>> M.subscribeTo(
+inline infix fun <reified T : Any, M : Mailbox<in T>> M.subscribeTo(
     bus: MagicBus,
 ): M {
     bus += this
@@ -34,7 +34,7 @@ inline fun <reified T : Any> MagicBus.unsubscribe(
 ) = unsubscribe(T::class.java, mailbox)
 
 /** A fluent alternative syntax to [unsubscribe]. */
-inline fun <reified T : Any, M : Mailbox<in T>> M.unsubscribeFrom(
+inline infix fun <reified T : Any, M : Mailbox<in T>> M.unsubscribeFrom(
     bus: MagicBus,
 ): M {
     bus -= this
@@ -68,3 +68,6 @@ inline fun <reified T : Any> discard(): Mailbox<T> =
  */
 inline fun <reified T : Any> MagicBus.subscribersTo() =
     subscribersTo(T::class.java)
+
+/** Fluent alternative syntax to [MagicBus.post]. */
+infix fun Any.postTo(bus: MagicBus) = bus.post(this)

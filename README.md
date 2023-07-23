@@ -86,6 +86,7 @@ new posts based on typing.
 val bus: MagicBus // assigned elsewhere
 
 bus.post(UUID.randomUUID()) // Only received by subscribers of `UUID` JDK type
+UUID.randomUUID() postTo bus // fluent alternative
 ```
 
 ### Receive messages
@@ -138,13 +139,15 @@ bus.subscribe<Any> { message ->
 val bus: MagicBus // assigned elsewhere
 
 val mailbox: Mailbox<SomeType> = { println(it) }
-bus.subscribe(mailbox)
+bus.subscribe(mailbox) // Start receiving messages
+mailbox subscribeTo bus // fluent alternative
 
 bus.post(SomeType()) // PRINTED
 
 bus.unsubscribe(mailbox) // Stop receiving messages
+mailbox unscribeFrom bus // flient alternative
 
-bus.post(SomeType()) // NOT PRINTED
+SomeType() postTo bus // NOT PRINTED
 ```
 
 ### Process dead letters or failed posts
