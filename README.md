@@ -59,11 +59,11 @@ CI (GitHub Actions) runs Batect on each non-README push.
   Your domain boundaries post messages for other internal domains to process,
   or communicate with external resources.
   See [`MessageBus.post`](./src/main/kotlin/hm/binkley/labs/MagicBus.kt)
-- _Returned_ (adj) &mdash; a posted message with no subscribed mailbox to
+- _Undelivered_ (adj) &mdash; a posted message with no subscribed mailbox to
   receive. This always indicates an error in program design or logic &mdash;
   you are posting messages for which there is no mailbox to receive.
   See the
-  [`ReturnedMessage`](./src/main/kotlin/hm/binkley/labs/ReturnedMessage.kt)
+  [`ReturnedMessage`](./src/main/kotlin/hm/binkley/labs/WithoutReceipt.kt)
   type in this library.
 - _Failed_ (adj) &mdash; a "failed message" is when a mailbox raises a JVM
   exception while processing the message.
@@ -71,7 +71,12 @@ CI (GitHub Actions) runs Batect on each non-README push.
   error in design or mailbox logic &mdash; when external input is bad, this 
   should result in a message processed by your program, not in crashing.
   See the
-  [`FailedMessage`](./src/main/kotlin/hm/binkley/labs/FailedMessage.kt) type
+  [`FailedMessage`](./src/main/kotlin/hm/binkley/labs/WithoutReceipt.kt) type
+  in this library.
+- _Return receipt_ (noun) &mdash; a notification sent on succeful delivery 
+  of messages when there are subscribers for these
+  See the
+  [`ReturnReceipt`](./src/main/kotlin/hm/binkley/labs/WithoutReceipt.kt) type
   in this library.
 
 ## Examples
@@ -192,7 +197,7 @@ val bus = SimpleMagicBus().apply {
 }
 ```
 
-An alternative using class extension:
+An alternative using a class extension:
 
 ```kotlin
 class ExampleRecordingMagicBus : SimpleMagicBus() {

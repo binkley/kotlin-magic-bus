@@ -10,4 +10,4 @@ import lombok.Generated
 data class UndeliveredMessage<T : Any>(
     val bus: MagicBus,
     val message: T,
-)
+) : WithoutReceipt

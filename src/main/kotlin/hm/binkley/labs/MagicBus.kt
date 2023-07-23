@@ -15,7 +15,7 @@ interface MagicBus {
 
     /**
      * Lists subscribers which would receive a message of [messageType]
-     * by order they would receive.
+     * in the order by which they would receive it.
      */
     fun <T : Any> subscribersTo(messageType: Class<in T>): List<Mailbox<T>>
 
@@ -37,6 +37,7 @@ interface MagicBus {
      * Note that:
      * - Subscribed mailboxen that fail produce [FailedMessage] posts
      * - Posts with no subscribers produce [UndeliveredMessage] posts
+     * - Unsubscribed [ReturnReceipt] posts do not generate undelivered posts
      */
     fun post(message: Any)
 }

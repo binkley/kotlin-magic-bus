@@ -15,4 +15,4 @@ data class FailedMessage<T>(
     val mailbox: Mailbox<T>,
     val message: T,
     val failure: Exception,
-)
+) : WithoutReceipt

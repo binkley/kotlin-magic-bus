@@ -48,11 +48,10 @@ open class SimpleMagicBus : MagicBus {
     override val subscriptions: Map<Class<*>, List<Mailbox<*>>>
         get() = _subscriptions
 
+    // TODO: Moving the sort into the map leads to ClassCastException;
+    //  the filter is needed to prevent this.
     @Suppress("UNCHECKED_CAST")
     override fun <T : Any> subscribersTo(messageType: Class<in T>) =
-        // TODO: Moving the sort into the map leads to ClassCastException;
-        //  the filter is needed to prevent this.  There is no defined
-        //  ordering between unrelated classes
         _subscriptions.entries.filter { it.key.isAssignableFrom(messageType) }
             .sortedWith { a, b -> orderByParentElseFifo(a.key, b.key) }
             .flatMap { it.value } as List<Mailbox<T>>
@@ -80,14 +79,19 @@ open class SimpleMagicBus : MagicBus {
 
     override fun post(message: Any) {
         val mailboxen = subscribersTo(message.javaClass)
-        if (mailboxen.isEmpty()) return post(UndeliveredMessage(this, message))
 
-        mailboxen.forEach { it.post(message) }
+        if (mailboxen.isNotEmpty()) {
+            val received = mailboxen.map { it.post(message) }.any { it }
+            if (received && message !is WithoutReceipt)
+                post(ReturnReceipt(this, message))
+        } else
+            post(UndeliveredMessage(this, message))
     }
 
     @Suppress("TooGenericExceptionCaught")
-    private fun <T> Mailbox<in T>.post(message: T & Any) = try {
+    private fun <T> Mailbox<in T>.post(message: T & Any): Boolean = try {
         this(message)
+        true
     } catch (e: RuntimeException) {
         // NB -- `RuntimeException` is a subtype of `Exception` No need to
         // handle `Error`: it is not a subtype, and catching `Error` leads to
@@ -96,16 +100,21 @@ open class SimpleMagicBus : MagicBus {
         throw e
     } catch (e: Exception) {
         post(FailedMessage(this@SimpleMagicBus, this, message, e))
+        false
     }
 
     /**
-     * Add fallback do-nothing mailboxen for [UndeliveredMessage] and
-     * [FailedMessage].  This avoids stack overflow from reposting if the user
-     * themselves does not install mailboxen for these message types, or if
-     * the user mailboxen are themselves faulty (raising exceptions, or
-     * reposting received message types without a way to eventually halt).
+     * Add fallback do-nothing mailboxen for:
+     * - [ReturnReceipt]
+     * - [UndeliveredMessage]
+     * - [FailedMessage].
+     * This avoids stack overflow from reposting if the user themselves does
+     * not install mailboxen for these message types, or if the user
+     * mailboxen are themselves faulty (raising exceptions, or reposting
+     * received message types without a way to eventually halt).
      */
     private fun installFallbackMailboxen() {
+        subscribe(discard<ReturnReceipt<*>>())
         subscribe(discard<UndeliveredMessage<*>>())
         subscribe(discard<FailedMessage<*>>())
     }
@@ -116,6 +125,6 @@ open class SimpleMagicBus : MagicBus {
  * * Invert natural order so that parents come first -- [b] before [a]
  * * Ordering is stable so that FIFO on ties
  * * `Boolean` sorts with `false` coming before `true`
-*/
+ */
 private fun orderByParentElseFifo(a: Class<*>, b: Class<*>) =
     b.isAssignableFrom(a).compareTo(a.isAssignableFrom(b))
