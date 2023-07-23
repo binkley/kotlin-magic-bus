@@ -1,7 +1,7 @@
 package hm.binkley.labs
 
 /**
- * A _simple_ implementation of [MagicBus] designed for extension.
+ * A _simple_ implementation of [MagicBus] designed for extending.
  *
  * Limitations include:
  * * No thread safety outside the current thread
@@ -85,7 +85,7 @@ open class SimpleMagicBus : MagicBus {
         mailboxen.forEach { it.post(message) }
     }
 
-    @Suppress("TooGenericExceptionCaught", "RethrowCaughtException")
+    @Suppress("TooGenericExceptionCaught")
     private fun <T> Mailbox<in T>.post(message: T & Any) = try {
         this(message)
     } catch (e: RuntimeException) {
