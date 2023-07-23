@@ -32,10 +32,10 @@ interface MagicBus {
     )
 
     /**
-     * Posts [message] to any subscribed mailboxen based on message type.
+     * Posts [message] to any subscribed mailboxen based on the message type.
      *
      * Note that:
-     * - Subscribed mailboxes that fail produce [FailedMessage] posts
+     * - Subscribed mailboxen that fail produce [FailedMessage] posts
      * - Posts with no subscribers produce [ReturnedMessage] posts
      */
     fun post(message: Any)

@@ -33,7 +33,7 @@ inline fun <reified T : Any> MagicBus.unsubscribe(
     noinline mailbox: Mailbox<in T>,
 ) = unsubscribe(T::class.java, mailbox)
 
-/** An fluent alternative syntax to [unsubscribe]. */
+/** A fluent alternative syntax to [unsubscribe]. */
 inline fun <reified T : Any, M : Mailbox<in T>> M.unsubscribeFrom(
     bus: MagicBus,
 ): M {
@@ -54,8 +54,9 @@ fun <T> namedMailbox(name: String, receive: Mailbox<in T>) =
     }
 
 /**
- * Creates a mailbox which throws away messages.  Use case: To ignore posts
- * for messages of type [T], use a discard mailbox.
+ * Creates a mailbox which throws away messages.
+ * An example use case: To ignore posts for messages of type [T], use a discard
+ * mailbox.
  */
 inline fun <reified T : Any> discard(): Mailbox<T> =
     namedMailbox("DISCARD-MAILBOX<${T::class.java.simpleName}>") { }
