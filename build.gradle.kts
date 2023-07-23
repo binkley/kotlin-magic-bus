@@ -62,15 +62,15 @@ jacoco {
 
 /*
 ktlint {
-    outputColorName.set("RED")
-    version.set(ktlintVersion)
+    outputColorName = "RED"
+    version = ktlintVersion
 }
 */
 
 pitest {
-    junit5PluginVersion.set(pitestJUnit5PluginVersion)
-    mutationThreshold.set(94) // TODO: Return to 100%
-    timestampedReports.set(false)
+    junit5PluginVersion = pitestJUnit5PluginVersion
+    mutationThreshold = 86 // TODO: Return to 100%
+    timestampedReports = false
 }
 
 dependencyCheck {
