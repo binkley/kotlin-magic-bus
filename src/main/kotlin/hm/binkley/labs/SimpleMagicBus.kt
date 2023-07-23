@@ -49,7 +49,7 @@ open class SimpleMagicBus : MagicBus {
         get() = _subscriptions
 
     @Suppress("UNCHECKED_CAST")
-    override fun <T : Any> subscribersTo(messageType: Class<in T>): List<Mailbox<T>> =
+    override fun <T : Any> subscribersTo(messageType: Class<in T>) =
         // TODO: Moving the sort into the map leads to ClassCastException;
         //  the filter is needed to prevent this.  There is no defined
         //  ordering between unrelated classes
