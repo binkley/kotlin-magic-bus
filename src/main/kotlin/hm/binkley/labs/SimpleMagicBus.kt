@@ -88,15 +88,17 @@ open class SimpleMagicBus : MagicBus {
             post(UndeliveredMessage(this, message))
     }
 
+    /**
+     * `RuntimeException` is a subtype of `Exception`.
+     * No need to handle `Error`: it is not a subtype, and catching `Error`
+     * leads to bad mojo (this includes things like JVM errors).
+     * So rethrow `RuntimeException`, and send `Exception` as a failed message.
+     */
     @Suppress("TooGenericExceptionCaught")
     private fun <T> Mailbox<in T>.post(message: T & Any): Boolean = try {
         this(message)
         true
     } catch (e: RuntimeException) {
-        // NB -- `RuntimeException` is a subtype of `Exception` No need to
-        // handle `Error`: it is not a subtype, and catching `Error` leads to
-        // bad mojo; see
-        // https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Error.html
         throw e
     } catch (e: Exception) {
         post(FailedMessage(this@SimpleMagicBus, this, message, e))
