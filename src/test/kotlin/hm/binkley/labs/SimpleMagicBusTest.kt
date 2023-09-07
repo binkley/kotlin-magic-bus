@@ -241,7 +241,7 @@ internal class SimpleMagicBusTest {
         val mailboxen = OrderedMailboxen()
         val rightMailbox =
             mailboxen.orderedMailbox<RightType>() subscribeTo bus
-        //  And an unrelated type which should *not* show up
+        //  Add an unrelated type which should *not* show up
         mailboxen.orderedMailbox<LeftType>() subscribeTo bus
         val farRightMailbox =
             mailboxen.orderedMailbox<FarRightType>() subscribeTo bus
@@ -256,19 +256,13 @@ internal class SimpleMagicBusTest {
 
         FarRightType() postTo bus
 
-        println("TODO: Fix tests or code about ordering")
-        println(
-            "Expected: ${
-                listOf(
-                    allMailbox,
-                    baseMailbox,
-                    rightMailbox,
-                    farRightMailbox,
-                    receiptsMailbox,
-                )
-            }"
-        )
-        println("Actual: ${mailboxen.deliveriesInOrder()}")
+        assertThat(mailboxen.deliveriesInOrder()).isEqualTo(listOf(
+            allMailbox,
+            baseMailbox,
+            rightMailbox,
+            farRightMailbox,
+            receiptsMailbox,
+        ))
     }
 
     @Test
