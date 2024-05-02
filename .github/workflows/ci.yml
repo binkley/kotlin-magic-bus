@@ -3,11 +3,11 @@ name: Build with Gradle
 on:
   push:
     paths-ignore:
-      - '*.md'
+      - '**.md'
       - 'images/**'
   pull_request:
     paths-ignore:
-      - '*.md'
+      - '**.md'
       - 'images/**'
 
 jobs:
@@ -33,9 +33,6 @@ jobs:
             ${{ runner.os }}-build-${{ env.cache-name }}-
             ${{ runner.os }}-build-
             ${{ runner.os }}-
-
-      - name: Manage Batect telemetry
-        run: ./batect --permanently-enable-telemetry
 
       - name: Restore Gradle caches
         uses: actions/cache@master
