@@ -74,11 +74,17 @@ pitest {
 }
 
 dependencyCheck {
-    failBuildOnCVSS = 0f
-    // TODO: provide "skip" from -D command line
-    // TODO: Workaround https://github.com/snakeyaml/snakeyaml#cve and
-    //       recheck when SnakeYML updates
+    failBuildOnCVSS = 0.0f // Kotlin is strict here, no simple "0"
+    skip = "owasp.skip".toBoolean() // DEFAULT is false
+    // TODO: Something is different from this project and the template
+    // suppressionFile = rootProject.file("config/owasp-suppressions.xml")
     suppressionFile = "config/owasp-suppressions.xml"
+
+    /* TODO: Needs syntax/type fixing specific to Kotlin
+    nvd {
+        apiKey = findProperty("owasp.nvdApiKey") ?: System.getenv("OWASP_NVD_API_KEY")
+    }
+    */
 }
 
 tasks {
