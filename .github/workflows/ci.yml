@@ -16,6 +16,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Use Earthly
+        uses: earthly/actions-setup@v1
+        with:
+          version: v0.8
+
       - name: Clone repository
         uses: actions/checkout@master
 
